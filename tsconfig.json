@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+      "target": "es6",                           // Target modern JavaScript
+      "module": "esnext",                        // Use ESNext module resolution
+      "jsx": "react",                            // Enable JSX for React
+      "strict": true,                            // Enable strict type-checking
+      "moduleResolution": "node",                // Use Node.js module resolution
+      "baseUrl": "src",                          // Base URL for absolute imports
+      "paths": {                                 // Aliases for modules
+        "@components/*": ["components/*"],       // Example alias
+        "@utils/*": ["utils/*"]
+      },
+      "esModuleInterop": true,                   // Enable interoperability for CommonJS modules
+      "skipLibCheck": true,                      // Skip checking library files
+      "forceConsistentCasingInFileNames": true   // Ensure file name casing consistency
+    },
+    "include": ["src", "declaration.d.ts"],                          // Include files in the `src` directory
+    "exclude": ["node_modules", "build"]         // Exclude certain directories
+  }
