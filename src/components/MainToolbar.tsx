@@ -5,7 +5,6 @@ import MenuItem from '@mui/material/MenuItem';
 import {MainTextBox} from  './../styles/SiloTextBoxStyle';
 
 
-
 const MainToolbar : FC = () =>{
   const [menuState, setMenuState] =  React.useState<{[key: string]: HTMLElement | null}>({
     File: null,
@@ -13,6 +12,8 @@ const MainToolbar : FC = () =>{
     Export: null,
     View: null
   });
+
+ 
 
     const handleClick = (menu:string) =>  (event: React.MouseEvent<HTMLButtonElement>) => {
       setMenuState((prevState) => ({
@@ -30,7 +31,6 @@ const MainToolbar : FC = () =>{
 
     return (
       <div style={{display: 'flex', justifyContent: 'normal', alignItems: 'center', width: '80%' }} >
-     
       <div >
         <Button style={MainTextBox}
           id="basic-button"

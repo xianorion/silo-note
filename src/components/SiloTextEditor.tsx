@@ -9,18 +9,38 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle'; 
 import InsertLinkIcon from '@mui/icons-material/InsertLinkRounded'
+import ContextMenu from './ContextMenu';
 
 
 
 const SiloTextEditor = () =>{
     const [text, setText] = useState("Welcome!");
     const [fontSize, setFontSize] = useState('3');
+    const [contextMenuOpen, setContextMenuOpen] = React.useState<boolean>(false);
+    const [contextMenuPos, setContextMenuPos] =  React.useState<{x:number, y:number}>({x:0 , y:0});
+  
+    const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      console.log("Showing menu: ", contextMenuOpen);
+      setContextMenuOpen(true);
+      console.log("Showing menu after..: ", contextMenuOpen);
+      console.log("Showing menu x..: ", event.clientX);
+      console.log("Showing menu y..: ", event.clientY);
 
+      setContextMenuPos({x: event.clientX, y: event.clientY});
+    }
+
+    const closeContextMenu = (event: React.MouseEvent | MouseEvent) =>{
+      event.preventDefault();
+      setContextMenuOpen(false);
+    }
+ 
 
     const handleChange = (event: React.FormEvent<HTMLDivElement>) => {
         console.log("font size is: ", fontSize);
         setText(event.currentTarget.innerHTML)
     }
+
 
     const applyStyle = (command: string, value?: string) => {
         if(command === "fontSize"){
@@ -55,7 +75,11 @@ const SiloTextEditor = () =>{
 
     return (
         // <TextField  style={mainToolBarStyle}>
+        <div onContextMenu={handleContextMenu} onMouseLeave={closeContextMenu}  >
+        { contextMenuOpen && <ContextMenu style={{left: contextMenuPos.x, top: contextMenuPos.y}} onClose={closeContextMenu} />}
+  
         <div>
+
              <Toolbar sx={{ display: 'flex', }}>
         <Button  onClick={() => applyStyle('bold')}>
         <img src={'/img/text-editor-imgs/format_bold.svg'}/> 
@@ -127,7 +151,8 @@ const SiloTextEditor = () =>{
       </div>
       
       </Toolbar>
-            <Box
+    
+      <Box
             contentEditable
             suppressContentEditableWarning
             onInput={handleChange}
@@ -142,8 +167,10 @@ const SiloTextEditor = () =>{
                 },
               }}
             >
-                
+
             </Box>
+    </div>
+          
         </div>
 
     );
