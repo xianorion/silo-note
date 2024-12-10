@@ -6,7 +6,7 @@ import { GuiStyle } from 'styles/SiloTextBoxStyle';
 const SiloGui : FC = () => {
 
     return <div style={GuiStyle} >
-        <MainToolbar/>
+        {/* <MainToolbar/> */}
         <SiloTextEditor/>
     
     </div>

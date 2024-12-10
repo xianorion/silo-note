@@ -4,9 +4,13 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem'; 
 import {MainTextBox} from  './../styles/SiloTextBoxStyle';
 
+interface MainToolbarProps {
+  style?: React.CSSProperties; // style prop for inline styles
+
+}
 
 
-const MainToolbar : FC = () =>{
+const MainToolbar : FC<MainToolbarProps> = () =>{
   const [menuState, setMenuState] =  React.useState<{[key: string]: HTMLElement | null}>({
     File: null,
     Edit: null,
@@ -81,7 +85,6 @@ const MainToolbar : FC = () =>{
         <MenuItem onClick={() => handleClose("Edit")}>Cut</MenuItem>
         <MenuItem onClick={() => handleClose("Edit")}>Copy</MenuItem>
         <MenuItem onClick={() => handleClose("Edit")}>Paste</MenuItem>
-        <MenuItem onClick={() => handleClose("Edit")}>Paste With Link</MenuItem>
       </Menu>
       </div>
       <div>

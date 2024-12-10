@@ -14,7 +14,6 @@ enum action {
   CUT = "CUT",
   UNDO = "UNDO",
   REDO = "REDO",
-  PASTE_WITH_LINK= "PASTE_WITH_LINK"
 }
 
 interface ContextMenuProps {
@@ -23,6 +22,9 @@ interface ContextMenuProps {
   onClose: (event: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent> ) => void;
   selectedText: string | null,
   handlePasteEvent: (text:string) => void,
+  handleTextCutEvent: () => void,
+  handleUndoEvent: () => void,
+  handleRedoEvent: () => void,
   editor?: HTMLInputElement
 }
 
@@ -32,7 +34,7 @@ const listItemTextStyle = {
   paddin: '10px'
 }
 
-const ContextMenu: FC<ContextMenuProps> = ({style, editor, selectedText, handlePasteEvent, onClose}) =>{
+const ContextMenu: FC<ContextMenuProps> = ({style, editor, selectedText, handlePasteEvent,handleTextCutEvent,handleUndoEvent, handleRedoEvent, onClose}) =>{
 
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -64,10 +66,28 @@ const ContextMenu: FC<ContextMenuProps> = ({style, editor, selectedText, handleP
           );
         }
         break;
-        case action.PASTE_WITH_LINK: {
-
-          break;
+        case action.CUT:{
+          if(selectedText){
+            navigator.clipboard.writeText(selectedText).then(
+              (res)=>{
+                handleTextCutEvent();
+                console.log("text to cut is ", res);
+              }
+            ).catch(()=>{
+              console.log("ERROR: Cutting text failed...")
+            });
+          }
+          
         }
+        break;
+        case action.UNDO:{
+          handleUndoEvent();
+        }
+        break;  
+        case action.REDO:{
+          handleRedoEvent();
+        }
+        break;
 
       default:
         break;
@@ -110,30 +130,22 @@ const ContextMenu: FC<ContextMenuProps> = ({style, editor, selectedText, handleP
  <List >
     <ListItem disablePadding>
      
-      <ListItemText primary="Undo" 
+      <ListItemText onClick={handleClick(action.UNDO)} primary="Undo" 
       primaryTypographyProps={{...listItemTextStyle}}
       />
     </ListItem>
     <ListItem disablePadding>
-      {/* <ListItemAvatar>
-        <Avatar>
-          <WorkIcon />
-        </Avatar>
-      </ListItemAvatar> */}
-      <ListItemText primary="Redo" primaryTypographyProps={{...listItemTextStyle}}
+      <ListItemText onClick={handleClick(action.REDO)} primary="Redo" primaryTypographyProps={{...listItemTextStyle}}
       />
     </ListItem>
     <ListItem disablePadding>
-      <ListItemText primary="Cut" primaryTypographyProps={{...listItemTextStyle}}/>
+      <ListItemText onClick={handleClick(action.CUT)} primary="Cut" primaryTypographyProps={{...listItemTextStyle}}/>
     </ListItem>
     <ListItem disablePadding>
       <ListItemText onClick={handleClick(action.COPY)} primary="Copy" primaryTypographyProps={{...listItemTextStyle}}/>
     </ListItem>
     <ListItem disablePadding>
       <ListItemText primary="Paste" onClick={handleClick(action.PASTE)}  primaryTypographyProps={{...listItemTextStyle}}/>
-    </ListItem>
-    <ListItem disablePadding>
-      <ListItemText primary="Paste With Link" primaryTypographyProps={{...listItemTextStyle}}/>
     </ListItem>
   </List>
     </div>
