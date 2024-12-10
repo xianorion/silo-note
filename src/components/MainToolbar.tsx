@@ -5,6 +5,7 @@ import MenuItem from '@mui/material/MenuItem';
 import {MainTextBox} from  './../styles/SiloTextBoxStyle';
 
 
+
 const MainToolbar : FC = () =>{
   const [menuState, setMenuState] =  React.useState<{[key: string]: HTMLElement | null}>({
     File: null,
@@ -23,6 +24,7 @@ const MainToolbar : FC = () =>{
     };
 
     const handleClose = (menu:string) =>  (event: React.MouseEvent<HTMLButtonElement>) => {
+
       setMenuState((prevState) => ({
         ...prevState,
         [menu] : null,
