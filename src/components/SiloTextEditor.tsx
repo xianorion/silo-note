@@ -71,7 +71,7 @@ const SiloTextEditor = () =>{
          // Create a new range and set the cursor position
           const range = document.createRange();
           const textNode = editor.firstChild; // Get the text node (assuming it's the first child)
-
+          console.log("children: ",editor.childNodes);
           if (textNode) {
             // Set the start of the range at the desired position (mousePos.start)
             range.setStart(textNode, position);
@@ -228,7 +228,14 @@ const SiloTextEditor = () =>{
         onClose={closeContextMenu} 
         />}
   
-      <MainToolbar />
+      <MainToolbar 
+      selectedText={selectedText} 
+       handlePasteEvent={handleTextPaste} 
+       handleTextCutEvent={handleTextCut}
+       handleUndoEvent = {undoEvent}
+       handleRedoEvent={redoEvent}
+       onClose={closeContextMenu} 
+      />
 
       <Toolbar 
       sx={{ display: 'flex', }}
@@ -259,6 +266,7 @@ const SiloTextEditor = () =>{
             onInput={handleChange}
             onMouseUp={handleTextSelection}
             sx={{
+                fontFamily:'Poiret-One-Latin',
                 minHeight: '300px',
                 minWidth: '100%',
                 maxWidth: '100%',

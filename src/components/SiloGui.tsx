@@ -1,15 +1,27 @@
-import React, {FC} from 'react';
-import MainToolbar from './MainToolbar';
+import React, {FC, useState} from 'react';
 import SiloTextEditor from './SiloTextEditor';
 import { GuiStyle } from 'styles/SiloTextBoxStyle';
+import { createTheme, ThemeProvider, Typography } from '@mui/material';
+
+// Create a theme with custom typography
+const theme = createTheme({
+  typography: {
+    fontFamily: '"Poiret-One-Latin"', // Your custom font family
+    fontSize:20
+  },
+});
 
 const SiloGui : FC = () => {
+   
 
-    return <div style={GuiStyle} >
-        {/* <MainToolbar/> */}
-        <SiloTextEditor/>
-    
-    </div>
+    return <ThemeProvider theme={theme}>
+        <div style={GuiStyle} >
+                {/* <MainToolbar/> */}
+                <SiloTextEditor/>
+            
+            </div>
+    </ThemeProvider>
+  
 }
 
 export default SiloGui;

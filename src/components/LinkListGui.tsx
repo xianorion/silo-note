@@ -3,7 +3,7 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
-import { Paper } from '@mui/material';
+import { Paper, Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -13,6 +13,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import InsertLinkIcon from '@mui/icons-material/InsertLinkRounded'
 import Button from '@mui/material/Button';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import ErrorPopup from './ErrorPopup';
 
 const testLinkData:{name: string, url: string, notes:string}[]  = [
 {
@@ -27,14 +28,23 @@ url: "https://mui.com/material-ui/react-list/"
 }
 ];
 
+interface LinkListGuiProps {
+    styles?: React.CSSProperties;
+}
 
-const LinkListGui : FC = () =>{
+const ListItemTextStyle:{fontSize:number} =  {
+    fontSize:15
+}
+
+const LinkListGui : FC<LinkListGuiProps> = () =>{
     const [srcLinks, setSrcLinks] = useState<{name: string, url: string, notes:string}[]>(testLinkData);
     // const [linkUrl, setLinkUrl] = useState<string>("");
     // const [linkName, setLinkName] = useState<string>("");
     // const [linkNotes, setLinkNotes] = useState<string>("");
     const [open, setOpen] = React.useState(false);
-    const [error, setError] = React.useState<string | null>(null);
+    const [error, setError] = useState<string|null>(null);
+    const [errorSubtext, setErrorSubtext] = useState<string|null>(null);
+
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -43,6 +53,10 @@ const LinkListGui : FC = () =>{
     const handleClose = () => {
         setOpen(false);
     };
+
+    const removeError = () =>{
+        setError(null);
+    }
 
     const addLink = (event:React.FormEvent<HTMLFormElement>) =>{
         const formData = new FormData(event.currentTarget);
@@ -57,15 +71,11 @@ const LinkListGui : FC = () =>{
       
         
         //check if name is unqiue
-        let isNameUnqiue :boolean = srcLinks.every( link =>{
-            if(link.name == newLink.name){
-                return false;
-            }
-            return true;
-        })
+        let isNameUnqiue :boolean = srcLinks.every( link =>link.name != newLink.name);
         //prompt user that link name must be unique
         if(!isNameUnqiue){
             setError("Link name must be unique!");
+            setErrorSubtext("The name ["+newLink.name+"] is already in use.")
 
         }else{
             console.log("Added link!");
@@ -82,11 +92,25 @@ const LinkListGui : FC = () =>{
 
 
     return <Paper>
+        <Typography
+        sx={{
+        fontSize: '20px',                           // Change font size
+        fontWeight: 'bold',   
+        }}
+        >Link Bank</Typography>
+        {error != null && <ErrorPopup 
+        open={error != null}
+         error={error} 
+         errorSubtext={errorSubtext}
+         handleClose={removeError}
+         
+         />}
         <List>
             {srcLinks.map((link) =>(
-                <ListItem>
-                    <ListItemButton component="a" href={link.url}>
-                        <ListItemText>{link.name}</ListItemText>
+                <ListItem key={link.name}>
+                    <ListItemButton component="a" href={link.url} >
+                        <ListItemText primaryTypographyProps={{...ListItemTextStyle}}
+                        >{link.name}</ListItemText>
                     </ListItemButton>
                     <RemoveCircleOutlineIcon onClick={() => removeLink(link.name)} />
                 </ListItem>

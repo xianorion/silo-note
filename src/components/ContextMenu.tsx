@@ -122,9 +122,9 @@ const ContextMenu: FC<ContextMenuProps> = ({style, editor, selectedText, handleP
       backgroundColor: 'white',
       position: 'absolute',
       border: '1px solid #ccc',
-      width: '20%', maxWidth: '30%',
+      width: '8%',
       borderRadius: '4px',
-    
+      padding:'20px',
       boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'  // Optional shadow for a modal effect
     }} >
  <List >

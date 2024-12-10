@@ -6,17 +6,92 @@ import {MainTextBox} from  './../styles/SiloTextBoxStyle';
 
 interface MainToolbarProps {
   style?: React.CSSProperties; // style prop for inline styles
+  selectedText: string | null,
+  handlePasteEvent: (text:string) => void,
+  handleTextCutEvent: () => void,
+  handleUndoEvent: () => void,
+  handleRedoEvent: () => void,
+  onClose: (event: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent> ) => void;
 
 }
 
+enum action {
+  COPY =  "COPY",
+  PASTE = "PASTE",
+  CUT = "CUT",
+  UNDO = "UNDO",
+  REDO = "REDO",
+}
 
-const MainToolbar : FC<MainToolbarProps> = () =>{
+
+const MainToolbar : FC<MainToolbarProps> = ({selectedText, handlePasteEvent,handleTextCutEvent,handleUndoEvent, handleRedoEvent, onClose}) =>{
   const [menuState, setMenuState] =  React.useState<{[key: string]: HTMLElement | null}>({
     File: null,
     Edit: null,
     Export: null,
     View: null
   });
+
+  const handleAction = (commmand: action |null, event: React.MouseEvent<HTMLLIElement, MouseEvent>) => {
+    // event.preventDefault();
+    console.log("Handing click...");
+    console.log("with selection", selectedText);
+    // onClose(event);
+    switch(commmand) {
+      case action.COPY:
+        if (selectedText) {
+          // Copy to the clipboard
+          navigator.clipboard.writeText(selectedText)
+            .then(() => {
+              console.log("Text copied to clipboard");
+            })
+            .catch((error) => {
+              console.error("Failed to copy text: ", error);
+            });
+        } 
+        break;
+        case action.PASTE: {
+          navigator.clipboard.readText().then(
+            (res) =>{
+              handlePasteEvent(res)
+              console.log("text to paste is ", res);
+
+            }
+          );
+        }
+        break;
+        case action.CUT:{
+          if(selectedText){
+            navigator.clipboard.writeText(selectedText).then(
+              (res)=>{
+                handleTextCutEvent();
+                console.log("text to cut is ", res);
+              }
+            ).catch(()=>{
+              console.log("ERROR: Cutting text failed...")
+            });
+          }
+          
+        }
+        break;
+        case action.UNDO:{
+          handleUndoEvent();
+        }
+        break;  
+        case action.REDO:{
+          handleRedoEvent();
+        }
+        break;
+
+      default:
+        break;
+
+    }
+
+    handleClose("Edit");
+
+  }
+
 
  
 
@@ -80,11 +155,11 @@ const MainToolbar : FC<MainToolbarProps> = () =>{
           'aria-labelledby': 'basic-button',
         }}
       >
-        <MenuItem onClick={() => handleClose("Edit")}>Undo</MenuItem>
-        <MenuItem onClick={() => handleClose("Edit")}>Redo</MenuItem>
-        <MenuItem onClick={() => handleClose("Edit")}>Cut</MenuItem>
-        <MenuItem onClick={() => handleClose("Edit")}>Copy</MenuItem>
-        <MenuItem onClick={() => handleClose("Edit")}>Paste</MenuItem>
+        <MenuItem onClick={(e) => handleAction(action.UNDO,e)}>Undo</MenuItem>
+        <MenuItem onClick={(e) => handleAction(action.REDO,e)}>Redo</MenuItem>
+        <MenuItem onClick={(e) => handleAction(action.CUT,e)}>Cut</MenuItem>
+        <MenuItem onClick={(e) => handleAction(action.COPY,e)}>Copy</MenuItem>
+        <MenuItem onClick={(e) => handleAction(action.PASTE,e)}>Paste</MenuItem>
       </Menu>
       </div>
       <div>
