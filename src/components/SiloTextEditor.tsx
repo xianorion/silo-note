@@ -72,6 +72,7 @@ const SiloTextEditor = () =>{
           const range = document.createRange();
           const textNode = editor.firstChild; // Get the text node (assuming it's the first child)
           console.log("children: ",editor.childNodes);
+          console.log("selection", selection);
           if (textNode) {
             // Set the start of the range at the desired position (mousePos.start)
             range.setStart(textNode, position);
@@ -90,19 +91,87 @@ const SiloTextEditor = () =>{
     const handleTextSelection = (event: React.MouseEvent) => {
       //console.log("document selection info:  ",document.getSelection());
       const selection = window.getSelection();
+      const doc = document.getSelection();
       console.log("window Selection is: ", selection);
+      console.log("doc Selection is: ", doc);
+
       const selectionText = selection?.toString();
       let start = 0, end = 0;
       if (selection) {
-        if(selection.focusOffset > selection.anchorOffset){
-          start = selection.anchorOffset;
-          end = selection.focusOffset;
+        const range = selection.getRangeAt(0);  // The range representing the selection
+    
+        // Get the start and end of the range
+        const startNode = range.startContainer;
+        const endNode = range.endContainer;
+
+         // Get the start and end offsets
+        const startOffset = range.startOffset;
+        const endOffset = range.endOffset;
+        
+        console.log(`Start Node:`, startNode);
+        console.log(`Start first child Node:`, startNode.TEXT_NODE);
+
+        console.log(`End Node:`, endNode);
+        console.log(`Start first child Node:`, endNode.TEXT_NODE);
+
+        console.log(`Start Offset: ${startOffset}`);
+        console.log(`End Offset: ${endOffset}`);
+        let totalLength = 0;
+        let selectionSpan: {node:number, start:number, end:number}[] = [];
+
+        if (startNode !== endNode) {
+          // You may want to handle each node separately here
+          console.log("The selection spans across multiple nodes.");
+          // If the selection spans multiple nodes, we loop through the nodes between startNode and endNode
+          let nodePointer: Node | null = startNode;
+          let node = 0;
+
+          // Loop through the nodes from startNode to the endNode (inclusive)
+          while (nodePointer && nodePointer !== endNode) {
+            if (nodePointer.nodeType === Node.TEXT_NODE) {
+              console.log("NODE NUMBER: ", node);
+
+              console.log("nodePointer.textContent", nodePointer.textContent);
+              if(nodePointer === startNode){
+                if(selection.focusOffset > selection.anchorOffset){
+                  start = selection.anchorOffset;
+                  end = selection.focusOffset;
+                }else{
+                  end = selection.anchorOffset;
+                  start = selection.focusOffset;
+                }
+                selectionSpan = [{node:node++, start, end}];
+              }else if (nodePointer.textContent){
+                if(nodePointer.nextSibling != null){
+                  end = nodePointer.textContent.length;
+                }else{
+                  if(selection.focusOffset > selection.anchorOffset){
+                    end = selection.focusOffset;
+                  }else{
+                    end = selection.anchorOffset;
+                  }
+                }
+                selectionSpan = [{node:node++, start: 0, end}, ...selectionSpan];
+              }
+            }
+            nodePointer = nodePointer.nextSibling; // Move to the next sibling node
+          }
+
+          console.log("Selection span is: ", selectionSpan);
+         
         }else{
-          end = selection.anchorOffset;
-          start = selection.focusOffset;
+          if(selection.focusOffset > selection.anchorOffset){
+            start = selection.anchorOffset;
+            end = selection.focusOffset;
+          }else{
+            end = selection.anchorOffset;
+            start = selection.focusOffset;
+          }
         }
+            
         console.log(`mouse start: ${start} \nand end:${end}`);
         setMousePos({start, end});
+        console.log("selected text:", selectionText);
         setSelectedText(selectionText || null);
       }
     };
