@@ -1,0 +1,57 @@
+/* Global styles for Tiptap */
+
+.tiptap {
+    font-family:'Poiret-One-Latin';
+    height: 80vh;
+   width: 90vh;
+    border: '1px solid #ccc';
+    border-radius: '4px';
+    outline: 'none';
+    text-align: 'left';
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    margin: auto;
+    background-color: #fafafa;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+  }
+
+  .icon{
+    color: #000;
+  }
+
+  .MenuToolbar{
+    width: 80vh;
+    padding: 10px;
+    margin: auto;
+  }
+
+  .editor {
+
+  }
+  
+  .tiptap .ProseMirror {
+    padding: 10px;
+    font-size: 16px;
+  }
+  
+  .tiptap .ProseMirror code {
+    font-family: "Courier New", Courier, monospace;
+  }
+  
+  .tiptap .ProseMirror p {
+    margin: 0;
+  }
+  
+  .tiptap .ProseMirror h1,
+  .tiptap .ProseMirror h2,
+  .tiptap .ProseMirror h3 {
+    color: #333;
+  }
+  
+  .tiptap .ProseMirror blockquote {
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-left: 4px solid #ccc;
+  }

@@ -1,4 +1,4 @@
-import logo from './logo.svg';
+import React from 'react';
 import './App.css';
 import SiloGui from './components/SiloGui'
 
@@ -10,5 +10,7 @@ function App() {
     </div>
   );
 }
+
+
 
 export default App;

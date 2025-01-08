@@ -1,17 +1,12 @@
 import React, {FC} from 'react';
+import { Editor } from '@tiptap/react'
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem'; 
-import {MainTextBox} from  './../styles/SiloTextBoxStyle';
+import {MainTextBox} from  '../styles/SiloTextBoxStyle';
 
 interface MainToolbarProps {
-  style?: React.CSSProperties; // style prop for inline styles
-  selectedText: string | null,
-  handlePasteEvent: (text:string) => void,
-  handleTextCutEvent: () => void,
-  handleUndoEvent: () => void,
-  handleRedoEvent: () => void,
-  onClose: (event: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent> ) => void;
+editor: Editor | null;
 
 }
 
@@ -24,7 +19,10 @@ enum action {
 }
 
 
-const MainToolbar : FC<MainToolbarProps> = ({selectedText, handlePasteEvent,handleTextCutEvent,handleUndoEvent, handleRedoEvent, onClose}) =>{
+const MainToolbar : FC<MainToolbarProps> = ({editor}) =>{
+  if (!editor) {
+    return null
+  }
   const [menuState, setMenuState] =  React.useState<{[key: string]: HTMLElement | null}>({
     File: null,
     Edit: null,
@@ -35,51 +33,32 @@ const MainToolbar : FC<MainToolbarProps> = ({selectedText, handlePasteEvent,hand
   const handleAction = (commmand: action |null, event: React.MouseEvent<HTMLLIElement, MouseEvent>) => {
     // event.preventDefault();
     console.log("Handing click...");
-    console.log("with selection", selectedText);
     // onClose(event);
     switch(commmand) {
       case action.COPY:
-        if (selectedText) {
-          // Copy to the clipboard
-          navigator.clipboard.writeText(selectedText)
-            .then(() => {
-              console.log("Text copied to clipboard");
-            })
-            .catch((error) => {
-              console.error("Failed to copy text: ", error);
-            });
-        } 
+       
         break;
         case action.PASTE: {
-          navigator.clipboard.readText().then(
-            (res) =>{
-              handlePasteEvent(res)
-              console.log("text to paste is ", res);
-
-            }
-          );
+         
         }
         break;
         case action.CUT:{
-          if(selectedText){
-            navigator.clipboard.writeText(selectedText).then(
-              (res)=>{
-                handleTextCutEvent();
-                console.log("text to cut is ", res);
-              }
-            ).catch(()=>{
-              console.log("ERROR: Cutting text failed...")
-            });
-          }
+          const from = editor.state.selection.from;
+          const to = editor.state.selection.to;
+          
+          const endPos = editor.state.doc.nodeSize - 2;
+          
+          // Cut out content from range and put it at the end of the document
+          editor.commands.cut({ from, to }, endPos);
           
         }
         break;
         case action.UNDO:{
-          handleUndoEvent();
+          editor.chain().focus().undo().run();
         }
         break;  
         case action.REDO:{
-          handleRedoEvent();
+          editor.chain().focus().redo().run();
         }
         break;
 

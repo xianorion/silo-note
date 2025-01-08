@@ -11,3 +11,8 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+@font-face {
+  font-family: 'Poiret-One-Latin';
+  src: url('./resources/fonts/poiret-one-latin-400-normal.ttf') format('truetype');
+}
