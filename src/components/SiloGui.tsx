@@ -1,5 +1,6 @@
 import React, {FC, useState} from 'react';
 import SiloTextEditor from './SiloTextEditor';
+import SiloTextEditor2 from './SiloTextEditor2';
 import { GuiStyle } from 'styles/SiloTextBoxStyle';
 import { createTheme, ThemeProvider, Typography } from '@mui/material';
 
@@ -17,7 +18,8 @@ const SiloGui : FC = () => {
     return <ThemeProvider theme={theme}>
         <div style={GuiStyle} >
                 {/* <MainToolbar/> */}
-                <SiloTextEditor/>
+                {/* <SiloTextEditor/> */}
+                <SiloTextEditor2/>
             
             </div>
     </ThemeProvider>
