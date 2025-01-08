@@ -1,15 +1,20 @@
-# Getting Started with Create React App
+# Getting Started with SiloNote App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+It utilizes electron to create a notepad desktop app where we can package and install in mac, windows, and linux environments.
+
+This app includes features such as a basic text editor, the ability to link files you'd like to reference without saving them or keeping them directly in your file, a mood board for images to help inspire your writing, and finally export features that include exporting to google drive.
 
 ## Available Scripts
 
 In the project directory, you can run:
 
-### `npm start`
+### `npm run electron:start`
 
 Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Open [http://localhost:3000](http://localhost:3000) 
+but it will open up in an electro desktop app for your testing.
 
 The page will reload when you make changes.\
 You may also see any lint errors in the console.
@@ -28,6 +33,18 @@ The build is minified and the filenames include the hashes.\
 Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+
+### `npm run electron:package:mac`
+
+This command will package everything in the build folder and create an installer and app to run on mac os.
+
+### `npm run electron:package:win`
+
+This command will package everything in the build folder and create an installer and app to run on windows os.
+
+### `npm run electron:package:linux`
+
+This command will package everything in the build folder and create an installer and app to run on linux os.
 
 ### `npm run eject`
 
