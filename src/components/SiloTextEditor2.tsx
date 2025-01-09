@@ -1,11 +1,28 @@
 // import './styles.scss'
 import './../styles/editor.css';
+import Electron from 'electron';
 import { Editor, EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import React, {FC} from 'react'
+import React, {FC, useState} from 'react'
 import Toolbar from '@mui/material/Toolbar';
 import Button from '@mui/material/Button';
 import { FormatListBulletedRounded, RedoOutlined, UndoOutlined, FormatListNumberedRounded, FormatBoldRounded, FormatItalicRounded } from '@mui/icons-material';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Slide from '@mui/material/Slide';
+import { TransitionProps } from '@mui/material/transitions';
+
+const Transition = React.forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement<any, any>;
+  },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 interface MenuBarProps {
 
@@ -174,6 +191,9 @@ const MenuToolbar : FC<MenuToolbarProps>= ({className, editor}) =>{
 }
 
 export default () => {
+  const [edited, setEdited] = useState(false);
+  const [alertMsg, setAlertMsg] = useState<string | null>(null);
+
   const editor: Editor |null = useEditor({
     extensions: [
       StarterKit,
@@ -185,34 +205,90 @@ export default () => {
     },
   })
 
+  editor?.on('update', ({ editor }) => {
+    // The content has changed.
+    setEdited(true);
+  })
+
   const saveFile = async (event : React.MouseEvent<HTMLButtonElement>) =>{
     console.log("SaveFile --- data is: ", event);
-    const fileName = "newFileName.txt";
+    const fileName = "newFile.txt";
 
-    let path = await window.electron.openFileDialog();
-    path = path +"/"+fileName
+    let path = await window.electron.saveFileDialog(fileName);
     console.log("Path to write in: ", path);
-    let content = (editor!=null ? editor.getText():"test");
-    if(path !=null){
+    let content = (editor!=null ? editor.getText():"");
+    if(path !=null && path.length >0){
       const data = await window.electron.writeFile(path, content);
       console.log(data);
+      //Message that save was successful
+
+    }else{
+      //Message that path is empty
+
     }
     
+  }
+
+  const openFile = async (event : React.MouseEvent<HTMLButtonElement>) =>{
+    console.log("Opening File --- event is: ", event);
+    const fileName = "newFileName.txt";
+    //have screen loader
+
+    //if editor has text, check with user if they want to save it or discard
+    if(edited){
+      setAlertMsg("Your current file has not been saved, would you like to continue?");
+      console.log("ALERT!!!");
+    }
+
+    let pathObj : Electron.OpenDialogReturnValue = await window.electron.openFileDialog();
+    console.log("File opened...", pathObj.filePaths[0]);
+    console.log("pathObj.canceled...", pathObj.canceled);
+
+    if(pathObj.canceled === false && pathObj.filePaths.length === 1 && editor){
+      const data = await window.electron.readFile(pathObj.filePaths[0]);
+
+      editor.commands.clearContent();
+      editor.commands.insertContent(data);
+      setEdited(false);
+      console.log("DATA READ FROM FILE:",data);
+    }
+    
+  }
+
+  const handleAlertClose = () =>{
+    setAlertMsg(null);
   }
 
   return (
     <div style={{margin:'auto'}}>
       {/* <MenuBar editor={editor} />
       <br/> */}
+      <Dialog
+        open={alertMsg !== null}
+        TransitionComponent={Transition}
+        keepMounted
+        onClose={handleAlertClose}
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <DialogTitle>{"Hey!"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">
+            {alertMsg}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleAlertClose}>Ok</Button>
+        </DialogActions>
+      </Dialog>
       <MenuToolbar  className='MenuToolbar' editor={editor} />
       <br/>
       <EditorContent 
       id='editor'
       editor={editor} 
       className='editor'
-        
       />
       <Button onClick={saveFile}>Save</Button>
+      <Button onClick={openFile}>Open</Button>
     </div>
   )
 }

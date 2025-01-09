@@ -65,12 +65,33 @@ app.whenReady().then(() => {
   });
 });
 
-// Open the file dialog and return the file path
+// select a folder dialog and return the file path
+// ipcMain.handle('select-folder-dialog', async () => {
+//     const result = await dialog.showOpenDialog(mainWindow, {
+//       properties: ['openDirectory','createDirectory'],
+//       buttonLabel: 'Save'
+//     });
+//     return result.filePaths[0];  // Return the path of the selected file
+//   });
+ipcMain.handle('save-file-dialog', async (event, defaultFilename) => {
+    const result = await dialog.showSaveDialog(mainWindow, {
+      buttonLabel: 'Save',
+      defaultPath: defaultFilename,
+    });
+    return result.filePath;  // Return the path of the selected file
+  });
+
+
+// Open the file dialog and return the file data
 ipcMain.handle('open-file-dialog', async () => {
     const result = await dialog.showOpenDialog(mainWindow, {
-      properties: ['openDirectory'],
+      properties: ['openFile'],
+      buttonLabel: 'Open',
+      filters: [
+        { name: 'Text Files', extensions: ['txt', 'rtf'] },
+      ]
     });
-    return result.filePaths[0];  // Return the path of the selected file
+    return result;  // Return the path of the selected file
   });
 
 

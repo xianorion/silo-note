@@ -3,9 +3,10 @@
 declare global {
     interface Window {
       electron: {
-        openFileDialog: () => Promise<string | null>;
+        openFileDialog: () => Promise<Electron.OpenDialogReturnValue>;
         readFile: (filePath: string) => Promise<string | null>;
         writeFile: (filePath: string, content: string) => Promise<boolean>;
+        saveFileDialog: (defaultFile: string) => Promise<string | null>;
       };
     }
   }

@@ -13,5 +13,6 @@ contextBridge.exposeInMainWorld('electron', {
     openFileDialog: () => ipcRenderer.invoke('open-file-dialog'),
     readFile: (path) => ipcRenderer.invoke('readFile', path),
     writeFile: (path, data) => ipcRenderer.invoke('writeFile', path, data),
+    saveFileDialog: (defaultFilename) => ipcRenderer.invoke('save-file-dialog',defaultFilename),
     // Add other file system operations as needed
   });
