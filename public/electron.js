@@ -1,11 +1,12 @@
 // Module to control the application lifecycle and the native browser window.
-const { app, BrowserWindow, protocol } = require("electron");
+const { app, BrowserWindow, protocol, ipcMain, dialog } = require("electron");
 const path = require("path");
+var fs = require("fs");
 const url = require("url");
- 
+let mainWindow;
 // Create the native browser window.
 function createWindow() {
-  const mainWindow = new BrowserWindow({
+   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     // Set the path of an additional "preload" script that can be used to
@@ -63,6 +64,35 @@ app.whenReady().then(() => {
     }
   });
 });
+
+// Open the file dialog and return the file path
+ipcMain.handle('open-file-dialog', async () => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openDirectory'],
+    });
+    return result.filePaths[0];  // Return the path of the selected file
+  });
+
+
+ipcMain.handle('readFile', async (event, path) => {
+    try {
+      const data = await fs.promises.readFile(path, 'utf8');
+      return data;
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  });
+  
+  ipcMain.handle('writeFile', async (event, path, data) => {
+    try {
+      await fs.promises.writeFile(path, data);
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  });
  
 // Quit when all windows are closed, except on macOS.
 // There, it's common for applications and their menu bar to stay active until

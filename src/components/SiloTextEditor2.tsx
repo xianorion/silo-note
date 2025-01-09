@@ -7,8 +7,6 @@ import Toolbar from '@mui/material/Toolbar';
 import Button from '@mui/material/Button';
 import { FormatListBulletedRounded, RedoOutlined, UndoOutlined, FormatListNumberedRounded, FormatBoldRounded, FormatItalicRounded } from '@mui/icons-material';
 
-
-
 interface MenuBarProps {
 
 editor:Editor | null;
@@ -187,6 +185,21 @@ export default () => {
     },
   })
 
+  const saveFile = async (event : React.MouseEvent<HTMLButtonElement>) =>{
+    console.log("SaveFile --- data is: ", event);
+    const fileName = "newFileName.txt";
+
+    let path = await window.electron.openFileDialog();
+    path = path +"/"+fileName
+    console.log("Path to write in: ", path);
+    let content = (editor!=null ? editor.getText():"test");
+    if(path !=null){
+      const data = await window.electron.writeFile(path, content);
+      console.log(data);
+    }
+    
+  }
+
   return (
     <div style={{margin:'auto'}}>
       {/* <MenuBar editor={editor} />
@@ -194,11 +207,12 @@ export default () => {
       <MenuToolbar  className='MenuToolbar' editor={editor} />
       <br/>
       <EditorContent 
-     
+      id='editor'
       editor={editor} 
       className='editor'
         
       />
+      <Button onClick={saveFile}>Save</Button>
     </div>
   )
 }
