@@ -6,7 +6,7 @@ import StarterKit from '@tiptap/starter-kit'
 import React, {FC, useState} from 'react'
 import Toolbar from '@mui/material/Toolbar';
 import Button from '@mui/material/Button';
-import { FormatListBulletedRounded, RedoOutlined, UndoOutlined, FormatListNumberedRounded, FormatBoldRounded, FormatItalicRounded } from '@mui/icons-material';
+import { FormatListBulletedRounded, RedoOutlined, UndoOutlined, FormatListNumberedRounded, FormatBoldRounded, FormatItalicRounded, DatasetLinkedRounded, PhotoLibraryRounded } from '@mui/icons-material';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -14,6 +14,11 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Slide from '@mui/material/Slide';
 import { TransitionProps } from '@mui/material/transitions';
+import MainToolbar from './MainToolbar2';
+import LinkListGui from './LinkListGui';
+import MoodBoardGui from './MoodBoardGui';
+import { Drawer } from '@mui/material';
+import { Grid2 as Grid } from "@mui/material";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -192,7 +197,22 @@ const MenuToolbar : FC<MenuToolbarProps>= ({className, editor}) =>{
 
 export default () => {
   const [edited, setEdited] = useState(false);
-  const [alertMsg, setAlertMsg] = useState<string | null>(null);
+  const [linkSection, setLinkSection] = useState(false);
+  const [mbSection, setMBSection] = useState(false);
+
+  const toggle = (obj :string) =>{
+    switch (obj){
+      case 'link':
+        setLinkSection(!linkSection);
+        break;
+      case 'mb':
+        setMBSection(!mbSection);
+        break;
+    }
+   
+  }
+
+  const [saveAlertMsg, setSaveAlertMsg] = useState<string | null>(null);
 
   const editor: Editor |null = useEditor({
     extensions: [
@@ -210,7 +230,7 @@ export default () => {
     setEdited(true);
   })
 
-  const saveFile = async (event : React.MouseEvent<HTMLButtonElement>) =>{
+  const saveFile = async (event : React.MouseEvent<any>) =>{
     console.log("SaveFile --- data is: ", event);
     const fileName = "newFile.txt";
 
@@ -229,42 +249,59 @@ export default () => {
     
   }
 
-  const openFile = async (event : React.MouseEvent<HTMLButtonElement>) =>{
+  const openFile = async (event : React.MouseEvent<any>, override: boolean) =>{
     console.log("Opening File --- event is: ", event);
     const fileName = "newFileName.txt";
     //have screen loader
+    console.log("edited is: ",edited );
+    console.log("override is ", override);
 
     //if editor has text, check with user if they want to save it or discard
-    if(edited){
-      setAlertMsg("Your current file has not been saved, would you like to continue?");
+    if(edited && !override){
+      setSaveAlertMsg("Your current file has not been saved, would you like to continue?");
       console.log("ALERT!!!");
+    }else{
+      let pathObj : Electron.OpenDialogReturnValue = await window.electron.openFileDialog();
+      console.log("File opened...", pathObj.filePaths[0]);
+      console.log("pathObj.canceled...", pathObj.canceled);
+  
+      if(pathObj.canceled === false && pathObj.filePaths.length === 1 && editor){
+        const data = await window.electron.readFile(pathObj.filePaths[0]);
+  
+        editor.commands.clearContent();
+        editor.commands.insertContent(data);
+
+        //Since a new file is loaded we are no longer in an 'edited' state
+        setEdited(false);
+        console.log("DATA READ FROM FILE:",data);
+      }
     }
 
-    let pathObj : Electron.OpenDialogReturnValue = await window.electron.openFileDialog();
-    console.log("File opened...", pathObj.filePaths[0]);
-    console.log("pathObj.canceled...", pathObj.canceled);
-
-    if(pathObj.canceled === false && pathObj.filePaths.length === 1 && editor){
-      const data = await window.electron.readFile(pathObj.filePaths[0]);
-
-      editor.commands.clearContent();
-      editor.commands.insertContent(data);
-      setEdited(false);
-      console.log("DATA READ FROM FILE:",data);
-    }
+   
     
   }
 
   const handleAlertClose = () =>{
-    setAlertMsg(null);
+    setSaveAlertMsg(null);
+  }
+  const handleAlertAction = (event: React.MouseEvent<HTMLButtonElement> ,continueOperation: boolean) =>{
+    if(continueOperation){
+      openFile(event, true);
+    }
+    setSaveAlertMsg(null);
   }
 
   return (
     <div style={{margin:'auto'}}>
       {/* <MenuBar editor={editor} />
       <br/> */}
+      {editor !=null?<MainToolbar
+            editor={editor}
+      saveFileEvent={saveFile}
+      openFileEvent={(event: React.MouseEvent<HTMLButtonElement>)=> openFile(event, false)}
+      />:null}
       <Dialog
-        open={alertMsg !== null}
+        open={saveAlertMsg !== null}
         TransitionComponent={Transition}
         keepMounted
         onClose={handleAlertClose}
@@ -273,22 +310,50 @@ export default () => {
         <DialogTitle>{"Hey!"}</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-slide-description">
-            {alertMsg}
+            {saveAlertMsg}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleAlertClose}>Ok</Button>
+          <Button onClick={(event) => handleAlertAction(event,true)}>Continue</Button>
+          <Button onClick={(event) =>handleAlertAction(event,false)}>Abort</Button>
+
         </DialogActions>
       </Dialog>
-      <MenuToolbar  className='MenuToolbar' editor={editor} />
+      <Grid container columnSpacing={2} >
+      <Grid size={7}>
+        <div>
+        <MenuToolbar  className='MenuToolbar' editor={editor} />
       <br/>
       <EditorContent 
       id='editor'
       editor={editor} 
       className='editor'
       />
-      <Button onClick={saveFile}>Save</Button>
-      <Button onClick={openFile}>Open</Button>
+        </div>
+      
+      </Grid>
+       <Grid 
+       size={3}
+    component="div" 
+    sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}
+  >
+       <Button onClick={() => toggle('link')}>
+        <DatasetLinkedRounded/>
+      </Button>
+      <Drawer anchor='right' open={linkSection} onClose={() => toggle('link')}>
+        <LinkListGui/>
+      </Drawer>
+      <Button onClick={() =>toggle('mb')}>
+        <PhotoLibraryRounded/>
+      </Button>
+      <Drawer anchor='right' open={mbSection} onClose={() =>toggle('mb')}>
+        <MoodBoardGui/>
+      </Drawer>
+      </Grid>
+
+    </Grid>
+    <br/>
+     
     </div>
   )
 }
