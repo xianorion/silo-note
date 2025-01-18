@@ -3,6 +3,7 @@ const path = require('path');
 module.exports = {
   mode: 'development',  // or 'production'
   entry: './src/index.tsx',  // Your entry point
+  target: 'node', //add electron as the target export, this allows fs to be used too!!
   output: {
     filename: 'bundle.js',  // The output bundle
     path: path.resolve(__dirname, 'public'),  // The output folder
@@ -25,6 +26,7 @@ module.exports = {
     // Make sure Webpack looks in 'src' and 'node_modules' for modules
     modules: [path.resolve(__dirname, 'src'), 'node_modules'], 
   },
+  
   module: {
     rules: [
       // TypeScript loader configuration
