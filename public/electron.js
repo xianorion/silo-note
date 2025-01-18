@@ -1,5 +1,5 @@
 // Module to control the application lifecycle and the native browser window.
-const { app, BrowserWindow, protocol, ipcMain, dialog } = require("electron");
+const { app, BrowserWindow, protocol, ipcMain, dialog, shell } = require("electron");
 const path = require("path");
 var fs = require("fs");
 const url = require("url");
@@ -114,7 +114,22 @@ ipcMain.handle('readFile', async (event, path) => {
       return false;
     }
   });
- 
+
+  //take in a link from the elction application and opens it in a browser
+  ipcMain.handle("open-link", async(event, link)=>{
+    let returnObj = {status: 200, msg:""}
+    if (typeof link === 'string' && link.startsWith('http')) {
+      shell.openExternal(link);
+    } else {
+      returnObj.status = 400;
+      returnObj.msg = "Invalid URL:, "+link+"\n"+"Please use links prefixed with 'https://' or 'http:'"
+      console.error('Invalid URL:', link);  // Log error if URL is invalid
+
+    }
+
+    return 
+
+  }); 
 // Quit when all windows are closed, except on macOS.
 // There, it's common for applications and their menu bar to stay active until
 // the user quits  explicitly with Cmd + Q.

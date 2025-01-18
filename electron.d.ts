@@ -7,6 +7,7 @@ declare global {
         readFile: (filePath: string) => Promise<string | null>;
         writeFile: (filePath: string, content: string) => Promise<boolean>;
         saveFileDialog: (defaultFile: string) => Promise<string | null>;
+        openLink: (link: string) => Promise<boolean>;
       };
     }
   }

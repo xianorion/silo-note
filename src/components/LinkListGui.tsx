@@ -77,6 +77,8 @@ const LinkListGui : FC<LinkListGuiProps> = () =>{
             setError("Link name must be unique!");
             setErrorSubtext("The name ["+newLink.name+"] is already in use.")
 
+        }else if(!formJson.link.startsWith("http://") && !formJson.link.startsWith("https://")){
+          setError("Link must start with 'http://' or 'https://'");
         }else{
             console.log("Added link!");
             setSrcLinks([...srcLinks, newLink]);
@@ -88,6 +90,15 @@ const LinkListGui : FC<LinkListGuiProps> = () =>{
         const newSrcLinks = srcLinks.filter((link)=> link.name != linkName);
         setSrcLinks(newSrcLinks);
 
+    }
+
+    const openLink = async (link:string) =>{
+      let opened : boolean = await window.electron.openLink(link);
+      if(opened){
+        console.log('opened...');
+      }else{
+        console.log('issue opening link...');
+      }
     }
 
 
@@ -108,7 +119,7 @@ const LinkListGui : FC<LinkListGuiProps> = () =>{
         <List>
             {srcLinks.map((link) =>(
                 <ListItem key={link.name}>
-                    <ListItemButton component="a" href={link.url} >
+                    <ListItemButton component="a" onClick={() => openLink(link.url)} >
                         <ListItemText primaryTypographyProps={{...ListItemTextStyle}}
                         >{link.name}</ListItemText>
                     </ListItemButton>
@@ -161,6 +172,8 @@ const LinkListGui : FC<LinkListGuiProps> = () =>{
             //type="link"
             fullWidth
             variant="standard"
+            helperText={error}
+            error={error != null}
             // value={linkUrl}
             // onChange={e=> setLinkUrl(e.target.value)}
           />
