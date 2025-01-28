@@ -83,16 +83,28 @@ ipcMain.handle('save-file-dialog', async (event, defaultFilename) => {
 
 
 // Open the file dialog and return the file data
-ipcMain.handle('open-file-dialog', async () => {
+ipcMain.handle('open-file-dialog', async (event, fileTypes) => {
     const result = await dialog.showOpenDialog(mainWindow, {
       properties: ['openFile'],
       buttonLabel: 'Open',
       filters: [
-        { name: 'Text Files', extensions: ['txt', 'rtf'] },
+        { name: 'Files', extensions: fileTypes},
       ]
     });
-    return result;  // Return the path of the selected file
+    if (result.canceled) {
+      return null;  // Return null if user cancels
+    }
+  
+    const selectedFilePath = result.filePaths[0];  // Get the first selected file path
+  
+    // Read the file as a Blob
+    const fileBuffer = fs.readFileSync(selectedFilePath); // Read file as buffer
+    // Convert the Buffer to a base64 string
+    const fileData = fileBuffer.toString('base64');
+
+    return { ...result, blob: fileData };  // Return both the file path and Blob
   });
+
 
 
 ipcMain.handle('readFile', async (event, path) => {

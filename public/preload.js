@@ -10,7 +10,7 @@ process.once("loaded", () => {
 });
 
 contextBridge.exposeInMainWorld('electron', {
-    openFileDialog: () => ipcRenderer.invoke('open-file-dialog'),
+    openFileDialog: (fileTypes) => ipcRenderer.invoke('open-file-dialog', fileTypes),
     readFile: (path) => ipcRenderer.invoke('readFile', path),
     writeFile: (path, data) => ipcRenderer.invoke('writeFile', path, data),
     saveFileDialog: (defaultFilename) => ipcRenderer.invoke('save-file-dialog',defaultFilename),

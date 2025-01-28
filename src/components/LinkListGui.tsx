@@ -30,14 +30,15 @@ url: "https://mui.com/material-ui/react-list/"
 
 interface LinkListGuiProps {
     styles?: React.CSSProperties;
+    links: {name: string, url: string, notes:string}[] | [];
+    setLinks: (links: {name: string, url: string, notes:string}[]) => void;
 }
 
 const ListItemTextStyle:{fontSize:number} =  {
     fontSize:15
 }
 
-const LinkListGui : FC<LinkListGuiProps> = () =>{
-    const [srcLinks, setSrcLinks] = useState<{name: string, url: string, notes:string}[]>(testLinkData);
+const LinkListGui : FC<LinkListGuiProps> = ({links, setLinks}) =>{
     // const [linkUrl, setLinkUrl] = useState<string>("");
     // const [linkName, setLinkName] = useState<string>("");
     // const [linkNotes, setLinkNotes] = useState<string>("");
@@ -71,7 +72,7 @@ const LinkListGui : FC<LinkListGuiProps> = () =>{
       
         
         //check if name is unqiue
-        let isNameUnqiue :boolean = srcLinks.every( link =>link.name != newLink.name);
+        let isNameUnqiue :boolean = links.every( link =>link.name != newLink.name);
         //prompt user that link name must be unique
         if(!isNameUnqiue){
             setError("Link name must be unique!");
@@ -81,14 +82,14 @@ const LinkListGui : FC<LinkListGuiProps> = () =>{
           setError("Link must start with 'http://' or 'https://'");
         }else{
             console.log("Added link!");
-            setSrcLinks([...srcLinks, newLink]);
+            setLinks([...links, newLink]);
             handleClose();
         }
     }
 
     const removeLink = (linkName:string) =>{
-        const newSrcLinks = srcLinks.filter((link)=> link.name != linkName);
-        setSrcLinks(newSrcLinks);
+        const newSrcLinks = links.filter((link)=> link.name != linkName);
+        setLinks(newSrcLinks);
 
     }
 
@@ -117,7 +118,7 @@ const LinkListGui : FC<LinkListGuiProps> = () =>{
          
          />}
         <List>
-            {srcLinks.map((link) =>(
+            {links.map((link) =>(
                 <ListItem key={link.name}>
                     <ListItemButton component="a" onClick={() => openLink(link.url)} >
                         <ListItemText primaryTypographyProps={{...ListItemTextStyle}}
