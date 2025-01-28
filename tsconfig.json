@@ -3,14 +3,16 @@
     "target": "es6",                           // Target modern JavaScript
     "module": "esnext",                        // Use ESNext module resolution
                               // Enable JSX for React
+    //"jsx": "react-jsx",
     "jsx": "react-jsx",
     "strict": true,                            // Enable strict type-checking
     "moduleResolution": "node",                // Use Node.js module resolution
     "baseUrl": "src",                          // Base URL for absolute imports
-    "paths": {                                 // Aliases for modules
-      "@components/*": ["components/*"],       // Example alias for components
-      "@utils/*": ["utils/*"],                 // Example alias for utils
-      "@styles/*": ["styles/*"]                // Correct alias for styles
+    "paths": {       
+      //"@/*": ["*"],                          // Aliases for modules
+      "@components/*": ["./components/*"],       // Example alias for components
+      "@utils/*": ["./utils/*"],                 // Example alias for utils
+      "@styles/*": ["./styles/*"]                // Correct alias for styles
     },
     "esModuleInterop": true,                   // Enable interoperability for CommonJS modules
     "skipLibCheck": true,                      // Skip checking library files

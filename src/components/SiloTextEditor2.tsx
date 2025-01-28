@@ -19,6 +19,8 @@ import LinkListGui from './LinkListGui';
 import MoodBoardGui from './MoodBoardGui';
 import { Drawer } from '@mui/material';
 import { Grid2 as Grid } from "@mui/material";
+import { TEXT_FILETYPES, IMAGE_FILETYPES } from './../utils/constants';
+import { ImgListType, SiloNoteFile, SourceLinksType } from 'types/GlobalTypes';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -40,8 +42,6 @@ interface MenuToolbarProps {
   className: string;
   editor: Editor | null;
 }
-
-
 
 const MenuBar : FC<MenuBarProps> = ({ editor }) => {
   if (!editor) {
@@ -199,6 +199,8 @@ export default () => {
   const [edited, setEdited] = useState(false);
   const [linkSection, setLinkSection] = useState(false);
   const [mbSection, setMBSection] = useState(false);
+  const [imgList, setImgList] = useState<ImgListType[]>([]);
+  const [srcLinks, setSrcLinks] = useState<SourceLinksType[]>([]);
 
   const toggle = (obj :string) =>{
     switch (obj){
@@ -230,15 +232,69 @@ export default () => {
     setEdited(true);
   })
 
+  const addImage = async (event:React.MouseEvent<any>) =>{
+    console.log("Add image clicked...");
+    let pathObj : FileReturnValue = await window.electron.openFileDialog(IMAGE_FILETYPES);
+    
+    console.log("Image file opened...", pathObj.filePaths[0]);
+    console.log("image file? pathObj.canceled...", pathObj.canceled);
+    let imgPath: string= '';
+    let result = {
+      status: false,
+      msg: "Error loading image"
+    };
+    if(!pathObj.canceled){
+        imgPath = pathObj.filePaths[0];
+        console.log("Adding image...", pathObj);
+        console.log("from path...", pathObj.filePaths[0]);
+        //create the image URL using blob
+        const imageUrl = `data:image/png;base64,${pathObj.blob}`;
+        const  newImage ={
+          data: imageUrl,
+          name: imgPath,
+          note: null
+        }
+       
+        //TODO: check if item was added to the list or not
+        const ImgsWithSamePath = imgList.filter((item)=> item.name === imgPath);
+        if(ImgsWithSamePath.length > 0){
+          result.status = false;
+          result.msg = "This image already exists!";
+        }else{
+          //TODO:if not, add
+          result.status = true;
+          result.msg = "Added Image to Mood Board list!!!";
+          setImgList([newImage, ...imgList]);
+        }
+      
+    }
+    return result;
+  }
+
   const saveFile = async (event : React.MouseEvent<any>) =>{
     console.log("SaveFile --- data is: ", event);
-    const fileName = "newFile.txt";
+    const fileName = "newFile.sd";
 
     let path = await window.electron.saveFileDialog(fileName);
     console.log("Path to write in: ", path);
+
+    //save as sd file
+    if(path && !path.endsWith('.sd')){
+      path = path + '.sd';
+    }
+   
+
+
+
     let content = (editor!=null ? editor.getText():"");
     if(path !=null && path.length >0){
-      const data = await window.electron.writeFile(path, content);
+      const newFile : SiloNoteFile = {
+        links: srcLinks,
+        imageRefs: imgList,
+        content: content
+      }
+      const serializedData = JSON.stringify(newFile);
+      const data = await window.electron.writeFile(path, serializedData);
       console.log(data);
       //Message that save was successful
 
@@ -261,12 +317,17 @@ export default () => {
       setSaveAlertMsg("Your current file has not been saved, would you like to continue?");
       console.log("ALERT!!!");
     }else{
-      let pathObj : Electron.OpenDialogReturnValue = await window.electron.openFileDialog();
+      let pathObj : Electron.OpenDialogReturnValue = await window.electron.openFileDialog(TEXT_FILETYPES);
       console.log("File opened...", pathObj.filePaths[0]);
       console.log("pathObj.canceled...", pathObj.canceled);
   
       if(pathObj.canceled === false && pathObj.filePaths.length === 1 && editor){
         const data = await window.electron.readFile(pathObj.filePaths[0]);
+
+        //if it is a silo note file, parse
+        if(pathObj.filePaths[0].endsWith(".sd")){
+
+        }
   
         editor.commands.clearContent();
         editor.commands.insertContent(data);
@@ -341,13 +402,13 @@ export default () => {
         <DatasetLinkedRounded/>
       </Button>
       <Drawer anchor='right' open={linkSection} onClose={() => toggle('link')}>
-        <LinkListGui/>
+        <LinkListGui links={srcLinks} setLinks={(links) => setSrcLinks(links)}/>
       </Drawer>
       <Button onClick={() =>toggle('mb')}>
         <PhotoLibraryRounded/>
       </Button>
       <Drawer anchor='right' open={mbSection} onClose={() =>toggle('mb')}>
-        <MoodBoardGui/>
+        <MoodBoardGui imgList={imgList} addImage={addImage} onClose={() =>toggle('mb')}/>
       </Drawer>
       </Grid>
 

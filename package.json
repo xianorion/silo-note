@@ -56,7 +56,6 @@
   },
   "scripts": {
     "start": "export BROWSER=none && react-scripts start",
-    "start-electron": "export ELECTRON_START_URL=http://localhost:3000 && electron .",
     "electron": "electron .",
     "build": "react-scripts build",
     "test": "react-scripts test",

@@ -1,5 +1,5 @@
 // Module to control the application lifecycle and the native browser window.
-const { app, BrowserWindow, protocol, ipcMain, dialog } = require("electron");
+const { app, BrowserWindow, protocol, ipcMain, dialog, shell } = require("electron");
 const path = require("path");
 var fs = require("fs");
 const url = require("url");
@@ -83,16 +83,28 @@ ipcMain.handle('save-file-dialog', async (event, defaultFilename) => {
 
 
 // Open the file dialog and return the file data
-ipcMain.handle('open-file-dialog', async () => {
+ipcMain.handle('open-file-dialog', async (event, fileTypes) => {
     const result = await dialog.showOpenDialog(mainWindow, {
       properties: ['openFile'],
       buttonLabel: 'Open',
       filters: [
-        { name: 'Text Files', extensions: ['txt', 'rtf'] },
+        { name: 'Files', extensions: fileTypes},
       ]
     });
-    return result;  // Return the path of the selected file
+    if (result.canceled) {
+      return null;  // Return null if user cancels
+    }
+  
+    const selectedFilePath = result.filePaths[0];  // Get the first selected file path
+  
+    // Read the file as a Blob
+    const fileBuffer = fs.readFileSync(selectedFilePath); // Read file as buffer
+    // Convert the Buffer to a base64 string
+    const fileData = fileBuffer.toString('base64');
+
+    return { ...result, blob: fileData };  // Return both the file path and Blob
   });
+
 
 
 ipcMain.handle('readFile', async (event, path) => {
@@ -114,7 +126,22 @@ ipcMain.handle('readFile', async (event, path) => {
       return false;
     }
   });
- 
+
+  //take in a link from the elction application and opens it in a browser
+  ipcMain.handle("open-link", async(event, link)=>{
+    let returnObj = {status: 200, msg:""}
+    if (typeof link === 'string' && link.startsWith('http')) {
+      shell.openExternal(link);
+    } else {
+      returnObj.status = 400;
+      returnObj.msg = "Invalid URL:, "+link+"\n"+"Please use links prefixed with 'https://' or 'http:'"
+      console.error('Invalid URL:', link);  // Log error if URL is invalid
+
+    }
+
+    return 
+
+  }); 
 // Quit when all windows are closed, except on macOS.
 // There, it's common for applications and their menu bar to stay active until
 // the user quits  explicitly with Cmd + Q.

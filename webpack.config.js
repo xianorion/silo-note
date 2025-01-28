@@ -23,6 +23,12 @@ module.exports = {
   resolve: {
     // Automatically resolve certain extensions without needing to include them in import statements
     extensions: ['.ts', '.tsx', '.js', '.css'],
+    alias: {
+      //'@': path.resolve(__dirname, 'src/'),
+      '@components': path.resolve(__dirname, './components'),
+      '@utils': path.resolve(__dirname, './utils'),
+      '@styles': path.resolve(__dirname, './styles')
+    },
     // Make sure Webpack looks in 'src' and 'node_modules' for modules
     modules: [path.resolve(__dirname, 'src'), 'node_modules'], 
   },

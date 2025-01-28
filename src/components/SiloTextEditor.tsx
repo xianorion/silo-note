@@ -414,8 +414,6 @@ const SiloTextEditor = () =>{
               <div>${text}</div>
       </Grid>
        <Grid size={{ xs: 6, md: 4 }}>
-        <MoodBoardGui/>
-        <LinkListGui/>
       </Grid>
 
     </Grid>
