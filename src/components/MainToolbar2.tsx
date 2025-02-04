@@ -6,23 +6,22 @@ import MenuItem from '@mui/material/MenuItem';
 import {MainTextBox} from  '../styles/SiloTextBoxStyle';
 
 interface MainToolbarProps {
-editor: Editor | null;
-
+editor: Editor ;
+saveFileEvent: (event: React.MouseEvent<any>) => Promise<void>,
+openFileEvent: (event: React.MouseEvent<any>, override: boolean) => Promise<void>
 }
 
 enum action {
-  COPY =  "COPY",
-  PASTE = "PASTE",
+  SAVE =  "SAVE",
+  OPEN = "OPEN",
   CUT = "CUT",
   UNDO = "UNDO",
   REDO = "REDO",
 }
 
 
-const MainToolbar : FC<MainToolbarProps> = ({editor}) =>{
-  if (!editor) {
-    return null
-  }
+const MainToolbar : FC<MainToolbarProps> = ({editor,saveFileEvent, openFileEvent}) =>{
+ 
   const [menuState, setMenuState] =  React.useState<{[key: string]: HTMLElement | null}>({
     File: null,
     Edit: null,
@@ -35,11 +34,11 @@ const MainToolbar : FC<MainToolbarProps> = ({editor}) =>{
     console.log("Handing click...");
     // onClose(event);
     switch(commmand) {
-      case action.COPY:
-       
+      case action.SAVE:
+        saveFileEvent(event);
         break;
-        case action.PASTE: {
-         
+        case action.OPEN: {
+         openFileEvent(event, false);
         }
         break;
         case action.CUT:{
@@ -111,8 +110,8 @@ const MainToolbar : FC<MainToolbarProps> = ({editor}) =>{
           }}
         >
           <MenuItem onClick={() => handleClose("File")}>New</MenuItem>
-          <MenuItem onClick={() => handleClose("File")}>Open</MenuItem>
-          <MenuItem onClick={() => handleClose("File")}>Save</MenuItem>
+          <MenuItem onClick={(e) => handleAction(action.OPEN,e)}>Open</MenuItem>
+          <MenuItem onClick={(e) => handleAction(action.SAVE,e)}>Save</MenuItem>
         </Menu>
       </div>
       <div >
@@ -136,9 +135,6 @@ const MainToolbar : FC<MainToolbarProps> = ({editor}) =>{
       >
         <MenuItem onClick={(e) => handleAction(action.UNDO,e)}>Undo</MenuItem>
         <MenuItem onClick={(e) => handleAction(action.REDO,e)}>Redo</MenuItem>
-        <MenuItem onClick={(e) => handleAction(action.CUT,e)}>Cut</MenuItem>
-        <MenuItem onClick={(e) => handleAction(action.COPY,e)}>Copy</MenuItem>
-        <MenuItem onClick={(e) => handleAction(action.PASTE,e)}>Paste</MenuItem>
       </Menu>
       </div>
       <div>

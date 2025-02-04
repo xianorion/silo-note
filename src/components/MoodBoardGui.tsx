@@ -1,16 +1,44 @@
 import { Button, ImageList, ImageListItem, ImageListItemBar,Paper,Box,Typography, Grid2 as Grid } from '@mui/material';
-import React, {FC, useState} from 'react';
+import React, {FC, useEffect} from 'react';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
-const MoodBoardGui: FC = () =>{
+import { ImgListType } from 'types/GlobalTypes';
+import Zoom from '@mui/material/Zoom';
+import Slide from '@mui/material/Slide';
 
-    const [imgList, setImgList] = useState<{url:string, name:string}[]>([]);
 
+interface MoodBoardGuiProps {
+    imgList:ImgListType[] | [];
+    addImage: (event:React.MouseEvent) => void;
+    onClose: () => void
+}
+const MoodBoardGui: FC<MoodBoardGuiProps> = ({imgList, addImage, onClose}) =>{
+
+    useEffect(()=>{
+        console.log("New LIMAGE LIST: ", imgList);
+    },[imgList]);
+
+    const addImageToList = async (event:React.MouseEvent) =>{
+        const res = await addImage(event);
+       
+        console.log("Returned to MoodBoardGui addimagefunction.")
+        console.log("Recieved addImge result: ", res);
+    }
+
+    const removeImageFromList = async (event:React.MouseEvent) =>{
+        console.log("removeImageFromList event triggered: ", event);     
+
+    }
+
+    const editImageMsg= async (event:React.MouseEvent) =>{
+        console.log("Edit event triggered: ", event)       
+    }
 
 
     return(
         <Paper
         sx={{
-            margin:'2px'
+            margin:'2px',
+            width: '80vw'
         }}
         >
         <Box>
@@ -26,31 +54,43 @@ const MoodBoardGui: FC = () =>{
                 </Grid>
                 <Grid size={2}  sx={{
                     }}>
-                    <OpenInFullIcon/>
+                     
+                    <OpenInFullIcon onClick={onClose}/>
                 </Grid>
            
             </Grid>
         
-            <ImageList variant="masonry" cols={3} gap={8}>
-                {imgList.map((item)=>(
-                    <ImageListItem key={item.url}>
-                            <img
-                                srcSet={`${item.url}?w=248&fit=crop&auto=format&dpr=2 2x`}
-                                src={`${item.url}?w=248&fit=crop&auto=format`}
-                                alt={item.name}
-                                loading="lazy"
-                            />
-                    <ImageListItemBar position="below" title={item.name} />
-                    
-                    </ImageListItem>
-                ))}
-            
+        <ImageList sx={{ overflowX: 'auto', height: '100%', padding:'5px', margin:'10px'}} >
+          
+          {imgList && imgList.map((item)=>(
+                 item && <Slide in timeout={1000} key={item.name}><ImageListItem key={item.name}>
+                      <img
+                          // srcSet={`${item?.data}`}
+                          src={item.data}
+                          alt={item?.name}
+                          style={{
+                              width:'30vw',
+                              height:'auto',
+                              display: 'flex', 
+                              padding:'5px',
+                              flexDirection: 'row',
+                              textAlign: 'center'
 
-            </ImageList>
+                             }}
+
+
+                      />
+              
+              </ImageListItem></Slide>
+          ))}
+      
+
+      </ImageList>
+            
         </Box>
        
 
-        <Button>Add</Button>
+        <Button onClick={addImageToList}>Add</Button>
         <Button>Edit</Button>
         <Button>Remove</Button>
         </Paper>

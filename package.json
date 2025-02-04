@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "main": "./public/electron.js",
+  "author": "Mack Cunningham <mackattacksart@gmail.com>",
   "homepage": "./",
   "dependencies": {
     "@emotion/react": "^11.13.5",
@@ -38,13 +39,23 @@
     "win": {
       "target": "nsis"
     },
-    "linux": {
-      "target": "deb"
+    "build": {
+      "appId": "com.example.app",
+      "productName": "MyApp",
+      "linux": {
+        "target": [
+          "AppImage",
+          "deb",
+          "tar.gz"
+        ]
+      },
+      "arch": [
+        "arm64"
+      ]
     }
   },
   "scripts": {
     "start": "export BROWSER=none && react-scripts start",
-    "start-electron": "export ELECTRON_START_URL=http://localhost:3000 && electron .",
     "electron": "electron .",
     "build": "react-scripts build",
     "test": "react-scripts test",
@@ -53,7 +64,7 @@
     "electron:start": "concurrently -k \"cross-env BROWSER=none npm start\" \"wait-on http://localhost:3000 && electronmon .\"",
     "electron:package:mac": "npm run build && electron-builder -m -c.extraMetadata.main=build/electron.js",
     "electron:package:win": "npm run build && electron-builder -w -c.extraMetadata.main=build/electron.js",
-    "electron:package:linux": "npm run build && electron-builder -l -c.extraMetadata.main=build/electron.js"
+    "electron:package:linux": "npm run build && electron-builder --linux --arm64 --publish never -c.extraMetadata.main=build/electron.js"
   },
   "eslintConfig": {
     "extends": [

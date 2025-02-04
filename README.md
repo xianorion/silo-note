@@ -34,6 +34,9 @@ Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
+For mor information on how this build was configured, please see:
+(https://mmazzarolo.com/blog/2021-08-12-building-an-electron-application-using-create-react-app/_)
+
 ### `npm run electron:package:mac`
 
 This command will package everything in the build folder and create an installer and app to run on mac os.
@@ -85,3 +88,4 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
