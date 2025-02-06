@@ -1,30 +1,30 @@
 import React, {FC} from 'react';
+import { Editor } from '@tiptap/react'
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem'; 
-import {MainTextBox} from  './../styles/SiloTextBoxStyle';
+import {MainTextBox} from  '../styles/SiloTextBoxStyle';
 
 interface MainToolbarProps {
-  style?: React.CSSProperties; // style prop for inline styles
-  selectedText: string | null,
-  handlePasteEvent: (text:string) => void,
-  handleTextCutEvent: () => void,
-  handleUndoEvent: () => void,
-  handleRedoEvent: () => void,
-  onClose: (event: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent> ) => void;
-
+editor: Editor ;
+newFileEvent: (event: React.MouseEvent<any>, override: boolean) => Promise<void>,
+saveFileEvent: (event: React.MouseEvent<any>, isSaveAs: boolean) => Promise<void>,
+openFileEvent: (event: React.MouseEvent<any>, override: boolean) => Promise<void>
 }
 
 enum action {
-  COPY =  "COPY",
-  PASTE = "PASTE",
+  NEW = "NEW",
+  SAVE =  "SAVE",
+  SAVE_AS = "SAVE_AS",
+  OPEN = "OPEN",
   CUT = "CUT",
   UNDO = "UNDO",
   REDO = "REDO",
 }
 
 
-const MainToolbar : FC<MainToolbarProps> = ({selectedText, handlePasteEvent,handleTextCutEvent,handleUndoEvent, handleRedoEvent, onClose}) =>{
+const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, openFileEvent}) =>{
+ 
   const [menuState, setMenuState] =  React.useState<{[key: string]: HTMLElement | null}>({
     File: null,
     Edit: null,
@@ -35,51 +35,38 @@ const MainToolbar : FC<MainToolbarProps> = ({selectedText, handlePasteEvent,hand
   const handleAction = (commmand: action |null, event: React.MouseEvent<HTMLLIElement, MouseEvent>) => {
     // event.preventDefault();
     console.log("Handing click...");
-    console.log("with selection", selectedText);
     // onClose(event);
     switch(commmand) {
-      case action.COPY:
-        if (selectedText) {
-          // Copy to the clipboard
-          navigator.clipboard.writeText(selectedText)
-            .then(() => {
-              console.log("Text copied to clipboard");
-            })
-            .catch((error) => {
-              console.error("Failed to copy text: ", error);
-            });
-        } 
+      case action.NEW:
+        newFileEvent(event, false);
         break;
-        case action.PASTE: {
-          navigator.clipboard.readText().then(
-            (res) =>{
-              handlePasteEvent(res)
-              console.log("text to paste is ", res);
-
-            }
-          );
+      case action.SAVE:
+        saveFileEvent(event, false);
+        break;
+        case action.SAVE_AS:
+          saveFileEvent(event, true);
+        break;
+        case action.OPEN: {
+         openFileEvent(event, false);
         }
         break;
         case action.CUT:{
-          if(selectedText){
-            navigator.clipboard.writeText(selectedText).then(
-              (res)=>{
-                handleTextCutEvent();
-                console.log("text to cut is ", res);
-              }
-            ).catch(()=>{
-              console.log("ERROR: Cutting text failed...")
-            });
-          }
+          const from = editor.state.selection.from;
+          const to = editor.state.selection.to;
+          
+          const endPos = editor.state.doc.nodeSize - 2;
+          
+          // Cut out content from range and put it at the end of the document
+          editor.commands.cut({ from, to }, endPos);
           
         }
         break;
         case action.UNDO:{
-          handleUndoEvent();
+          editor.chain().focus().undo().run();
         }
         break;  
         case action.REDO:{
-          handleRedoEvent();
+          editor.chain().focus().redo().run();
         }
         break;
 
@@ -131,9 +118,10 @@ const MainToolbar : FC<MainToolbarProps> = ({selectedText, handlePasteEvent,hand
             'aria-labelledby': 'basic-button',
           }}
         >
-          <MenuItem onClick={() => handleClose("File")}>New</MenuItem>
-          <MenuItem onClick={() => handleClose("File")}>Open</MenuItem>
-          <MenuItem onClick={() => handleClose("File")}>Save</MenuItem>
+          <MenuItem onClick={(e) => handleAction(action.NEW,e)}>New</MenuItem>
+          <MenuItem onClick={(e) => handleAction(action.OPEN,e)}>Open</MenuItem>
+          <MenuItem onClick={(e) => handleAction(action.SAVE,e)}>Save</MenuItem>
+          <MenuItem onClick={(e) => handleAction(action.SAVE_AS, e)}>Save As</MenuItem>
         </Menu>
       </div>
       <div >
@@ -157,9 +145,6 @@ const MainToolbar : FC<MainToolbarProps> = ({selectedText, handlePasteEvent,hand
       >
         <MenuItem onClick={(e) => handleAction(action.UNDO,e)}>Undo</MenuItem>
         <MenuItem onClick={(e) => handleAction(action.REDO,e)}>Redo</MenuItem>
-        <MenuItem onClick={(e) => handleAction(action.CUT,e)}>Cut</MenuItem>
-        <MenuItem onClick={(e) => handleAction(action.COPY,e)}>Copy</MenuItem>
-        <MenuItem onClick={(e) => handleAction(action.PASTE,e)}>Paste</MenuItem>
       </Menu>
       </div>
       <div>

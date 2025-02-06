@@ -1,6 +1,5 @@
 import React, {FC, useState} from 'react';
-import SiloTextEditor from './SiloTextEditor';
-import SiloTextEditor2 from './SiloTextEditor2';
+import SiloTextEditor2 from './SiloTextEditor';
 import { GuiStyle } from './../styles/SiloTextBoxStyle';
 import { createTheme, ThemeProvider, Typography } from '@mui/material';
 
