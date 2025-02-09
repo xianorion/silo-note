@@ -1,85 +1,79 @@
 import React, {FC} from 'react';
+import { Editor } from '@tiptap/react'
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem'; 
-import {MainTextBox} from  './../styles/SiloTextBoxStyle';
+import {MainTextBox} from  '../styles/SiloTextBoxStyle';
 
 interface MainToolbarProps {
-  style?: React.CSSProperties; // style prop for inline styles
-  selectedText: string | null,
-  handlePasteEvent: (text:string) => void,
-  handleTextCutEvent: () => void,
-  handleUndoEvent: () => void,
-  handleRedoEvent: () => void,
-  onClose: (event: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent> ) => void;
-
+editor: Editor ;
+newFileEvent: (event: React.MouseEvent<any>, override: boolean) => Promise<void>,
+saveFileEvent: (event: React.MouseEvent<any>, isSaveAs: boolean) => Promise<void>,
+openFileEvent: (event: React.MouseEvent<any>, override: boolean) => Promise<void>
 }
 
 enum action {
-  COPY =  "COPY",
-  PASTE = "PASTE",
+  NEW = "NEW",
+  SAVE =  "SAVE",
+  SAVE_AS = "SAVE_AS",
+  OPEN = "OPEN",
   CUT = "CUT",
   UNDO = "UNDO",
   REDO = "REDO",
 }
 
+enum DROPDOWN_OPTIONS {
+  FILE= "FILE",
+  EDIT = "EDIT",
+  EXPORT = "EXPORT",
+  VIEW = "VIEW"
+}
 
-const MainToolbar : FC<MainToolbarProps> = ({selectedText, handlePasteEvent,handleTextCutEvent,handleUndoEvent, handleRedoEvent, onClose}) =>{
-  const [menuState, setMenuState] =  React.useState<{[key: string]: HTMLElement | null}>({
-    File: null,
-    Edit: null,
-    Export: null,
-    View: null
+
+const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, openFileEvent}) =>{
+ 
+  const [menuState, setMenuState] =  React.useState<{[key in DROPDOWN_OPTIONS]: HTMLElement | null}>({
+    [DROPDOWN_OPTIONS.FILE]: null,
+    [DROPDOWN_OPTIONS.EDIT]: null,
+    [DROPDOWN_OPTIONS.EXPORT]: null,
+    [DROPDOWN_OPTIONS.VIEW]: null
   });
 
-  const handleAction = (commmand: action |null, event: React.MouseEvent<HTMLLIElement, MouseEvent>) => {
+  const handleAction = (commmand: action |null, event: React.MouseEvent<HTMLLIElement, MouseEvent>, origin: string) => {
     // event.preventDefault();
     console.log("Handing click...");
-    console.log("with selection", selectedText);
     // onClose(event);
     switch(commmand) {
-      case action.COPY:
-        if (selectedText) {
-          // Copy to the clipboard
-          navigator.clipboard.writeText(selectedText)
-            .then(() => {
-              console.log("Text copied to clipboard");
-            })
-            .catch((error) => {
-              console.error("Failed to copy text: ", error);
-            });
-        } 
+      case action.NEW:
+        newFileEvent(event, false);
         break;
-        case action.PASTE: {
-          navigator.clipboard.readText().then(
-            (res) =>{
-              handlePasteEvent(res)
-              console.log("text to paste is ", res);
-
-            }
-          );
+      case action.SAVE:
+        saveFileEvent(event, false);
+        break;
+        case action.SAVE_AS:
+          saveFileEvent(event, true);
+        break;
+        case action.OPEN: {
+         openFileEvent(event, false);
         }
         break;
         case action.CUT:{
-          if(selectedText){
-            navigator.clipboard.writeText(selectedText).then(
-              (res)=>{
-                handleTextCutEvent();
-                console.log("text to cut is ", res);
-              }
-            ).catch(()=>{
-              console.log("ERROR: Cutting text failed...")
-            });
-          }
+          const from = editor.state.selection.from;
+          const to = editor.state.selection.to;
+          
+          const endPos = editor.state.doc.nodeSize - 2;
+          
+          // Cut out content from range and put it at the end of the document
+          editor.commands.cut({ from, to }, endPos);
           
         }
         break;
         case action.UNDO:{
-          handleUndoEvent();
+          editor.chain().focus().undo().run();
         }
         break;  
         case action.REDO:{
-          handleRedoEvent();
+          editor.chain().focus().redo().run();
         }
         break;
 
@@ -87,8 +81,8 @@ const MainToolbar : FC<MainToolbarProps> = ({selectedText, handlePasteEvent,hand
         break;
 
     }
-
-    handleClose("Edit");
+    console.log("Handling close about to be called with origin: ", origin);
+    handleClose(origin);
 
   }
 
@@ -102,8 +96,8 @@ const MainToolbar : FC<MainToolbarProps> = ({selectedText, handlePasteEvent,hand
       }));
     };
 
-    const handleClose = (menu:string) =>  (event: React.MouseEvent<HTMLButtonElement>) => {
-
+    const handleClose = (menu:string)  => {
+      console.log("Maintoolbar - HANDLING CLOSE: ", menu);
       setMenuState((prevState) => ({
         ...prevState,
         [menu] : null,
@@ -115,98 +109,96 @@ const MainToolbar : FC<MainToolbarProps> = ({selectedText, handlePasteEvent,hand
       <div >
         <Button style={MainTextBox}
           id="basic-button"
-          aria-controls={menuState.File ? 'basic-menu' : undefined}
+          aria-controls={menuState.FILE ? 'basic-menu' : undefined}
           aria-haspopup="true"
-          aria-expanded={menuState.File ? 'true' : undefined}
-          onClick={handleClick("File")}
+          aria-expanded={menuState.FILE ? 'true' : undefined}
+          onClick={handleClick(DROPDOWN_OPTIONS.FILE)}
         >
           File
         </Button>
         <Menu
           id="basic-menu"
-          anchorEl={menuState.File}
-          open={!!menuState.File}
-          onClose={handleClose("File")}
+          anchorEl={menuState.FILE}
+          open={!!menuState.FILE}
+          onClose={()=>handleClose(DROPDOWN_OPTIONS.FILE)}
           MenuListProps={{
             'aria-labelledby': 'basic-button',
           }}
         >
-          <MenuItem onClick={() => handleClose("File")}>New</MenuItem>
-          <MenuItem onClick={() => handleClose("File")}>Open</MenuItem>
-          <MenuItem onClick={() => handleClose("File")}>Save</MenuItem>
+          <MenuItem onClick={(e) => handleAction(action.NEW,e, DROPDOWN_OPTIONS.FILE)}>New</MenuItem>
+          <MenuItem onClick={(e) => handleAction(action.OPEN,e,DROPDOWN_OPTIONS.FILE)}>Open</MenuItem>
+          <MenuItem onClick={(e) => handleAction(action.SAVE,e,DROPDOWN_OPTIONS.FILE)}>Save</MenuItem>
+          <MenuItem onClick={(e) => handleAction(action.SAVE_AS, e, DROPDOWN_OPTIONS.FILE)}>Save As</MenuItem>
         </Menu>
       </div>
       <div >
       <Button style={MainTextBox}
         id="basic-button"
-        aria-controls={menuState.Edit ? 'basic-menu' : undefined}
+        aria-controls={menuState.EDIT ? 'basic-menu' : undefined}
         aria-haspopup="true"
-        aria-expanded={menuState.Edit ? 'true' : undefined}
-        onClick={handleClick("Edit")}
+        aria-expanded={menuState.EDIT ? 'true' : undefined}
+        onClick={handleClick(DROPDOWN_OPTIONS.EDIT)}
       >
         Edit
       </Button>
       <Menu
         id="basic-menu"
-        anchorEl={menuState.Edit}
-        open={!!menuState.Edit}
-        onClose={handleClose("Edit")}
+        anchorEl={menuState.EDIT}
+        open={!!menuState.EDIT}
+        onClose={()=>handleClose(DROPDOWN_OPTIONS.EDIT)}
         MenuListProps={{
           'aria-labelledby': 'basic-button',
         }}
       >
-        <MenuItem onClick={(e) => handleAction(action.UNDO,e)}>Undo</MenuItem>
-        <MenuItem onClick={(e) => handleAction(action.REDO,e)}>Redo</MenuItem>
-        <MenuItem onClick={(e) => handleAction(action.CUT,e)}>Cut</MenuItem>
-        <MenuItem onClick={(e) => handleAction(action.COPY,e)}>Copy</MenuItem>
-        <MenuItem onClick={(e) => handleAction(action.PASTE,e)}>Paste</MenuItem>
+        <MenuItem onClick={(e) => handleAction(action.UNDO,e, DROPDOWN_OPTIONS.EDIT)}>Undo</MenuItem>
+        <MenuItem onClick={(e) => handleAction(action.REDO,e, DROPDOWN_OPTIONS.EDIT)}>Redo</MenuItem>
       </Menu>
       </div>
       <div>
       <Button style={MainTextBox}
         id="basic-button"
-        aria-controls={menuState.Export ? 'basic-menu' : undefined}
+        aria-controls={menuState.EXPORT ? 'basic-menu' : undefined}
         aria-haspopup="true"
-        aria-expanded={menuState.Export ? 'true' : undefined}
+        aria-expanded={menuState.EXPORT ? 'true' : undefined}
         onClick={handleClick("Export")}
       >
         Export
       </Button>
       <Menu
         id="basic-menu"
-        anchorEl={menuState.Export}
-        open={!!menuState.Export}
-        onClose={handleClose("Export")}
+        anchorEl={menuState.EXPORT}
+        open={!!menuState.EXPORT}
+        onClose={()=>handleClose(DROPDOWN_OPTIONS.EXPORT)}
         MenuListProps={{
           'aria-labelledby': 'basic-button',
         }}
       >
-        <MenuItem onClick={() => handleClose("Export")}>Google Drive</MenuItem>
-        <MenuItem onClick={() => handleClose("Export")}>PDF</MenuItem>
-        <MenuItem onClick={() => handleClose("Export")}>DOC</MenuItem>
+        <MenuItem onClick={() => handleClose(DROPDOWN_OPTIONS.EXPORT)}>Google Drive</MenuItem>
+        <MenuItem onClick={() => handleClose(DROPDOWN_OPTIONS.EXPORT)}>PDF</MenuItem>
+        <MenuItem onClick={() => handleClose(DROPDOWN_OPTIONS.EXPORT)}>DOC</MenuItem>
       </Menu>
     </div>
     <div>
       <Button style={MainTextBox}
         id="basic-button"
-        aria-controls={menuState.View ? 'basic-menu' : undefined}
+        aria-controls={menuState.VIEW ? 'basic-menu' : undefined}
         aria-haspopup="true"
-        aria-expanded={menuState.View ? 'true' : undefined}
-        onClick={handleClick("View")}
+        aria-expanded={menuState.VIEW ? 'true' : undefined}
+        onClick={handleClick(DROPDOWN_OPTIONS.VIEW)}
       >
         View
       </Button>
       <Menu
         id="basic-menu"
-        anchorEl={menuState.View}
-        open={!!menuState.View}
-        onClose={handleClose("View")}
+        anchorEl={menuState.VIEW}
+        open={!!menuState.VIEW}
+        onClose={()=>handleClose(DROPDOWN_OPTIONS.VIEW)}
         MenuListProps={{
           'aria-labelledby': 'basic-button',
         }}
       >
-        <MenuItem onClick={() => handleClose("View")}>Mood Board</MenuItem>
-        <MenuItem onClick={() => handleClose("View")}>Reference Links</MenuItem>
+        <MenuItem onClick={() => handleClose(DROPDOWN_OPTIONS.VIEW)}>Mood Board</MenuItem>
+        <MenuItem onClick={() => handleClose(DROPDOWN_OPTIONS.VIEW)}>Reference Links</MenuItem>
       </Menu>
     </div>
     </div>
