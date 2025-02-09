@@ -3,16 +3,20 @@ import './../styles/editor.css';
 import Electron from 'electron';
 import { Editor, EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import React, {FC, useState} from 'react'
-import Toolbar from '@mui/material/Toolbar';
-import Button from '@mui/material/Button';
+import React, {FC, useEffect, useState} from 'react'
+import {
+  Alert, 
+  Button, 
+  Dialog, 
+  DialogActions, 
+  DialogContent, 
+  DialogContentText,
+  DialogTitle,
+  Toolbar, 
+  Slide,
+} from '@mui/material'
+import CircularProgress from '@mui/material/CircularProgress';
 import { FormatListBulletedRounded, RedoOutlined, UndoOutlined, FormatListNumberedRounded, FormatBoldRounded, FormatItalicRounded, DatasetLinkedRounded, PhotoLibraryRounded } from '@mui/icons-material';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import Slide from '@mui/material/Slide';
 import { TransitionProps } from '@mui/material/transitions';
 import MainToolbar from './MainToolbar';
 import LinkListGui from './LinkListGui';
@@ -205,6 +209,29 @@ const SiloTextEditor =() => {
   const [mbSection, setMBSection] = useState(false);
   const [imgList, setImgList] = useState<ImgListType[]>([]);
   const [srcLinks, setSrcLinks] = useState<SourceLinksType[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saveAlert, setSaveAlert] = useState<{msg:string, location:string} | null>(null);
+  const [savePopupVisible, setSavePopupVisible] = useState<boolean>(false);
+
+  useEffect(()=>{
+    console.log("is content edited?", edited);
+    window.electron.setSaveStatus(edited);
+
+  },[edited]);
+
+
+  useEffect(()=>{
+
+      // Set the timer to change the variable after 3 seconds
+      const timer = setTimeout(() => {
+        setSavePopupVisible(false);
+      }, 3000); // 3000ms = 3 seconds
+  
+      // Cleanup the timer on component unmount
+      return () => clearTimeout(timer);
+
+  },[savePopupVisible]);
 
   const toggle = (obj :string) =>{
     switch (obj){
@@ -218,7 +245,6 @@ const SiloTextEditor =() => {
    
   }
 
-  const [saveAlert, setSaveAlert] = useState<{msg:string, location:string} | null>(null);
 
   const editor: Editor |null = useEditor({
     extensions: [
@@ -277,6 +303,7 @@ const SiloTextEditor =() => {
   }
 
   const saveFile = async (event : React.MouseEvent<any>, isSaveAs:boolean) =>{
+    setIsLoading(true);
     console.log("SaveFile --- data is: ", event);
     let path =currentFile;
     if(path == null || isSaveAs){
@@ -304,12 +331,15 @@ const SiloTextEditor =() => {
       console.log(data);
       //Message that save was successful
       console.log("Saving was successful!!");
+      setSavePopupVisible(true);
        //Since the file has been saved we are no longer in an 'edited' state
        setEdited(false);
     }else{
       //Message that path is empty
 
     }
+
+    setIsLoading(false);
     
   }
 
@@ -348,6 +378,8 @@ const SiloTextEditor =() => {
       setSaveAlert({msg:"Your current file has not been saved, would you like to continue?", location: OPEN_FILE});
       console.log("ALERT!!!");
     }else{
+      setIsLoading(true);
+      try{
       let pathObj : Electron.OpenDialogReturnValue = await window.electron.openFileDialog(TEXT_FILETYPES);
       console.log("File opened...", pathObj?.filePaths[0]);
       console.log("pathObj.canceled...", pathObj.canceled);
@@ -375,6 +407,13 @@ const SiloTextEditor =() => {
         //Since a new file is loaded we are no longer in an 'edited' state
         setEdited(false);
       }
+
+    }catch(e){
+        //log error with opening file
+        setError("Error opening file...")
+    }finally{
+      setIsLoading(false);
+    }
     }
   }
 
@@ -398,6 +437,27 @@ const SiloTextEditor =() => {
     <div style={{margin:'auto'}}>
       {/* <MenuBar editor={editor} />
       <br/> */}
+      <Slide in={savePopupVisible} mountOnEnter unmountOnExit>
+          <Alert style={{
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            position: 'absolute', 
+            top: '50%', 
+            left: '50%', 
+            transform: 'translate(-50%, -50%)', 
+            zIndex: 900,
+            backgroundColor: '#FFFFFF',
+            boxShadow:'5px 5px 10px rgba(0, 0, 0, 0.7)',
+          }} 
+          variant="outlined" 
+          severity="success"
+          color='success'
+          >
+          Your file has been saved!
+        </Alert>
+      </Slide>
+     
       {editor !=null?<MainToolbar
             editor={editor}
             newFileEvent={newFile}
@@ -424,6 +484,16 @@ const SiloTextEditor =() => {
         </DialogActions>)
       </Dialog>}
       <Grid container columnSpacing={2} >
+       {isLoading && <CircularProgress style={{
+    display: 'flex', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    position: 'absolute', 
+    top: '50%', 
+    left: '50%', 
+    transform: 'translate(-50%, -50%)', 
+    zIndex: 900 
+  }}    />}
       <Grid size={7}>
         <div>
         <MenuToolbar  className='MenuToolbar' editor={editor} />

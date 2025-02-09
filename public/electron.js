@@ -4,6 +4,9 @@ const path = require("path");
 var fs = require("fs");
 const url = require("url");
 let mainWindow;
+let hasConfirmedClose = false;
+let isContentEdited = true; 
+
 // Create the native browser window.
 function createWindow() {
    mainWindow = new BrowserWindow({
@@ -33,6 +36,8 @@ function createWindow() {
     mainWindow.webContents.openDevTools();
   }
 }
+
+
  
 // Setup a local proxy to adjust the paths of requested files when loading
 // them from the local production bundle (e.g.: local fonts, etc...).
@@ -63,6 +68,40 @@ app.whenReady().then(() => {
       createWindow();
     }
   });
+
+   // Prevent sudden close without saving...
+   mainWindow.on("close", async (e) => {
+    console.log("On close activated with hasConfirmedClose as", hasConfirmedClose);
+    try{
+      if (!hasConfirmedClose) {
+        e.preventDefault(); // Prevent default close action until confirmation
+  
+        // Await the dialog confirmation
+        const choice = await dialog.showMessageBox(mainWindow, {
+          type: "question",
+          buttons: ["Yes", "No"],
+          title: "Confirm",
+          message: isContentEdited?"Are you sure you want to quit? You're text file isn't saved.":"Are you sure you want to quit?",
+        });
+  
+        if (choice.response === 0) {
+          console.log("Quitting....");
+          hasConfirmedClose = true; // Set the confirmation flag to true
+          app.quit(); // Close the app
+        }
+      }
+    }catch(e){
+      console.log("error closing app: ", e);
+    }
+   
+  });
+
+// Listen for changes to the save state from the renderer (React)
+ipcMain.on('set-save-status', (event, isSaved) => {
+  console.log("Is content isContentEdited?", isContentEdited);
+  isContentEdited = isSaved;
+});
+
 });
 
 // select a folder dialog and return the file path
@@ -116,7 +155,7 @@ ipcMain.handle('readFile', async (event, path) => {
       return null;
     }
   });
-  
+
   ipcMain.handle('writeFile', async (event, path, data) => {
     try {
       await fs.promises.writeFile(path, data);
