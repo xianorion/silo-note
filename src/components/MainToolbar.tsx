@@ -69,6 +69,7 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
         }
         break;
         case action.UNDO:{
+          console.log("Undoing....");
           editor.chain().focus().undo().run();
         }
         break;  

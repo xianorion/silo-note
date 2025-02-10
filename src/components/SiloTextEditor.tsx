@@ -212,26 +212,25 @@ const SiloTextEditor =() => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [saveAlert, setSaveAlert] = useState<{msg:string, location:string} | null>(null);
-  const [savePopupVisible, setSavePopupVisible] = useState<boolean>(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  useEffect(()=>{
+
+      // Set the timer to change the variable after 3 seconds
+      const timer = setTimeout(() => {
+        setToast(null);
+      }, 3000); // 3000ms = 3 seconds
+  
+      // Cleanup the timer on component unmount
+      return () => clearTimeout(timer);
+
+  },[toast]);
 
   useEffect(()=>{
     console.log("is content edited?", edited);
     window.electron.setSaveStatus(edited);
 
   },[edited]);
-
-
-  useEffect(()=>{
-
-      // Set the timer to change the variable after 3 seconds
-      const timer = setTimeout(() => {
-        setSavePopupVisible(false);
-      }, 3000); // 3000ms = 3 seconds
-  
-      // Cleanup the timer on component unmount
-      return () => clearTimeout(timer);
-
-  },[savePopupVisible]);
 
   const toggle = (obj :string) =>{
     switch (obj){
@@ -331,7 +330,7 @@ const SiloTextEditor =() => {
       console.log(data);
       //Message that save was successful
       console.log("Saving was successful!!");
-      setSavePopupVisible(true);
+      setToast('Your file has been saved!');
        //Since the file has been saved we are no longer in an 'edited' state
        setEdited(false);
     }else{
@@ -437,27 +436,26 @@ const SiloTextEditor =() => {
     <div style={{margin:'auto'}}>
       {/* <MenuBar editor={editor} />
       <br/> */}
-      <Slide in={savePopupVisible} mountOnEnter unmountOnExit>
-          <Alert style={{
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center', 
-            position: 'absolute', 
-            top: '50%', 
-            left: '50%', 
-            transform: 'translate(-50%, -50%)', 
-            zIndex: 900,
-            backgroundColor: '#FFFFFF',
-            boxShadow:'5px 5px 10px rgba(0, 0, 0, 0.7)',
-          }} 
-          variant="outlined" 
-          severity="success"
-          color='success'
-          >
-          Your file has been saved!
-        </Alert>
-      </Slide>
-     
+       <Slide in={toast !=null} mountOnEnter unmountOnExit>
+                <Alert style={{
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  alignItems: 'center', 
+                  position: 'absolute', 
+                  top: '50%', 
+                  left: '50%', 
+                  transform: 'translate(-50%, -50%)', 
+                  zIndex: 1500,
+                  backgroundColor: '#FFFFFF',
+                  boxShadow:'5px 5px 10px rgba(0, 0, 0, 0.7)',
+                }} 
+                variant="outlined" 
+                severity='success'
+                color='success'
+                >
+                {toast}
+              </Alert>
+            </Slide>
       {editor !=null?<MainToolbar
             editor={editor}
             newFileEvent={newFile}
@@ -515,7 +513,7 @@ const SiloTextEditor =() => {
         <DatasetLinkedRounded/>
       </Button>
       <Drawer anchor='right' open={linkSection} onClose={() => toggle('link')}>
-        <LinkListGui links={srcLinks} setLinks={(links) => { setSrcLinks(links); setEdited(true);}} />
+        <LinkListGui links={srcLinks} setToast={(newToast:string) =>setToast(newToast)} setLinks={(links) => { setSrcLinks(links); setEdited(true);}} />
       </Drawer>
       <Button onClick={() =>toggle('mb')}>
         <PhotoLibraryRounded/>
