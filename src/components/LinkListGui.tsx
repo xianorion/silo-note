@@ -1,18 +1,26 @@
-import React, {FC, useState} from 'react';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
-import { Paper, Typography } from '@mui/material';
-import TextField from '@mui/material/TextField';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle'; 
-import InsertLinkIcon from '@mui/icons-material/InsertLinkRounded'
-import Button from '@mui/material/Button';
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import React, {FC, useState,useEffect} from 'react';
+import { 
+  Alert,
+  Button, 
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  List, 
+  ListItem, 
+  ListItemButton, 
+  ListItemText, 
+  Slide,
+  Paper, 
+  TextField,
+  Typography
+ } from '@mui/material';
+import {
+  Edit,
+  InsertLink,
+  RemoveCircleOutline
+} from '@mui/icons-material';
 import ErrorPopup from './ErrorPopup';
 
 const testLinkData:{name: string, url: string, notes:string}[]  = [
@@ -28,24 +36,27 @@ url: "https://mui.com/material-ui/react-list/"
 }
 ];
 
+type LinkType = {name: string, url: string, notes:string};
+
 interface LinkListGuiProps {
     styles?: React.CSSProperties;
-    links: {name: string, url: string, notes:string}[] | [];
-    setLinks: (links: {name: string, url: string, notes:string}[]) => void;
+    links: LinkType[] | [];
+    setToast: (newToast: string) => void;
+    setLinks: (links: LinkType[]) => void;
 }
 
 const ListItemTextStyle:{fontSize:number} =  {
     fontSize:15
 }
+const emptyLink = {name: '', url: '', notes:''}
 
-const LinkListGui : FC<LinkListGuiProps> = ({links, setLinks}) =>{
-    // const [linkUrl, setLinkUrl] = useState<string>("");
-    // const [linkName, setLinkName] = useState<string>("");
-    // const [linkNotes, setLinkNotes] = useState<string>("");
+const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
     const [open, setOpen] = React.useState(false);
     const [error, setError] = useState<string|null>(null);
     const [errorSubtext, setErrorSubtext] = useState<string|null>(null);
-
+    const [isEditing, setIsEditing] = useState<boolean>(false);
+    const [editingLinkData, setEditingLinkData] = useState<LinkType>(emptyLink);
+ 
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -58,6 +69,10 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setLinks}) =>{
     const removeError = () =>{
         setError(null);
     }
+    
+    const validateLink = (link: LinkType) : boolean =>{
+      return !link.url.startsWith("http://") && !link.url.startsWith("https://")
+    }
 
     const addLink = (event:React.FormEvent<HTMLFormElement>) =>{
         const formData = new FormData(event.currentTarget);
@@ -65,7 +80,7 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setLinks}) =>{
         console.log("form data", formJson);
 
         const newLink = {
-            url: formJson.link,
+            url: formJson.url,
             name: formJson.name,
             notes: formJson.notes,
         }
@@ -78,14 +93,59 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setLinks}) =>{
             setError("Link name must be unique!");
             setErrorSubtext("The name ["+newLink.name+"] is already in use.")
 
-        }else if(!formJson.link.startsWith("http://") && !formJson.link.startsWith("https://")){
+        }else if(validateLink(newLink)){
           setError("Link must start with 'http://' or 'https://'");
         }else{
             console.log("Added link!");
             setLinks([...links, newLink]);
             handleClose();
+            setToast("Link was Added!")
         }
     }
+
+    const openEditLink = (link: {name: string, url: string, notes:string})=>{
+      setEditingLinkData(link);
+      setIsEditing(true);
+    }
+
+    const closeEditLinkPopup = () =>{
+      setEditingLinkData(emptyLink);
+      setIsEditing(false);
+    }
+
+    const saveLink = (event:React.FormEvent<HTMLFormElement>) =>{
+      const formData = new FormData(event.currentTarget);
+      const formJson = Object.fromEntries((formData as any).entries());
+      const editedLink = {
+          url: formJson.url,
+          name: formJson.name,
+          notes: formJson.notes,
+      }
+
+      const otherLinks = links.filter((link)=> link.name != editedLink.name);
+      if(validateLink(editedLink)){
+        setError("Link must start with 'http://' or 'https://'");
+      }else{
+          console.log("Added link!");
+          setLinks([...otherLinks, editedLink]);
+          setIsEditing(false);
+          setEditingLinkData(emptyLink);
+          setToast("Link was Saved!")
+
+      }
+  }
+
+  // This function updates the specific field (name, url, or notes)
+  const handleEditLinkChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => {
+    const { value } = event.target;
+    setEditingLinkData((prevData) => {
+      // Ensure we return an object with the full data, filling in the missing fields
+      return {
+          ...prevData,
+          [field]: value, // Update the specified field
+      };
+  });
+};
 
     const removeLink = (linkName:string) =>{
         const newSrcLinks = links.filter((link)=> link.name != linkName);
@@ -103,20 +163,20 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setLinks}) =>{
     }
 
 
-    return <Paper>
+    return <Paper> 
         <Typography
         sx={{
         fontSize: '20px',                           // Change font size
         fontWeight: 'bold',   
         }}
         >Link Bank</Typography>
-        {error != null && <ErrorPopup 
+        {/* {error != null && <ErrorPopup 
         open={error != null}
          error={error} 
          errorSubtext={errorSubtext}
          handleClose={removeError}
          
-         />}
+         />} */}
         <List>
             {links.map((link) =>(
                 <ListItem key={link.name}>
@@ -124,13 +184,14 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setLinks}) =>{
                         <ListItemText primaryTypographyProps={{...ListItemTextStyle}}
                         >{link.name}</ListItemText>
                     </ListItemButton>
-                    <RemoveCircleOutlineIcon onClick={() => removeLink(link.name)} />
+                    <RemoveCircleOutline onClick={() => removeLink(link.name)} />
+                      <Edit onClick={() => openEditLink(link)}/>
                 </ListItem>
             ))}
             </List>
             <div>
             <Button  onClick={handleClickOpen}>
-        <InsertLinkIcon/>
+        <InsertLink/>
         </Button>
          <Dialog
         open={open}
@@ -144,7 +205,7 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setLinks}) =>{
           },
         }}
       >
-        <DialogTitle>Paste Link</DialogTitle>
+        <DialogTitle>Add Link</DialogTitle>
         <DialogContent>
           <DialogContentText>
             {`Got a good reference link to your project? Add it here!`}
@@ -167,8 +228,8 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setLinks}) =>{
             autoFocus
             required
             margin="dense"
-            id="link"
-            name="link"
+            id="url"
+            name="url"
             label="Link"
             //type="link"
             fullWidth
@@ -195,6 +256,69 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setLinks}) =>{
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
           <Button type="submit">Apply link</Button>
+        </DialogActions>
+      </Dialog>
+      
+      <Dialog
+        open={isEditing}
+        onClose={() => setIsEditing(false)}
+        PaperProps={{
+          component: 'form',
+          onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
+            event.preventDefault();
+            saveLink(event);
+           
+          },
+        }}
+      >
+        <DialogTitle>Edit Link</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {`Got a good reference link to your project? Add it here!`}
+          </DialogContentText>
+          <TextField
+            autoFocus
+            required
+            margin="dense"
+            id="name"
+            name="name"
+            label="Name"
+            fullWidth
+            variant="standard"
+            value={editingLinkData?.name}
+            onChange={(e) => handleEditLinkChange(e,'name')}
+          />
+          <TextField
+            autoFocus
+            required
+            margin="dense"
+            id="url"
+            name="url"
+            label="Link"
+            fullWidth
+            variant="standard"
+            helperText={error}
+            error={error != null}
+            value={editingLinkData?.url}
+            onChange={(e) => handleEditLinkChange(e,'url')}
+
+          />
+           <TextField
+            autoFocus
+            margin="dense"
+            id="notes"
+            name="notes"
+            label="Notes"
+            fullWidth
+            variant="standard"
+            value={editingLinkData?.notes}
+            onChange={(e) => handleEditLinkChange(e,'notes')}
+
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeEditLinkPopup}>Cancel</Button>
+          <Button type="submit">Save Changes</Button>
         </DialogActions>
       </Dialog>
             </div>
