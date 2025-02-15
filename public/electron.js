@@ -131,7 +131,7 @@ ipcMain.handle('open-file-dialog', async (event, fileTypes) => {
       ]
     });
     if (result.canceled) {
-      return null;  // Return null if user cancels
+      return {canceled: true};  // Return null if user cancels
     }
   
     const selectedFilePath = result.filePaths[0];  // Get the first selected file path

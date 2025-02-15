@@ -1,13 +1,13 @@
 import React, {FC, useState} from 'react';
-import SiloTextEditor2 from './SiloTextEditor';
+import SiloTextEditor from './SiloTextEditor';
 import { GuiStyle } from './../styles/SiloTextBoxStyle';
 import { createTheme, ThemeProvider, Typography } from '@mui/material';
 
 // Create a theme with custom typography
 const theme = createTheme({
   typography: {
-    fontFamily: '"Poiret-One-Latin"', // Your custom font family
-    fontSize:20
+    fontFamily: '"BaksoSapi"', // Your custom font family
+    fontSize:26
   },
 });
 
@@ -18,7 +18,7 @@ const SiloGui : FC = () => {
         <div style={GuiStyle} >
                 {/* <MainToolbar/> */}
                 {/* <SiloTextEditor/> */}
-                <SiloTextEditor2/>
+                <SiloTextEditor/>
             
             </div>
     </ThemeProvider>
