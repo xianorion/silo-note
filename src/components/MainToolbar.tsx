@@ -4,12 +4,15 @@ import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem'; 
 import { RetroToolbar, retroDropDownBtnStyle, retroMenuStyle } from '../styles/MainToolBarStyle';
+import { ToggleActions } from './../types/GlobalTypes';
 
 interface MainToolbarProps {
 editor: Editor ;
 newFileEvent: (event: React.MouseEvent<any>, override: boolean) => Promise<void>,
 saveFileEvent: (event: React.MouseEvent<any>, isSaveAs: boolean) => Promise<void>,
-openFileEvent: (event: React.MouseEvent<any>, override: boolean) => Promise<void>
+openFileEvent: (event: React.MouseEvent<any>, override: boolean) => Promise<void>,
+toggleEvent: (obj: string) => void
+
 }
 
 enum action {
@@ -20,6 +23,8 @@ enum action {
   CUT = "CUT",
   UNDO = "UNDO",
   REDO = "REDO",
+  OPEN_MOODBOARD = "OPEN_MOODBOARD",
+  OPEN_LINKS = "OPEN_LINKS",
 }
 
 enum DROPDOWN_OPTIONS {
@@ -30,7 +35,7 @@ enum DROPDOWN_OPTIONS {
 }
 
 
-const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, openFileEvent}) =>{
+const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, openFileEvent, toggleEvent}) =>{
  
   const [menuState, setMenuState] =  React.useState<{[key in DROPDOWN_OPTIONS]: HTMLElement | null}>({
     [DROPDOWN_OPTIONS.FILE]: null,
@@ -77,6 +82,14 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
           editor.chain().focus().redo().run();
         }
         break;
+        case action.OPEN_MOODBOARD:{
+          toggleEvent(ToggleActions.MB);
+          break;
+        }
+        case action.OPEN_LINKS:{
+          toggleEvent(ToggleActions.LINK);
+          break;
+        }
 
       default:
         break;
@@ -206,8 +219,8 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
           'aria-labelledby': 'basic-button',
         }}
       >
-        <MenuItem onClick={() => handleClose(DROPDOWN_OPTIONS.VIEW)}>Mood Board</MenuItem>
-        <MenuItem onClick={() => handleClose(DROPDOWN_OPTIONS.VIEW)}>Reference Links</MenuItem>
+        <MenuItem onClick={(e) => handleAction(action.OPEN_MOODBOARD,e, DROPDOWN_OPTIONS.VIEW)}>Mood Board</MenuItem>
+        <MenuItem onClick={(e) => handleAction(action.OPEN_LINKS,e, DROPDOWN_OPTIONS.VIEW)}>Reference Links</MenuItem>
       </Menu>
     </div>
     </RetroToolbar>

@@ -6,12 +6,10 @@ import StarterKit from '@tiptap/starter-kit'
 import React, {FC, useEffect, useState} from 'react'
 import {
   Alert, 
-  Button, 
   Dialog, 
   DialogActions, 
   DialogContent, 
   DialogContentText,
-  DialogTitle,
   Toolbar, 
   Slide,
 } from '@mui/material'
@@ -27,6 +25,7 @@ import { TEXT_FILETYPES, IMAGE_FILETYPES, SILONOTE_FILETYPE } from '../utils/con
 import { ImgListType, SiloNoteFile, SourceLinksType } from 'types/GlobalTypes';
 import { RetroBtn, iconStyles, RetroDialog, RetroDialogTitle } from './../styles/SiloTextBoxStyle';
 import TextAlign from '@tiptap/extension-text-align';
+import { ToggleActions } from './../types/GlobalTypes';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -240,10 +239,10 @@ const SiloTextEditor =() => {
 
   const toggle = (obj :string) =>{
     switch (obj){
-      case 'link':
+      case ToggleActions.LINK:
         setLinkSection(!linkSection);
         break;
-      case 'mb':
+      case ToggleActions.MB:
         setMBSection(!mbSection);
         break;
     }
@@ -315,6 +314,7 @@ const SiloTextEditor =() => {
         //create the image URL using blob
         const imageUrl = `data:image/png;base64,${pathObj.blob}`;
         const  newImage ={
+          id: imgPath,
           data: imageUrl,
           name: imgPath,
           note: null
@@ -498,6 +498,8 @@ const SiloTextEditor =() => {
     <div style={{margin:'auto'}}>
       {/* <MenuBar editor={editor} />
       <br/> */}
+      {/*TOAST/ERROR POPUP*/}
+
        <Slide in={toast !=null} mountOnEnter unmountOnExit>
                 <Alert style={{
                   display: 'flex', 
@@ -518,11 +520,39 @@ const SiloTextEditor =() => {
                 {toast}
               </Alert>
             </Slide>
+ {/*MOOD BOARD DIALOG POPUP*/}
+ <Dialog  open={mbSection} 
+ 
+ sx={{ 
+  justifyContent: 'center', 
+  alignItems: 'center', 
+  width: 'auto', 
+  height: 'auto', 
+  padding: 0, // Remove padding to allow full space for content
+  overflow: 'auto', // Prevents scrollbars on the dialog content
+}}>
+        <DialogContent sx={{ 
+    display: 'flex', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    width: 'auto', 
+    height: 'auto', 
+    background: "rgb(244, 208, 172)",  /* Darker border for depth */
+    padding: 0, // Remove padding to allow full space for content
+    overflow: 'auto', // Prevents scrollbars on the dialog content
+  }}>
+        <MoodBoardGui imgList={imgList} addImage={addImage} setImageList={setImgList} removeImage={removeImage} onClose={() =>toggle(ToggleActions.MB)}/>
+
+          </DialogContent>
+        </Dialog>
+      {/*TIPTAP EDITOR LOADER VERIFICATION AND MAINTOOLBAR*/}
+
       {editor !=null?<MainToolbar
             editor={editor}
             newFileEvent={newFile}
       saveFileEvent={saveFile}
       openFileEvent={(event: React.MouseEvent<HTMLButtonElement>)=> openFile(event, false)}
+      toggleEvent={toggle}
       />:null}
       {saveAlert &&<RetroDialog
         open={saveAlert !== null}
@@ -542,6 +572,11 @@ const SiloTextEditor =() => {
           <RetroBtn onClick={(event) =>handleAlertAction(event,saveAlert.location,false)}>Abort</RetroBtn>
         </DialogActions>
       </RetroDialog>}
+
+     
+    
+      {/*MAIN TEXT AREA AND SIDE DRAWERS + BUTTONS*/}
+
       <Grid container columnSpacing={2} >
        {isLoading && <CircularProgress style={{
     display: 'flex', 
@@ -568,18 +603,18 @@ const SiloTextEditor =() => {
     component="div" 
     sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}
   >
-       <RetroBtn  onClick={() => toggle('link')}>
+       <RetroBtn  onClick={() => toggle(ToggleActions.LINK)}>
         <DatasetLinkedRounded sx={iconStyles}/>
       </RetroBtn>
-      <Drawer anchor='right' open={linkSection} onClose={() => toggle('link')}>
+      <Drawer anchor='right' open={linkSection} onClose={() => toggle(ToggleActions.LINK)}>
         <LinkListGui links={srcLinks} setToast={(newToast:string) =>setToast(newToast)} setLinks={(links) => { setSrcLinks(links); setEdited(true);}} />
       </Drawer>
-      <RetroBtn onClick={() =>toggle('mb')}>
+      <RetroBtn onClick={() =>toggle(ToggleActions.MB)}>
         <PhotoLibraryRounded sx={iconStyles}/>
       </RetroBtn>
-      <Drawer anchor='right' open={mbSection} onClose={() =>toggle('mb')}>
+      {/* <Drawer anchor='right' open={mbSection} onClose={() =>toggle('mb')}>
         <MoodBoardGui imgList={imgList} addImage={addImage} setImageList={setImgList} removeImage={removeImage} onClose={() =>toggle('mb')}/>
-      </Drawer>
+      </Drawer> */}
       </Grid>
 
     </Grid>

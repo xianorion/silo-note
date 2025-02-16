@@ -1,13 +1,12 @@
 import { Button, Dialog, ImageList, ImageListItem, ImageListItemBar,IconButton, Paper,Box,Typography, Grid2 as Grid, Tooltip } from '@mui/material';
-import React, {FC, useEffect} from 'react';
-import {Delete, OpenInFull} from '@mui/icons-material';
-import OpenInFullIcon from '@mui/icons-material/OpenInFull';
+import React, {FC, useEffect, useState} from 'react';
+import {Close} from '@mui/icons-material';
 import { ImgListType } from 'types/GlobalTypes';
-import Slide from '@mui/material/Slide';
-//import { DndContext, useDroppable, useDraggable, MouseSensor, KeyboardSensor, useSensor, useSensors } from '@dnd-kit/core';
-//import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { corkboardStyle, corkboardImage, corkboardTitle, corkboardTextOptions} from './../styles/MoodBoardStyle';
+import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
+import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable';
+import { corkboardStyle, corkboardTitle, corkboardTextOptions} from './../styles/MoodBoardStyle';
 import { Dispatch, SetStateAction } from 'react';
+import SortableImageItem from './SortableImageItem';
 
 
 interface MoodBoardGuiProps {
@@ -23,12 +22,17 @@ const MoodBoardGui: FC<MoodBoardGuiProps> = ({imgList, addImage, removeImage, se
         console.log("New LIMAGE LIST: ", imgList);
     },[imgList]);
 
+    const [isDragging, setIsDragging] = useState<boolean>(false);
 
-  const handleDragEnd = (event: any) => {
+
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    console.log("Handing drag....");
+    setIsDragging(false);
     const { active, over } = event;
     if (active.id !== over?.id) {
-      const oldIndex = imgList.findIndex((image) => image.name === active.name);
-      const newIndex = imgList.findIndex((image) => image.name === over?.name);
+      const oldIndex = imgList.findIndex((image) => image.name === active.id);
+      const newIndex = imgList.findIndex((image) => image.name === over?.id);
 
       // Reorder the array based on the active and over elements
       const updatedImages = [...imgList];
@@ -47,6 +51,9 @@ const MoodBoardGui: FC<MoodBoardGuiProps> = ({imgList, addImage, removeImage, se
     }
 
     const removeImageFromList = async (event:React.MouseEvent, imgPath:string) =>{
+
+      console.log("Click remove image from list!");     
+
         const res = await removeImage(event, imgPath);
         console.log("removeImageFromList event triggered: ", event);     
     }
@@ -64,7 +71,7 @@ const MoodBoardGui: FC<MoodBoardGuiProps> = ({imgList, addImage, removeImage, se
         <Paper
         sx={corkboardStyle}
         >
-        <Box>
+        <Box >
             <Grid container spacing={2}
             sx={{padding:'10px'}}>
                 <Grid size={10}>
@@ -73,63 +80,38 @@ const MoodBoardGui: FC<MoodBoardGuiProps> = ({imgList, addImage, removeImage, se
                     >Mood Board</Typography>
                 </Grid>
                 <Grid size={2}  sx={{
-                    }}>
-                     
-                    <OpenInFullIcon onClick={onClose}/>
+                    }}>    
+                    <Close sx={{width: '3vw', height: '3vw'}} onClick={onClose}/>
                 </Grid>
            
             </Grid>
+            <Grid container spacing={2}>
+            <Grid size={12}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              height: '60vh', // Adjust the height as needed, can change based on content
+              overflow: 'auto', // Enable scrolling inside Box
+            }}
+            >
+                      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} onDragStart={()=> setIsDragging(true)}>
+                      <SortableContext  items={imgList} strategy={rectSortingStrategy}>
+                    <ImageList sx={{ height: '100%', width: '100%', overflowX: 'auto',overflowY: 'auto',  padding:'5px', margin:'5px'}} >
+                    
+                    {imgList && imgList.map((item)=>(
+                          item && 
+                            <SortableImageItem key={item.id} removeImageFromList={removeImageFromList} item={item} dragging={isDragging} setSelectedItem={setSelectedItem}/>
+                            ))}
+                
+              
+                </ImageList>
+                </SortableContext>
+                
+                </DndContext>
+                </Grid>
 
-        <ImageList sx={{ overflowX: 'auto', height: '100%', padding:'5px', margin:'10px'}} >
-          
-          {imgList && imgList.map((item)=>(
-                 item && <Slide in timeout={1000} key={item.name}>
-                    <ImageListItem 
-                    >
-                        <ImageListItemBar
-              position="top"
-              style={{
-                background:
-                'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, ' +
-                'rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 0%)',
-                width:'30vw',
-                height:'auto',
-                display: 'flex', 
-                              padding:'5px',
-                              flexDirection: 'row',
-                              textAlign: 'center'
-               }}
-              actionIcon={
-                <IconButton
-                onClick={(e) => removeImageFromList(e, item.name)}
-                  sx={{ color: 'white', "&:hover": { color: "black" }, zIndex:800}}
-                >
-                  <Tooltip id="button-remove" title="remove">
-                    <Delete sx={{ color: 'white', width: '3vw', height: '3vw' }}/>
-                  </Tooltip>
-                </IconButton>
-              }
-              actionPosition="right"
-            />
-                      
-                      <img
-                          // srcSet={`${item?.data}`}
-                          src={item.data}
-                          alt={item?.name}
-                          onClick={ () => setSelectedItem(item.data)}
-                          style={{
-                              ...corkboardImage
-
-                             }}
-
-                      />    
-              </ImageListItem>
-              </Slide>
-          ))}
-      
-
-      </ImageList>
-
+            </Grid>
+            
         </Box>
         <Dialog
         onClose={handleClose}
@@ -143,9 +125,7 @@ const MoodBoardGui: FC<MoodBoardGuiProps> = ({imgList, addImage, removeImage, se
       </Dialog>
        
 
-        <Button  sx={corkboardTextOptions}  onClick={addImageToList}>Add</Button>
-        <Button sx={corkboardTextOptions} >Edit</Button>
-        <Button sx={corkboardTextOptions}>Remove</Button>
+        <Button  sx={corkboardTextOptions} style={{margin:'10px',padding:'10px'}} onClick={addImageToList}>Add</Button>
         </Paper>
 
     );
@@ -153,3 +133,4 @@ const MoodBoardGui: FC<MoodBoardGuiProps> = ({imgList, addImage, removeImage, se
 }
 
 export default MoodBoardGui;
+
