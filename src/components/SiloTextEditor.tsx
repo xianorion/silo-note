@@ -23,7 +23,7 @@ import { Drawer } from '@mui/material';
 import { Grid2 as Grid } from "@mui/material";
 import { TEXT_FILETYPES, IMAGE_FILETYPES, SILONOTE_FILETYPE } from '../utils/constants';
 import { ImgListType, SiloNoteFile, SourceLinksType } from 'types/GlobalTypes';
-import { RetroBtn, iconStyles, RetroDialog, RetroDialogTitle } from './../styles/SiloTextBoxStyle';
+import { RetroBtn, iconStyles, RetroDialog, RetroDialogTitle, linkDrawerStyle } from './../styles/SiloTextBoxStyle';
 import TextAlign from '@tiptap/extension-text-align';
 import { ToggleActions } from './../types/GlobalTypes';
 
@@ -274,7 +274,7 @@ const SiloTextEditor =() => {
   useEffect(() => {
     // Set initial previous content
     setContent(editor?.getText());
-    
+    editor?.commands.setTextAlign('left');
     const handleUpdate = () => {
       const currentContent = editor?.getText();
 
@@ -286,7 +286,7 @@ const SiloTextEditor =() => {
       } else {
         setContent(''); // Update previous content
 
-        setEdited(false);
+        //setEdited(false);
       }
     };
 
@@ -402,10 +402,18 @@ const SiloTextEditor =() => {
     setIsLoading(false);
     
   }
+  const updateLinks = (links:SourceLinksType[]) => { 
+    console.log("LINKS HAVE BEEN EDITED!!!");
+    setSrcLinks(links); 
+    setEdited(true);
+  
+  }
 
   const newFile = async (event : React.MouseEvent<any>, override: boolean) =>{
     console.log("triggering new file event: ", event);
     //have screen loader
+    console.log("----------NEW FILE ASK-----------");
+
     console.log("edited is: ",edited );
     console.log("override is ", override);
 
@@ -606,8 +614,14 @@ const SiloTextEditor =() => {
        <RetroBtn  onClick={() => toggle(ToggleActions.LINK)}>
         <DatasetLinkedRounded sx={iconStyles}/>
       </RetroBtn>
-      <Drawer anchor='right' open={linkSection} onClose={() => toggle(ToggleActions.LINK)}>
-        <LinkListGui links={srcLinks} setToast={(newToast:string) =>setToast(newToast)} setLinks={(links) => { setSrcLinks(links); setEdited(true);}} />
+      <Drawer 
+      PaperProps={{
+        sx: linkDrawerStyle,
+      }}
+      anchor='right' 
+      open={linkSection} 
+      onClose={() => toggle(ToggleActions.LINK)}>
+        <LinkListGui  links={srcLinks} setToast={(newToast:string) =>setToast(newToast)} setLinks={updateLinks} />
       </Drawer>
       <RetroBtn onClick={() =>toggle(ToggleActions.MB)}>
         <PhotoLibraryRounded sx={iconStyles}/>

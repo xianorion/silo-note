@@ -2,7 +2,7 @@ export const corkboardStyle = {
   width: '80vw',  // Customize the width as per your requirement
   maxWidth: '90vw', // Max width of the Paper component
   maxHeight: '90vh', // Prevent the Paper from getting too large vertically
-    padding: "30px",
+    padding: "10px",
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'auto',

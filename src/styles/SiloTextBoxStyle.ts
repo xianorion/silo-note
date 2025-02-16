@@ -36,8 +36,12 @@ export const mainToolBarStyle: Properties<string | number, string & {}> = {
     width: '100%',
     height: '100%',
     textAlign: 'left'
-
 }
+
+export const linkDrawerStyle = {
+  backgroundColor:'rgb(237, 217, 186)',
+};
+
 
 export const RetroBtn = styled(Button)<RetroBtnProps>(({bgcolor, bordercolor}) =>({
     background: `${bgcolor != null?bgcolor:"#fdf0dc"}`,
