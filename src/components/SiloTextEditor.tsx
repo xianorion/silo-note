@@ -1,9 +1,9 @@
 // import './styles.scss'
 import './../styles/editor.css';
 import Electron from 'electron';
-import { Editor, EditorContent, useEditor } from '@tiptap/react'
+import { Editor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import React, {FC, useEffect, useState} from 'react'
+import React, {FC, useCallback, useEffect, useState, useRef} from 'react'
 import {
   Alert, 
   Dialog, 
@@ -51,117 +51,13 @@ interface MenuToolbarProps {
 const NEW_FILE = "NEW_FILE";
 const OPEN_FILE = "OPEN_FILE";
 
-const MenuBar : FC<MenuBarProps> = ({ editor }) => {
-  if (!editor) {
-    return null
-  }
-
-  return (
-    <div className="control-group">
-      
-      <div className="button-group">
-        <button
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={editor.isActive('bold') ? 'is-active' : ''}
-        >
-          Bold
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={editor.isActive('italic') ? 'is-active' : ''}
-        >
-          Italic
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleStrike().run()}
-          className={editor.isActive('strike') ? 'is-active' : ''}
-        >
-          Strike
-        </button>
-        <button
-          onClick={() => editor.chain().focus().setParagraph().run()}
-          className={editor.isActive('paragraph') ? 'is-active' : ''}
-        >
-          Paragraph
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-          className={editor.isActive('heading', { level: 1 }) ? 'is-active' : ''}
-        >
-          H1
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={editor.isActive('heading', { level: 2 }) ? 'is-active' : ''}
-        >
-          H2
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          className={editor.isActive('heading', { level: 3 }) ? 'is-active' : ''}
-        >
-          H3
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
-          className={editor.isActive('heading', { level: 4 }) ? 'is-active' : ''}
-        >
-          H4
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 5 }).run()}
-          className={editor.isActive('heading', { level: 5 }) ? 'is-active' : ''}
-        >
-          H5
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 6 }).run()}
-          className={editor.isActive('heading', { level: 6 }) ? 'is-active' : ''}
-        >
-          H6
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={editor.isActive('bulletList') ? 'is-active' : ''}
-        >
-          Bullet list
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={editor.isActive('orderedList') ? 'is-active' : ''}
-        >
-          Ordered list
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          className={editor.isActive('blockquote') ? 'is-active' : ''}
-        >
-          Blockquote
-        </button>
-        <button onClick={() => editor.chain().focus().setHorizontalRule().run()}>
-          Horizontal rule
-        </button>
-        <button onClick={() => editor.chain().focus().setHardBreak().run()}>
-          Hard break
-        </button>
-        <button onClick={() => editor.chain().focus().undo().run()}>
-          Undo
-        </button>
-        <button onClick={() => editor.chain().focus().redo().run()}>
-          Redo
-        </button>
-      </div>
-    </div>
-  )
-}
-
 const MenuToolbar : FC<MenuToolbarProps>= ({className, editor}) =>{
   if (!editor) {
     return null
   }
   return (
     <div className={className}>
-      <div ><h1><img id='logo' src='/silonote_logo.png' alt='SiloNotelogo'/></h1></div>
+      <div ><h1><img id='logo' src={`${process.env.PUBLIC_URL}/img/silonote_logo.png`}  alt='SiloNotelogo'/></h1></div>
        <Toolbar 
       sx={{ display: 'flex', }}
       >
@@ -177,7 +73,7 @@ const MenuToolbar : FC<MenuToolbarProps>= ({className, editor}) =>{
        <FormatItalicRounded className='icon'/>
         </RetroBtn>
          {/* undo button */}
-        <RetroBtn onClick={() => editor.chain().focus().undo().run()}>
+        <RetroBtn onClick={() => { editor.chain().focus().undo().run();}}>
         <UndoOutlined className='icon' />
         </RetroBtn>
          {/* redo button */}
@@ -203,7 +99,24 @@ const MenuToolbar : FC<MenuToolbarProps>= ({className, editor}) =>{
   );
 }
 
+
+const editorProps = {
+  extensions: [
+    StarterKit,
+    TextAlign.configure({
+      types: ['heading', 'paragraph'],
+      defaultAlignment: 'left'
+    }),
+  ],
+  editorProps: {
+    attributes: {
+      spellcheck: 'true',
+    },
+  }
+};
+
 const SiloTextEditor =() => {
+  const editorRef = useRef<Editor | null>(null); // Use useRef to persist editor instance
   const [currentFile, setCurrentFile] = useState<string|  null>(null);
   const [edited, setEdited] = useState(false);
   const [linkSection, setLinkSection] = useState(false);
@@ -216,10 +129,29 @@ const SiloTextEditor =() => {
   const [toast, setToast] = useState<string | null>(null);
   const [content, setContent] = useState<string | undefined>(undefined);
 
- 
+  /*initialize editor reference. 
+  We use a reference since i want to be able to create and detroy an editor 
+  when a new file is created. Help restart undo and redo history too.
+ */
+  useEffect(() => {
+    // Initialize the editor after the component mounts
+    editorRef.current = new Editor(editorProps);
+    // Cleanup the editor when the component unmounts
+    return () => {
+      if (editorRef.current) {
+        editorRef.current.destroy();
+      }
+    };
+  }, []);
 
+  /*This starts a new editor by destroying old one and reapplying props. */
+  const startNewEditor = () => {
+  if (editorRef.current) {
+    editorRef.current.destroy();
+    editorRef.current = new Editor(editorProps);
+  }
+  }
   useEffect(()=>{
-
       // Set the timer to change the variable after 3 seconds
       const timer = setTimeout(() => {
         setToast(null);
@@ -232,9 +164,8 @@ const SiloTextEditor =() => {
 
   useEffect(()=>{
     console.log("is content edited?", edited);
-    window.electron.setSaveStatus(edited);
-    editor?.commands.setTextAlign('left');  // Align text to the left
-
+    //let electron know to save to already file is saves
+    window.electron.setEditStatus(edited);
   },[edited]);
 
   const toggle = (obj :string) =>{
@@ -248,55 +179,50 @@ const SiloTextEditor =() => {
     }
    
   }
+  
 
+  // const editor: Editor |null = useEditor({
+  //   extensions: [
+  //     StarterKit,
+  //     TextAlign.configure({
+  //       types: ['heading', 'paragraph'],
+  //     }),
+  //   ],
+  //   editorProps: {
+  //     attributes: {
+  //       spellcheck: 'true',
+  //     },
+  //   }
+  // })
 
-  const editor: Editor |null = useEditor({
-    extensions: [
-      StarterKit,
-      TextAlign.configure({
-        types: ['heading', 'paragraph'],
-      }),
-    ],
-    editorProps: {
-      attributes: {
-        spellcheck: 'false',
-      },
-    },
-    onUpdate({editor}){
+  const stringIsEmptyOrUndefined  = (str:string | undefined): boolean => {
+    return str === undefined || str === '';
+  }
+
+  const handleUpdate = useCallback(() => {
+    const currentContent = editorRef.current?.getText();
+
+    // Check if the content has changed
+    if (currentContent !== content && !(stringIsEmptyOrUndefined(currentContent) && stringIsEmptyOrUndefined(content) )) {
+      setEdited(true);         
+
+      setContent(currentContent); // Update previous content
+    } else {
+      setContent(''); // Update previous content
+
+      //setEdited(false);
     }
-  })
-
-
-  editor?.on('update', ({ editor }) => {
-    // The content has changed.
-  })
+  },[editorRef.current]);
 
   useEffect(() => {
     // Set initial previous content
-    setContent(editor?.getText());
-    editor?.commands.setTextAlign('left');
-    const handleUpdate = () => {
-      const currentContent = editor?.getText();
-
-      // Check if the content has changed
-      if (currentContent !== content) {
-        console.log("Text has changed!");
-        setEdited(true);
-        setContent(currentContent); // Update previous content
-      } else {
-        setContent(''); // Update previous content
-
-        //setEdited(false);
-      }
-    };
-
+    setContent(editorRef.current?.getText());
     // Listen for updates to the editor
-    editor?.on('update', handleUpdate);
-
+    editorRef.current?.on('update', handleUpdate);
     return () => {
-      editor?.off('update', handleUpdate);
+      editorRef.current?.off('update', handleUpdate);
     };
-  }, [editor, content]);
+  }, [editorRef.current]);
 
   const addImage = async (event:React.MouseEvent<any>) =>{
     console.log("Add image clicked...");
@@ -379,7 +305,7 @@ const SiloTextEditor =() => {
     }
     
 
-    let content = (editor!=null ? editor.getText():"");
+    let content = (editorRef.current!=null ? editorRef.current.getText():"");
     if(path !=null && path.length >0){
       const newFile : SiloNoteFile = {
         content: content,
@@ -426,8 +352,7 @@ const SiloTextEditor =() => {
       //clear out current file settings
       setCurrentFile(null);
       //clear UI content 
-      editor?.commands.clearContent();
-      editor?.commands.setTextAlign('left');  // Align text to the left
+      startNewEditor();
       setSrcLinks([]);
       setImgList([]);
         //Since a new file is loaded we are no longer in an 'edited' state
@@ -453,22 +378,22 @@ const SiloTextEditor =() => {
       console.log("File opened...", pathObj?.filePaths[0]);
       console.log("pathObj.canceled...", pathObj?.canceled);
   
-      if(pathObj.canceled === false && pathObj.filePaths.length === 1 && editor){
+      if(pathObj.canceled === false && pathObj.filePaths.length === 1 && editorRef.current){
         const data = await window.electron.readFile(pathObj.filePaths[0]);
 
         //clear the whole document
-        editor.commands.clearContent();
+        editorRef.current.commands.clearContent();
         //if it is a silo note file, parse
         if(pathObj.filePaths[0].endsWith(SILONOTE_FILETYPE) && data){
           const fileData:SiloNoteFile = JSON.parse(data);
 
           setSrcLinks(fileData.links);
           setImgList(fileData.imageRefs);
-          editor.commands.insertContent(fileData.content);
+          editorRef.current.commands.insertContent(fileData.content);
       
 
         }else{
-          editor.commands.insertContent(data);
+          editorRef.current.commands.insertContent(data);
           //console.log("DATA READ FROM FILE:",data);
         }
         //set current file path
@@ -555,8 +480,8 @@ const SiloTextEditor =() => {
         </Dialog>
       {/*TIPTAP EDITOR LOADER VERIFICATION AND MAINTOOLBAR*/}
 
-      {editor !=null?<MainToolbar
-            editor={editor}
+      {editorRef.current !=null?<MainToolbar
+            editor={editorRef.current}
             newFileEvent={newFile}
       saveFileEvent={saveFile}
       openFileEvent={(event: React.MouseEvent<HTMLButtonElement>)=> openFile(event, false)}
@@ -598,9 +523,9 @@ const SiloTextEditor =() => {
   }}    />}
       <Grid size={7}>
         <div>
-        <MenuToolbar  className='MenuToolbar' editor={editor} />
+        <MenuToolbar  className='MenuToolbar' editor={editorRef.current} />
       <br/>
-      <EditorContent editor={editor}  onChange={()=>{
+      <EditorContent editor={editorRef.current}  onChange={()=>{
         console.log("edited is:", true );
         setEdited(true)}}/>     
         </div>

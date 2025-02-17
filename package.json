@@ -1,6 +1,7 @@
 {
   "name": "silo-note",
   "version": "0.1.0",
+  "description": "A notepad app for creatives",
   "private": true,
   "main": "./public/electron.js",
   "author": "Mack Cunningham <mackattacksart@gmail.com>",
@@ -29,10 +30,15 @@
     "web-vitals": "^2.1.4"
   },
   "build": {
-    "appId": "com.electron.myapp",
-    "productName": "My Electron App",
+    "appId": "com.electron.silonote",
+    "productName": "SiloNote",
     "files": [
+      "build/*",
       "build/**/*",
+      "src/**/*",
+      "src/styles/*",
+      "public/*",
+      "public/**/*",
       "node_modules/**/*"
     ],
     "directories": {
@@ -44,20 +50,14 @@
     "win": {
       "target": "nsis"
     },
-    "build": {
-      "appId": "com.example.app",
-      "productName": "MyApp",
       "linux": {
         "target": [
           "AppImage",
           "deb",
           "tar.gz"
         ]
-      },
-      "arch": [
-        "arm64"
-      ]
-    }
+      }
+  
   },
   "scripts": {
     "start": "export BROWSER=none && react-scripts start",
