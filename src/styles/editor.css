@@ -1,8 +1,10 @@
+/*Editor css*/
+
 /* Global styles for Tiptap */
 
 .tiptap {
-    font-family:'Poiret-One-Latin';
-    width: 20%; 
+  font-family:'Poiret-One-Latin';
+  width: 20%; 
   height: 80vh;
   width: 95vh;
   background: #d8c5c5; 
@@ -10,58 +12,57 @@
   box-shadow: 15px 10px 0px #a37c6f; 
   color: #333;
   padding: 10px 20px; 
-    border: '1px solid #ccc';
-    outline: 'none';
-    text-align: 'left';
-    border-radius: 8px;
-    margin: auto;
-    background-color: #fdf0dc;
-    font-family: Arial, sans-serif;
-    font-size: 16px;
+  outline: 'none';
+  text-align: 'left';
+  border-radius: 8px;
+  margin: auto;
+  background-color: #fdf0dc;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
 
-  }
+}
 
-  .tiptap:focus{
-    outline: none; /* Removes the default outline */
-  }
+.tiptap:focus{
+  outline: none; /* Removes the default outline */
+}
 
-  .icon{
-    color: #000;
-  }
+.icon{
+  color: #000;
+}
 
-  .MenuToolbar{
-    width: 80vh;
-    padding: 10px;
-    margin: auto;
-  }
-  
-  .tiptap .ProseMirror {
-    padding: 10px;
-    font-size: 16px;
-  }
-  
-  .tiptap .ProseMirror code {
-    font-family: "Courier New", Courier, monospace;
-  }
-  
-  .tiptap .ProseMirror p {
-    margin: 0;
-  }
-  
-  .tiptap .ProseMirror h1,
-  .tiptap .ProseMirror h2,
-  .tiptap .ProseMirror h3 {
-    color: #333;
-  }
-  
-  .tiptap .ProseMirror blockquote {
-    background-color: #f0f0f0;
-    padding: 10px;
-    border-left: 4px solid #ccc;
-  }
+.MenuToolbar{
+  width: 80vw;
+  padding: 10px;
+  margin: auto;
+}
 
-  #logo{
-    width: 25vw;
-    filter: invert(1) sepia(1) saturate(70) hue-rotate(0deg) brightness(0.2) contrast(1);
-  }
+.tiptap .ProseMirror {
+  padding: 10px;
+  font-size: 16px;
+}
+
+.tiptap .ProseMirror code {
+  font-family: "Courier New", Courier, monospace;
+}
+
+.tiptap .ProseMirror p {
+  margin: 0;
+}
+
+.tiptap .ProseMirror h1,
+.tiptap .ProseMirror h2,
+.tiptap .ProseMirror h3 {
+  color: #333;
+}
+
+.tiptap .ProseMirror blockquote {
+  background-color: #f0f0f0;
+  padding: 10px;
+  border-left: 4px solid #ccc;
+}
+
+#logo{
+  width: 25vw;
+  filter: invert(1) sepia(1) saturate(70) hue-rotate(0deg) brightness(0.2) contrast(1);
+}
 

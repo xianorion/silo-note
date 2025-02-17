@@ -45,6 +45,7 @@ export const linkDrawerStyle = {
 
 export const RetroBtn = styled(Button)<RetroBtnProps>(({bgcolor, bordercolor}) =>({
     background: `${bgcolor != null?bgcolor:"#fdf0dc"}`,
+    width: '5vw',
     border: `2px solid ${bordercolor != null?bordercolor:"#43281C"}`,
     boxShadow: "3px 3px 0px #888",
     color:"#43281C",
