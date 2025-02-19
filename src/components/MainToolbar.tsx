@@ -1,15 +1,19 @@
 import React, {FC} from 'react';
-import { Editor } from '@tiptap/react'
+import { Editor, getHTMLFromFragment } from '@tiptap/react'
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem'; 
-import {MainTextBox} from  '../styles/SiloTextBoxStyle';
+import { RetroToolbar, retroDropDownBtnStyle, retroMenuStyle } from '../styles/MainToolBarStyle';
+import { ToggleActions } from './../types/GlobalTypes';
+import { DOMSerializer } from '@tiptap/pm/model';
 
 interface MainToolbarProps {
 editor: Editor ;
 newFileEvent: (event: React.MouseEvent<any>, override: boolean) => Promise<void>,
 saveFileEvent: (event: React.MouseEvent<any>, isSaveAs: boolean) => Promise<void>,
-openFileEvent: (event: React.MouseEvent<any>, override: boolean) => Promise<void>
+openFileEvent: (event: React.MouseEvent<any>, override: boolean) => Promise<void>,
+toggleEvent: (obj: string) => void
+
 }
 
 enum action {
@@ -18,8 +22,12 @@ enum action {
   SAVE_AS = "SAVE_AS",
   OPEN = "OPEN",
   CUT = "CUT",
+  COPY = "COPY",
+  PASTE = "PASTE",
   UNDO = "UNDO",
   REDO = "REDO",
+  OPEN_MOODBOARD = "OPEN_MOODBOARD",
+  OPEN_LINKS = "OPEN_LINKS",
 }
 
 enum DROPDOWN_OPTIONS {
@@ -30,7 +38,7 @@ enum DROPDOWN_OPTIONS {
 }
 
 
-const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, openFileEvent}) =>{
+const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, openFileEvent, toggleEvent}) =>{
  
   const [menuState, setMenuState] =  React.useState<{[key in DROPDOWN_OPTIONS]: HTMLElement | null}>({
     [DROPDOWN_OPTIONS.FILE]: null,
@@ -39,7 +47,7 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
     [DROPDOWN_OPTIONS.VIEW]: null
   });
 
-  const handleAction = (commmand: action |null, event: React.MouseEvent<HTMLLIElement, MouseEvent>, origin: string) => {
+  const handleAction = async (commmand: action |null, event: React.MouseEvent<HTMLLIElement, MouseEvent>, origin: string) => {
     // event.preventDefault();
     console.log("Handing click...");
     // onClose(event);
@@ -57,6 +65,18 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
          openFileEvent(event, false);
         }
         break;
+        case action.COPY:{
+          // const data = await window.electron.copyTextToClipboard()
+          // console.log("pasting...: ", data);
+         
+          break;
+        }
+        case action.PASTE:{
+          // // clipboard.writeText("clipboard.readText()");
+          // const data = await window.electron.pasteClipboardText()
+          // console.log("pasting...: ", data);
+          break;
+        }
         case action.CUT:{
           const from = editor.state.selection.from;
           const to = editor.state.selection.to;
@@ -77,6 +97,14 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
           editor.chain().focus().redo().run();
         }
         break;
+        case action.OPEN_MOODBOARD:{
+          toggleEvent(ToggleActions.MB);
+          break;
+        }
+        case action.OPEN_LINKS:{
+          toggleEvent(ToggleActions.LINK);
+          break;
+        }
 
       default:
         break;
@@ -106,9 +134,10 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
     };
 
     return (
-      <div style={{display: 'flex', justifyContent: 'normal', alignItems: 'center', width: '80%' }} >
+      <RetroToolbar style={{display: 'flex', justifyContent: 'normal', alignItems: 'center', width: '80%' }} >
       <div >
-        <Button style={MainTextBox}
+        <Button 
+        sx={retroDropDownBtnStyle}
           id="basic-button"
           aria-controls={menuState.FILE ? 'basic-menu' : undefined}
           aria-haspopup="true"
@@ -119,6 +148,7 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
         </Button>
         <Menu
           id="basic-menu"
+          sx={retroMenuStyle}
           anchorEl={menuState.FILE}
           open={!!menuState.FILE}
           onClose={()=>handleClose(DROPDOWN_OPTIONS.FILE)}
@@ -133,7 +163,8 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
         </Menu>
       </div>
       <div >
-      <Button style={MainTextBox}
+      <Button 
+        sx={retroDropDownBtnStyle}
         id="basic-button"
         aria-controls={menuState.EDIT ? 'basic-menu' : undefined}
         aria-haspopup="true"
@@ -144,6 +175,7 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
       </Button>
       <Menu
         id="basic-menu"
+        sx={retroMenuStyle}
         anchorEl={menuState.EDIT}
         open={!!menuState.EDIT}
         onClose={()=>handleClose(DROPDOWN_OPTIONS.EDIT)}
@@ -153,10 +185,15 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
       >
         <MenuItem onClick={(e) => handleAction(action.UNDO,e, DROPDOWN_OPTIONS.EDIT)}>Undo</MenuItem>
         <MenuItem onClick={(e) => handleAction(action.REDO,e, DROPDOWN_OPTIONS.EDIT)}>Redo</MenuItem>
+        {/* <MenuItem onClick={(e) => handleAction(action.COPY,e, DROPDOWN_OPTIONS.EDIT)}>Copy</MenuItem>
+        <MenuItem onClick={(e) => handleAction(action.PASTE,e, DROPDOWN_OPTIONS.EDIT)}>Paste</MenuItem>
+        <MenuItem onClick={(e) => handleAction(action.CUT,e, DROPDOWN_OPTIONS.EDIT)}>Cut</MenuItem> */}
+
       </Menu>
       </div>
       <div>
-      <Button style={MainTextBox}
+      <Button  
+        sx={retroDropDownBtnStyle}
         id="basic-button"
         aria-controls={menuState.EXPORT ? 'basic-menu' : undefined}
         aria-haspopup="true"
@@ -167,6 +204,7 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
       </Button>
       <Menu
         id="basic-menu"
+        sx={retroMenuStyle}
         anchorEl={menuState.EXPORT}
         open={!!menuState.EXPORT}
         onClose={()=>handleClose(DROPDOWN_OPTIONS.EXPORT)}
@@ -180,7 +218,8 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
       </Menu>
     </div>
     <div>
-      <Button style={MainTextBox}
+      <Button 
+        sx={retroDropDownBtnStyle}
         id="basic-button"
         aria-controls={menuState.VIEW ? 'basic-menu' : undefined}
         aria-haspopup="true"
@@ -190,6 +229,7 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
         View
       </Button>
       <Menu
+        sx={retroMenuStyle}
         id="basic-menu"
         anchorEl={menuState.VIEW}
         open={!!menuState.VIEW}
@@ -198,11 +238,11 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
           'aria-labelledby': 'basic-button',
         }}
       >
-        <MenuItem onClick={() => handleClose(DROPDOWN_OPTIONS.VIEW)}>Mood Board</MenuItem>
-        <MenuItem onClick={() => handleClose(DROPDOWN_OPTIONS.VIEW)}>Reference Links</MenuItem>
+        <MenuItem onClick={(e) => handleAction(action.OPEN_MOODBOARD,e, DROPDOWN_OPTIONS.VIEW)}>Mood Board</MenuItem>
+        <MenuItem onClick={(e) => handleAction(action.OPEN_LINKS,e, DROPDOWN_OPTIONS.VIEW)}>Reference Links</MenuItem>
       </Menu>
     </div>
-    </div>
+    </RetroToolbar>
     );
 }
 

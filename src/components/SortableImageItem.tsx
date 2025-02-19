@@ -1,0 +1,87 @@
+import {ImageListItem, ImageListItemBar,IconButton,  Grid2 as Grid, Tooltip, Button, Icon } from '@mui/material';
+import React, {FC, useState} from 'react';
+import {Delete, ZoomIn} from '@mui/icons-material';
+import { ImgListType } from 'types/GlobalTypes';
+import Slide from '@mui/material/Slide';
+
+import { DndContext, useDroppable, useDraggable, MouseSensor, KeyboardSensor, useSensor, useSensors, closestCenter, DragEndEvent } from '@dnd-kit/core';
+import { rectSortingStrategy, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { corkboardImage} from './../styles/MoodBoardStyle';
+import { CSS } from '@dnd-kit/utilities';
+import { corkboardImageToolBar } from './../styles/MoodBoardStyle';
+
+interface SortableImageItemProps {  
+    removeImageFromList:(event: React.MouseEvent, imgPath: string) => Promise<void>;
+    item: ImgListType;
+    dragging: boolean;
+    setSelectedItem: React.Dispatch<React.SetStateAction<string | null>>
+}
+
+const SortableImageItem: FC<SortableImageItemProps> = ({removeImageFromList, setSelectedItem, item, dragging}) => {
+
+    const {listeners, transform,transition,attributes,setNodeRef} =useSortable({id:item.id});
+    const [showTrashIcon,setShowTrashIcon] = useState<boolean>(false);
+    const style = {
+      transition,
+      transform:CSS.Transform.toString(transform),
+    }
+
+    const handleRemove = (event: React.MouseEvent) =>{
+      event.stopPropagation();
+      console.log("Handle remove");
+
+      removeImageFromList(event, item.id);
+    }
+
+
+    return <Slide in timeout={1000} key={item.id}>
+      <ImageListItem
+             onMouseEnter={() => setShowTrashIcon(true)}
+             onMouseLeave={() => setShowTrashIcon(false)}
+      >
+      <ImageListItemBar 
+        position="top"
+        style={corkboardImageToolBar}
+        actionIcon={showTrashIcon && !dragging && 
+        <div  
+          style={{  
+             
+             
+        }}  >
+             <IconButton
+       onClick={()=> setSelectedItem(item.data)}
+     >
+     <Tooltip id="button-zoom" title="zoom">
+         <ZoomIn sx={{ color: 'white', width: '3vw', height: '3vw', background:'rgba(87, 62, 57, 0.4)'}} />
+       </Tooltip>
+     </IconButton>
+<IconButton
+       
+
+       onClick={handleRemove}
+       sx={{ color: 'white', "&:hover": { color: "black" }, zIndex: 800 }}
+     >
+       <Tooltip id="button-remove" title="remove">
+         <Delete sx={{ color: 'white', width: '3vw', height: '3vw',background:'rgba(87, 62, 57, 0.4)', }} />
+       </Tooltip>
+     </IconButton>
+  
+
+        </div>}
+        actionPosition="right" />
+      <img
+        // srcSet={`${item?.data}`}
+        ref={setNodeRef}
+        {...listeners}
+        {...attributes}
+        src={item.data}
+        alt={item?.name}
+        style={{
+          ...style,
+          ...corkboardImage
+        }} />
+    </ImageListItem></Slide>;
+  }
+  
+
+  export default SortableImageItem;

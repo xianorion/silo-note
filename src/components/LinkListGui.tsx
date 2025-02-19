@@ -22,6 +22,7 @@ import {
   RemoveCircleOutline
 } from '@mui/icons-material';
 import ErrorPopup from './ErrorPopup';
+import { linkBankContainerStyle, linkBankStyle, linkBankTitleTypographyStyle, linkItemTypographyStyle, linkIconStyle} from './../styles/LinkListStyles';
 
 const testLinkData:{name: string, url: string, notes:string}[]  = [
 {
@@ -45,18 +46,29 @@ interface LinkListGuiProps {
     setLinks: (links: LinkType[]) => void;
 }
 
-const ListItemTextStyle:{fontSize:number} =  {
-    fontSize:15
-}
 const emptyLink = {name: '', url: '', notes:''}
 
 const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
     const [open, setOpen] = React.useState(false);
-    const [error, setError] = useState<string|null>(null);
-    const [errorSubtext, setErrorSubtext] = useState<string|null>(null);
+    const [errors, setErrors] = useState<{name:string|null,url:string|null,notes:string|null}>({
+      name: null,
+      url:null,
+      notes:null,
+    });
+    const [errorSubtexts, setErrorSubtexts] = useState<{name:string|null,url:string|null,notes:string|null}>({
+      name: null,
+      url:null,
+      notes:null,
+    });
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [editingLinkData, setEditingLinkData] = useState<LinkType>(emptyLink);
- 
+
+    useEffect(()=>{
+      console.log("Errors had changed: ", errors);
+      console.log("errors.url != null", errors.url != null)
+      console.log("errors.name != null", errors.name != null)
+
+    }, [errors]);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -67,7 +79,11 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
     };
 
     const removeError = () =>{
-        setError(null);
+        setErrors({
+          name: null,
+          url:null,
+          notes:null,
+        });
     }
     
     const validateLink = (link: LinkType) : boolean =>{
@@ -87,19 +103,21 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
       
         
         //check if name is unqiue
-        let isNameUnqiue :boolean = links.every( link =>link.name != newLink.name);
+        let isNameUnqiue :boolean = links.every( link =>link.name !== newLink.name);
         //prompt user that link name must be unique
         if(!isNameUnqiue){
-            setError("Link name must be unique!");
-            setErrorSubtext("The name ["+newLink.name+"] is already in use.")
+            setErrors({...errors,name: "Link name must be unique!", });
+            setErrorSubtexts({...errors, name: "The name ["+newLink.name+"] is already in use."});
 
         }else if(validateLink(newLink)){
-          setError("Link must start with 'http://' or 'https://'");
+          console.log("ERROR WITH LINK", {...errors,url: "Link must start with 'http://' or 'https://'", });
+          setErrors({...errors,url: "Link must start with 'http://' or 'https://'", });
         }else{
             console.log("Added link!");
             setLinks([...links, newLink]);
             handleClose();
             setToast("Link was Added!")
+            removeError();
         }
     }
 
@@ -124,7 +142,7 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
 
       const otherLinks = links.filter((link)=> link.name != editedLink.name);
       if(validateLink(editedLink)){
-        setError("Link must start with 'http://' or 'https://'");
+        setErrors({...errors,url: "Link must start with 'http://' or 'https://'", });
       }else{
           console.log("Added link!");
           setLinks([...otherLinks, editedLink]);
@@ -163,12 +181,9 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
     }
 
 
-    return <Paper> 
+    return <div style={linkBankContainerStyle}> 
         <Typography
-        sx={{
-        fontSize: '20px',                           // Change font size
-        fontWeight: 'bold',   
-        }}
+        sx={linkBankTitleTypographyStyle}
         >Link Bank</Typography>
         {/* {error != null && <ErrorPopup 
         open={error != null}
@@ -177,21 +192,23 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
          handleClose={removeError}
          
          />} */}
-        <List>
+         <div style={linkBankStyle}>
+         <List>
             {links.map((link) =>(
                 <ListItem key={link.name}>
                     <ListItemButton component="a" onClick={() => openLink(link.url)} >
-                        <ListItemText primaryTypographyProps={{...ListItemTextStyle}}
+                        <ListItemText primaryTypographyProps={linkItemTypographyStyle}
                         >{link.name}</ListItemText>
                     </ListItemButton>
-                    <RemoveCircleOutline onClick={() => removeLink(link.name)} />
-                      <Edit onClick={() => openEditLink(link)}/>
+                    <RemoveCircleOutline sx={linkIconStyle} onClick={() => removeLink(link.name)} />
+                    <Edit sx={linkIconStyle} onClick={() => openEditLink(link)}/>
                 </ListItem>
             ))}
             </List>
+         </div>
             <div>
             <Button  onClick={handleClickOpen}>
-        <InsertLink/>
+        <InsertLink sx={linkIconStyle}/>
         </Button>
          <Dialog
         open={open}
@@ -218,6 +235,8 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
             name="name"
             label="Name"
             //type="link"
+            helperText={errors.name}
+            error={errors.name != null}
             fullWidth
             variant="standard"
             // value={linkName}
@@ -234,8 +253,8 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
             //type="link"
             fullWidth
             variant="standard"
-            helperText={error}
-            error={error != null}
+            helperText={errors.url}
+            error={errors.url != null}
             // value={linkUrl}
             // onChange={e=> setLinkUrl(e.target.value)}
           />
@@ -285,6 +304,8 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
             label="Name"
             fullWidth
             variant="standard"
+            helperText={errors.name}
+            error={errors.name != null}
             value={editingLinkData?.name}
             onChange={(e) => handleEditLinkChange(e,'name')}
           />
@@ -297,8 +318,8 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
             label="Link"
             fullWidth
             variant="standard"
-            helperText={error}
-            error={error != null}
+            helperText={errors.url}
+            error={errors.url != null}
             value={editingLinkData?.url}
             onChange={(e) => handleEditLinkChange(e,'url')}
 
@@ -322,7 +343,7 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
         </DialogActions>
       </Dialog>
             </div>
-    </Paper>
+    </div>
   
 }
 

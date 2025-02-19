@@ -1,17 +1,16 @@
 // import './styles.scss'
 import './../styles/editor.css';
 import Electron from 'electron';
-import { Editor, EditorContent, useEditor } from '@tiptap/react'
+
+import { Editor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import React, {FC, useEffect, useState} from 'react'
+import React, {FC, useCallback, useEffect, useState, useRef} from 'react'
 import {
   Alert, 
-  Button, 
   Dialog, 
   DialogActions, 
   DialogContent, 
   DialogContentText,
-  DialogTitle,
   Toolbar, 
   Slide,
 } from '@mui/material'
@@ -19,12 +18,14 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { FormatListBulletedRounded, RedoOutlined, UndoOutlined, FormatListNumberedRounded, FormatBoldRounded, FormatItalicRounded, DatasetLinkedRounded, PhotoLibraryRounded } from '@mui/icons-material';
 import { TransitionProps } from '@mui/material/transitions';
 import MainToolbar from './MainToolbar';
-import LinkListGui from './LinkListGui';
 import MoodBoardGui from './MoodBoardGui';
-import { Drawer } from '@mui/material';
+import SiloToolBar from './SiloToolbar';
 import { Grid2 as Grid } from "@mui/material";
 import { TEXT_FILETYPES, IMAGE_FILETYPES, SILONOTE_FILETYPE } from '../utils/constants';
 import { ImgListType, SiloNoteFile, SourceLinksType } from 'types/GlobalTypes';
+import { RetroBtn, iconStyles, RetroDialog, RetroDialogTitle, linkDrawerStyle } from './../styles/SiloTextBoxStyle';
+import TextAlign from '@tiptap/extension-text-align';
+import { ToggleActions } from './../types/GlobalTypes';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -50,146 +51,41 @@ interface MenuToolbarProps {
 const NEW_FILE = "NEW_FILE";
 const OPEN_FILE = "OPEN_FILE";
 
-const MenuBar : FC<MenuBarProps> = ({ editor }) => {
-  if (!editor) {
-    return null
-  }
-
-  return (
-    <div className="control-group">
-      
-      <div className="button-group">
-        <button
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={editor.isActive('bold') ? 'is-active' : ''}
-        >
-          Bold
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={editor.isActive('italic') ? 'is-active' : ''}
-        >
-          Italic
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleStrike().run()}
-          className={editor.isActive('strike') ? 'is-active' : ''}
-        >
-          Strike
-        </button>
-        <button
-          onClick={() => editor.chain().focus().setParagraph().run()}
-          className={editor.isActive('paragraph') ? 'is-active' : ''}
-        >
-          Paragraph
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-          className={editor.isActive('heading', { level: 1 }) ? 'is-active' : ''}
-        >
-          H1
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={editor.isActive('heading', { level: 2 }) ? 'is-active' : ''}
-        >
-          H2
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          className={editor.isActive('heading', { level: 3 }) ? 'is-active' : ''}
-        >
-          H3
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
-          className={editor.isActive('heading', { level: 4 }) ? 'is-active' : ''}
-        >
-          H4
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 5 }).run()}
-          className={editor.isActive('heading', { level: 5 }) ? 'is-active' : ''}
-        >
-          H5
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleHeading({ level: 6 }).run()}
-          className={editor.isActive('heading', { level: 6 }) ? 'is-active' : ''}
-        >
-          H6
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={editor.isActive('bulletList') ? 'is-active' : ''}
-        >
-          Bullet list
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={editor.isActive('orderedList') ? 'is-active' : ''}
-        >
-          Ordered list
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          className={editor.isActive('blockquote') ? 'is-active' : ''}
-        >
-          Blockquote
-        </button>
-        <button onClick={() => editor.chain().focus().setHorizontalRule().run()}>
-          Horizontal rule
-        </button>
-        <button onClick={() => editor.chain().focus().setHardBreak().run()}>
-          Hard break
-        </button>
-        <button onClick={() => editor.chain().focus().undo().run()}>
-          Undo
-        </button>
-        <button onClick={() => editor.chain().focus().redo().run()}>
-          Redo
-        </button>
-      </div>
-    </div>
-  )
-}
-
 const MenuToolbar : FC<MenuToolbarProps>= ({className, editor}) =>{
   if (!editor) {
     return null
   }
   return (
     <div className={className}>
-      <div><h1>SiloNote</h1></div>
+      <div ><h1><img id='logo' src={`${process.env.PUBLIC_URL}/img/silonote_logo.png`}  alt='SiloNotelogo'/></h1></div>
        <Toolbar 
       sx={{ display: 'flex', }}
       >
        
       <div>
-        <Button  onClick={() => editor.chain().focus().toggleBold().run()}
+        <RetroBtn  onClick={() => editor.chain().focus().toggleBold().run()}
           className={editor.isActive('bold') ? 'is-active' : ''}>
         <FormatBoldRounded className='icon'/>
-        </Button>
-        <Button  onClick={() => editor.chain().focus().toggleItalic().run()}
+        </RetroBtn>
+        <RetroBtn  onClick={() => editor.chain().focus().toggleItalic().run()}
           
           className={editor.isActive('italic') ? 'is-active' : ''}>
        <FormatItalicRounded className='icon'/>
-        </Button>
+        </RetroBtn>
          {/* undo button */}
-        <Button onClick={() => editor.chain().focus().undo().run()}>
+        <RetroBtn onClick={() => { editor.chain().focus().undo().run();}}>
         <UndoOutlined className='icon' />
-        </Button>
+        </RetroBtn>
          {/* redo button */}
-        <Button  onClick={() => editor.chain().focus().redo().run()}>
+        <RetroBtn  onClick={() => editor.chain().focus().redo().run()}>
         <RedoOutlined className='icon'/>
-        </Button>
-        <Button onClick={() => editor.chain().focus().toggleBulletList().run()}>
+        </RetroBtn>
+        <RetroBtn onClick={() => editor.chain().focus().toggleBulletList().run()}>
         <FormatListBulletedRounded className='icon'/>
-        </Button>
-        <Button onClick={() => editor.chain().focus().toggleOrderedList().run()}>
+        </RetroBtn>
+        <RetroBtn onClick={() => editor.chain().focus().toggleOrderedList().run()}>
         <FormatListNumberedRounded className='icon'/>
-        </Button>
-        <br/>
+        </RetroBtn>
         
       </div>
 
@@ -202,7 +98,24 @@ const MenuToolbar : FC<MenuToolbarProps>= ({className, editor}) =>{
   );
 }
 
+
+const editorProps = {
+  extensions: [
+    StarterKit,
+    TextAlign.configure({
+      types: ['heading', 'paragraph'],
+      defaultAlignment: 'left'
+    }),
+  ],
+  editorProps: {
+    attributes: {
+      spellcheck: 'true',
+    },
+  }
+};
+
 const SiloTextEditor =() => {
+  const editorRef = useRef<Editor | null>(null); // Use useRef to persist editor instance
   const [currentFile, setCurrentFile] = useState<string|  null>(null);
   const [edited, setEdited] = useState(false);
   const [linkSection, setLinkSection] = useState(false);
@@ -213,9 +126,31 @@ const SiloTextEditor =() => {
   const [error, setError] = useState<string | null>(null);
   const [saveAlert, setSaveAlert] = useState<{msg:string, location:string} | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [content, setContent] = useState<string | undefined>(undefined);
 
+  /*initialize editor reference. 
+  We use a reference since i want to be able to create and detroy an editor 
+  when a new file is created. Help restart undo and redo history too.
+ */
+  useEffect(() => {
+    // Initialize the editor after the component mounts
+    editorRef.current = new Editor(editorProps);
+    // Cleanup the editor when the component unmounts
+    return () => {
+      if (editorRef.current) {
+        editorRef.current.destroy();
+      }
+    };
+  }, []);
+
+  /*This starts a new editor by destroying old one and reapplying props. */
+  const startNewEditor = () => {
+  if (editorRef.current) {
+    editorRef.current.destroy();
+    editorRef.current = new Editor(editorProps);
+  }
+  }
   useEffect(()=>{
-
       // Set the timer to change the variable after 3 seconds
       const timer = setTimeout(() => {
         setToast(null);
@@ -228,45 +163,70 @@ const SiloTextEditor =() => {
 
   useEffect(()=>{
     console.log("is content edited?", edited);
-    window.electron.setSaveStatus(edited);
-
+    //let electron know to save to already file is saves
+    window.electron.setEditStatus(edited);
   },[edited]);
 
   const toggle = (obj :string) =>{
     switch (obj){
-      case 'link':
+      case ToggleActions.LINK:
         setLinkSection(!linkSection);
         break;
-      case 'mb':
+      case ToggleActions.MB:
         setMBSection(!mbSection);
         break;
     }
    
   }
+  
 
+  // const editor: Editor |null = useEditor({
+  //   extensions: [
+  //     StarterKit,
+  //     TextAlign.configure({
+  //       types: ['heading', 'paragraph'],
+  //     }),
+  //   ],
+  //   editorProps: {
+  //     attributes: {
+  //       spellcheck: 'true',
+  //     },
+  //   }
+  // })
 
-  const editor: Editor |null = useEditor({
-    extensions: [
-      StarterKit,
-    ],
-    editorProps: {
-      attributes: {
-        spellcheck: 'false',
-      },
-    },
-  })
+  const stringIsEmptyOrUndefined  = (str:string | undefined): boolean => {
+    return str === undefined || str === '';
+  }
 
-  editor?.on('update', ({ editor }) => {
-    // The content has changed.
-    setEdited(true);
-  })
+  const handleUpdate = useCallback(() => {
+    const currentContent = editorRef.current?.getText();
+
+    // Check if the content has changed
+    if (currentContent !== content && !(stringIsEmptyOrUndefined(currentContent) && stringIsEmptyOrUndefined(content) )) {
+      setEdited(true);         
+
+      setContent(currentContent); // Update previous content
+    } else {
+      setContent(''); // Update previous content
+
+      //setEdited(false);
+    }
+  },[editorRef.current]);
+
+  useEffect(() => {
+    // Set initial previous content
+    setContent(editorRef.current?.getText());
+    // Listen for updates to the editor
+    editorRef.current?.on('update', handleUpdate);
+    return () => {
+      editorRef.current?.off('update', handleUpdate);
+    };
+  }, [editorRef.current]);
 
   const addImage = async (event:React.MouseEvent<any>) =>{
     console.log("Add image clicked...");
     let pathObj : FileReturnValue = await window.electron.openFileDialog(IMAGE_FILETYPES);
     
-    console.log("Image file opened...", pathObj.filePaths[0]);
-    console.log("image file? pathObj.canceled...", pathObj.canceled);
     let imgPath: string= '';
     let result = {
       status: false,
@@ -279,6 +239,7 @@ const SiloTextEditor =() => {
         //create the image URL using blob
         const imageUrl = `data:image/png;base64,${pathObj.blob}`;
         const  newImage ={
+          id: imgPath,
           data: imageUrl,
           name: imgPath,
           note: null
@@ -297,8 +258,33 @@ const SiloTextEditor =() => {
         }
         setEdited(true);
       
+    }else{
+      result.status = true;
+      result.msg = "User canceled adding image";
+      console.log("Canceled adding image");
     }
     return result;
+  }
+
+  const removeImage = async (event:React.MouseEvent<any>, imageName: string) =>{
+    console.log("Add image clicked...");
+    let result = {
+      status: false,
+      msg: "Error removing image"
+    };
+    try{
+      const newImageList = imgList.filter((item)=> item.name !== imageName);
+      setImgList([...newImageList]);
+      setEdited(true);
+      setToast("Image Successfully Removed");
+      result.status = true;
+      result. msg =  "Image Successfully Removed";
+    }catch(e){
+      result.status = false;
+      result. msg =  `Error removing image: ${e}`;
+    }finally{
+      return result;
+    }
   }
 
   const saveFile = async (event : React.MouseEvent<any>, isSaveAs:boolean) =>{
@@ -318,7 +304,7 @@ const SiloTextEditor =() => {
     }
     
 
-    let content = (editor!=null ? editor.getText():"");
+    let content = (editorRef.current!=null ? editorRef.current.getText():"");
     if(path !=null && path.length >0){
       const newFile : SiloNoteFile = {
         content: content,
@@ -341,10 +327,18 @@ const SiloTextEditor =() => {
     setIsLoading(false);
     
   }
+  const updateLinks = (links:SourceLinksType[]) => { 
+    console.log("LINKS HAVE BEEN EDITED!!!");
+    setSrcLinks(links); 
+    setEdited(true);
+  
+  }
 
   const newFile = async (event : React.MouseEvent<any>, override: boolean) =>{
     console.log("triggering new file event: ", event);
     //have screen loader
+    console.log("----------NEW FILE ASK-----------");
+
     console.log("edited is: ",edited );
     console.log("override is ", override);
 
@@ -357,11 +351,11 @@ const SiloTextEditor =() => {
       //clear out current file settings
       setCurrentFile(null);
       //clear UI content 
-      editor?.commands.clearContent();
-
+      startNewEditor();
       setSrcLinks([]);
       setImgList([]);
         //Since a new file is loaded we are no longer in an 'edited' state
+        console.log("setting content edoted to false")
         setEdited(false);
       }
     }
@@ -381,24 +375,24 @@ const SiloTextEditor =() => {
       try{
       let pathObj : Electron.OpenDialogReturnValue = await window.electron.openFileDialog(TEXT_FILETYPES);
       console.log("File opened...", pathObj?.filePaths[0]);
-      console.log("pathObj.canceled...", pathObj.canceled);
+      console.log("pathObj.canceled...", pathObj?.canceled);
   
-      if(pathObj.canceled === false && pathObj.filePaths.length === 1 && editor){
+      if(pathObj.canceled === false && pathObj.filePaths.length === 1 && editorRef.current){
         const data = await window.electron.readFile(pathObj.filePaths[0]);
 
         //clear the whole document
-        editor.commands.clearContent();
+        editorRef.current.commands.clearContent();
         //if it is a silo note file, parse
         if(pathObj.filePaths[0].endsWith(SILONOTE_FILETYPE) && data){
           const fileData:SiloNoteFile = JSON.parse(data);
 
           setSrcLinks(fileData.links);
           setImgList(fileData.imageRefs);
-          editor.commands.insertContent(fileData.content);
+          editorRef.current.commands.insertContent(fileData.content);
       
 
         }else{
-          editor.commands.insertContent(data);
+          editorRef.current.commands.insertContent(data);
           //console.log("DATA READ FROM FILE:",data);
         }
         //set current file path
@@ -409,7 +403,7 @@ const SiloTextEditor =() => {
 
     }catch(e){
         //log error with opening file
-        setError("Error opening file...")
+        setToast("Error opening file...")
     }finally{
       setIsLoading(false);
     }
@@ -436,6 +430,8 @@ const SiloTextEditor =() => {
     <div style={{margin:'auto'}}>
       {/* <MenuBar editor={editor} />
       <br/> */}
+      {/*TOAST/ERROR POPUP*/}
+
        <Slide in={toast !=null} mountOnEnter unmountOnExit>
                 <Alert style={{
                   display: 'flex', 
@@ -456,31 +452,63 @@ const SiloTextEditor =() => {
                 {toast}
               </Alert>
             </Slide>
-      {editor !=null?<MainToolbar
-            editor={editor}
+ {/*MOOD BOARD DIALOG POPUP*/}
+ <Dialog  open={mbSection} 
+ 
+ sx={{ 
+  justifyContent: 'center', 
+  alignItems: 'center', 
+  width: 'auto', 
+  height: 'auto', 
+  padding: 0, // Remove padding to allow full space for content
+  overflow: 'auto', // Prevents scrollbars on the dialog content
+}}>
+        <DialogContent sx={{ 
+    display: 'flex', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    width: 'auto', 
+    height: 'auto', 
+    background: "rgb(244, 208, 172)",  /* Darker border for depth */
+    padding: 0, // Remove padding to allow full space for content
+    overflow: 'auto', // Prevents scrollbars on the dialog content
+  }}>
+        <MoodBoardGui imgList={imgList} addImage={addImage} setImageList={setImgList} removeImage={removeImage} onClose={() =>toggle(ToggleActions.MB)}/>
+
+          </DialogContent>
+        </Dialog>
+      {/*TIPTAP EDITOR LOADER VERIFICATION AND MAINTOOLBAR*/}
+
+      {editorRef.current !=null?<MainToolbar
+            editor={editorRef.current}
             newFileEvent={newFile}
       saveFileEvent={saveFile}
       openFileEvent={(event: React.MouseEvent<HTMLButtonElement>)=> openFile(event, false)}
+      toggleEvent={toggle}
       />:null}
-      {saveAlert &&<Dialog
+      {saveAlert &&<RetroDialog
         open={saveAlert !== null}
         TransitionComponent={Transition}
         keepMounted
         onClose={handleAlertClose}
         aria-describedby="alert-dialog-slide-description"
       >
-       
-        (<DialogTitle>{"Hey!"}</DialogTitle>
+      <RetroDialogTitle>{"Hey!"}</RetroDialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-slide-description">
             {saveAlert.msg}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={(event) => handleAlertAction(event,saveAlert.location, true)}>Continue</Button>
-          <Button onClick={(event) =>handleAlertAction(event,saveAlert.location,false)}>Abort</Button>
-        </DialogActions>)
-      </Dialog>}
+          <RetroBtn onClick={(event) => handleAlertAction(event,saveAlert.location, true)}>Continue</RetroBtn>
+          <RetroBtn onClick={(event) =>handleAlertAction(event,saveAlert.location,false)}>Abort</RetroBtn>
+        </DialogActions>
+      </RetroDialog>}
+
+     
+    
+      {/*MAIN TEXT AREA AND SIDE DRAWERS + BUTTONS*/}
+
       <Grid container columnSpacing={2} >
        {isLoading && <CircularProgress style={{
     display: 'flex', 
@@ -492,15 +520,15 @@ const SiloTextEditor =() => {
     transform: 'translate(-50%, -50%)', 
     zIndex: 900 
   }}    />}
-      <Grid size={7}>
+      <Grid size={12}>
         <div>
-        <MenuToolbar  className='MenuToolbar' editor={editor} />
+          <SiloToolBar editor={editorRef.current} toggle={toggle} linkSection={linkSection} 
+          srcLinks={srcLinks} setToast={setToast} updateLinks={updateLinks}/>
+        
       <br/>
-      <EditorContent 
-      id='editor'
-      editor={editor} 
-      className='editor'
-      />
+      <EditorContent editor={editorRef.current}  onChange={()=>{
+        console.log("edited is:", true );
+        setEdited(true)}}/>     
         </div>
       
       </Grid>
@@ -509,18 +537,7 @@ const SiloTextEditor =() => {
     component="div" 
     sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}
   >
-       <Button onClick={() => toggle('link')}>
-        <DatasetLinkedRounded/>
-      </Button>
-      <Drawer anchor='right' open={linkSection} onClose={() => toggle('link')}>
-        <LinkListGui links={srcLinks} setToast={(newToast:string) =>setToast(newToast)} setLinks={(links) => { setSrcLinks(links); setEdited(true);}} />
-      </Drawer>
-      <Button onClick={() =>toggle('mb')}>
-        <PhotoLibraryRounded/>
-      </Button>
-      <Drawer anchor='right' open={mbSection} onClose={() =>toggle('mb')}>
-        <MoodBoardGui imgList={imgList} addImage={addImage} onClose={() =>toggle('mb')}/>
-      </Drawer>
+      
       </Grid>
 
     </Grid>
@@ -531,3 +548,4 @@ const SiloTextEditor =() => {
 }
 
 export default SiloTextEditor;
+

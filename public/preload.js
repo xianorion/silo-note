@@ -15,6 +15,8 @@ contextBridge.exposeInMainWorld('electron', {
     writeFile: (path, data) => ipcRenderer.invoke('writeFile', path, data),
     saveFileDialog: (defaultFilename) => ipcRenderer.invoke('save-file-dialog',defaultFilename),
     openLink: (link) => ipcRenderer.invoke('open-link',link),
-    setSaveStatus: (isSaved) => ipcRenderer.send('set-save-status', isSaved),
+    setEditStatus: (isEdited) => ipcRenderer.send('set-edit-status', isEdited),
+    copyTextToClipboard: () => ipcRenderer.invoke('copy-to-clipboard'),
+    pasteClipboardText: () => ipcRenderer.invoke('paste-clipboard-text'),
     // Add other file system operations as needed
   });

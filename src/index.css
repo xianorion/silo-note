@@ -13,6 +13,32 @@ code {
 }
 
 @font-face {
-  font-family: 'Poiret-One-Latin';
-  src: url('./resources/fonts/poiret-one-latin-400-normal.ttf') format('truetype');
+  font-family: 'BaksoSapi';
+  src: url('./resources/fonts/BaksoSapi.otf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Singkong';
+  src: url('./resources/fonts/Singkong.otf') format('truetype');
+}
+
+
+
+@font-face {
+  font-family: '8bitArcadeIn';
+  src: url('./resources/fonts/8bitArcadeIn.ttf') format('truetype'); /* Ensure the file path is correct */
+}
+
+body {
+  background: linear-gradient(to bottom, #f5eccd, #fbfeda);
+  color: #333;
+  font-family: 'Courier New', monospace;
+}
+
+.window {
+  background: #F8F4E8;
+  border: 3px solid #333;
+  border-radius: 5px;
+  box-shadow: 4px 4px 0px #A8A29E;
+  padding: 20px;
 }

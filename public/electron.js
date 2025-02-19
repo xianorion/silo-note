@@ -1,5 +1,5 @@
 // Module to control the application lifecycle and the native browser window.
-const { app, BrowserWindow, protocol, ipcMain, dialog, shell } = require("electron");
+const { app, BrowserWindow, protocol, ipcMain, dialog, shell, clipboard, Menu} = require("electron");
 const path = require("path");
 var fs = require("fs");
 const url = require("url");
@@ -18,6 +18,22 @@ function createWindow() {
       preload: path.join(__dirname, "preload.js"),
     },
   });
+
+  //context menu template
+  var template = [
+        { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
+        { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
+        { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
+        { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" },
+        { label: "Quit", accelerator: "Command+Q", click: function() { app.quit(); }}
+];
+   // Build the context menu from the template
+   const contextMenu = Menu.buildFromTemplate(template);
+
+   // Listen for right-click event to show the context menu
+   mainWindow.webContents.on('context-menu', (e, params) => {
+     contextMenu.popup({ window: mainWindow, x: params.x, y: params.y });
+   });
  
   // In production, set the initial browser path to the local bundle generated
   // by the Create React App build process.
@@ -97,9 +113,9 @@ app.whenReady().then(() => {
   });
 
 // Listen for changes to the save state from the renderer (React)
-ipcMain.on('set-save-status', (event, isSaved) => {
+ipcMain.on('set-edit-status', (event, isEdited) => {
   console.log("Is content isContentEdited?", isContentEdited);
-  isContentEdited = isSaved;
+  isContentEdited = isEdited;
 });
 
 });
@@ -131,7 +147,7 @@ ipcMain.handle('open-file-dialog', async (event, fileTypes) => {
       ]
     });
     if (result.canceled) {
-      return null;  // Return null if user cancels
+      return {canceled: true};  // Return null if user cancels
     }
   
     const selectedFilePath = result.filePaths[0];  // Get the first selected file path
@@ -204,5 +220,25 @@ app.on("web-contents-created", (event, contents) => {
   });
 });
  
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+// copy and paste functionality
+ipcMain.handle('copy-to-clipboard', (event, text) => {
+  let textWritten=false;
+  let pastedText='';
+
+  let error=null;
+
+  try{
+    //write text that in clipboard
+    pastedText = text;
+    
+    clipboard.writeText(pastedText, text);
+    textWritten = true;
+  }catch(e){
+    error = e.toString();
+  }
+  return {status:textWritten, error, pasted: pastedText};
+});
+
+ipcMain.handle('paste-clipboard-text', () => {
+  return clipboard.readText();
+});
