@@ -15,6 +15,8 @@ declare global {
         saveFileDialog: (defaultFile: string) => Promise<string | null>;
         openLink: (link: string) => Promise<boolean>;
         setEditStatus: (isEdited:boolean) => void
+        copyTextToClipboard: () =>  Promise<{status:string, error:string }>,
+        pasteClipboardText: () =>  Promise<string>,
       };
     }
   }

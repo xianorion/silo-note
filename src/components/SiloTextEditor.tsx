@@ -1,6 +1,7 @@
 // import './styles.scss'
 import './../styles/editor.css';
 import Electron from 'electron';
+
 import { Editor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import React, {FC, useCallback, useEffect, useState, useRef} from 'react'
@@ -17,9 +18,8 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { FormatListBulletedRounded, RedoOutlined, UndoOutlined, FormatListNumberedRounded, FormatBoldRounded, FormatItalicRounded, DatasetLinkedRounded, PhotoLibraryRounded } from '@mui/icons-material';
 import { TransitionProps } from '@mui/material/transitions';
 import MainToolbar from './MainToolbar';
-import LinkListGui from './LinkListGui';
 import MoodBoardGui from './MoodBoardGui';
-import { Drawer } from '@mui/material';
+import SiloToolBar from './SiloToolbar';
 import { Grid2 as Grid } from "@mui/material";
 import { TEXT_FILETYPES, IMAGE_FILETYPES, SILONOTE_FILETYPE } from '../utils/constants';
 import { ImgListType, SiloNoteFile, SourceLinksType } from 'types/GlobalTypes';
@@ -86,7 +86,6 @@ const MenuToolbar : FC<MenuToolbarProps>= ({className, editor}) =>{
         <RetroBtn onClick={() => editor.chain().focus().toggleOrderedList().run()}>
         <FormatListNumberedRounded className='icon'/>
         </RetroBtn>
-        <br/>
         
       </div>
 
@@ -521,9 +520,11 @@ const SiloTextEditor =() => {
     transform: 'translate(-50%, -50%)', 
     zIndex: 900 
   }}    />}
-      <Grid size={7}>
+      <Grid size={12}>
         <div>
-        <MenuToolbar  className='MenuToolbar' editor={editorRef.current} />
+          <SiloToolBar editor={editorRef.current} toggle={toggle} linkSection={linkSection} 
+          srcLinks={srcLinks} setToast={setToast} updateLinks={updateLinks}/>
+        
       <br/>
       <EditorContent editor={editorRef.current}  onChange={()=>{
         console.log("edited is:", true );
@@ -536,24 +537,7 @@ const SiloTextEditor =() => {
     component="div" 
     sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}
   >
-       <RetroBtn  onClick={() => toggle(ToggleActions.LINK)}>
-        <DatasetLinkedRounded sx={iconStyles}/>
-      </RetroBtn>
-      <Drawer 
-      PaperProps={{
-        sx: linkDrawerStyle,
-      }}
-      anchor='right' 
-      open={linkSection} 
-      onClose={() => toggle(ToggleActions.LINK)}>
-        <LinkListGui  links={srcLinks} setToast={(newToast:string) =>setToast(newToast)} setLinks={updateLinks} />
-      </Drawer>
-      <RetroBtn onClick={() =>toggle(ToggleActions.MB)}>
-        <PhotoLibraryRounded sx={iconStyles}/>
-      </RetroBtn>
-      {/* <Drawer anchor='right' open={mbSection} onClose={() =>toggle('mb')}>
-        <MoodBoardGui imgList={imgList} addImage={addImage} setImageList={setImgList} removeImage={removeImage} onClose={() =>toggle('mb')}/>
-      </Drawer> */}
+      
       </Grid>
 
     </Grid>
@@ -564,3 +548,4 @@ const SiloTextEditor =() => {
 }
 
 export default SiloTextEditor;
+

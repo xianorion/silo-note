@@ -1,10 +1,11 @@
 import React, {FC} from 'react';
-import { Editor } from '@tiptap/react'
+import { Editor, getHTMLFromFragment } from '@tiptap/react'
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem'; 
 import { RetroToolbar, retroDropDownBtnStyle, retroMenuStyle } from '../styles/MainToolBarStyle';
 import { ToggleActions } from './../types/GlobalTypes';
+import { DOMSerializer } from '@tiptap/pm/model';
 
 interface MainToolbarProps {
 editor: Editor ;
@@ -21,6 +22,8 @@ enum action {
   SAVE_AS = "SAVE_AS",
   OPEN = "OPEN",
   CUT = "CUT",
+  COPY = "COPY",
+  PASTE = "PASTE",
   UNDO = "UNDO",
   REDO = "REDO",
   OPEN_MOODBOARD = "OPEN_MOODBOARD",
@@ -44,7 +47,7 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
     [DROPDOWN_OPTIONS.VIEW]: null
   });
 
-  const handleAction = (commmand: action |null, event: React.MouseEvent<HTMLLIElement, MouseEvent>, origin: string) => {
+  const handleAction = async (commmand: action |null, event: React.MouseEvent<HTMLLIElement, MouseEvent>, origin: string) => {
     // event.preventDefault();
     console.log("Handing click...");
     // onClose(event);
@@ -62,6 +65,18 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
          openFileEvent(event, false);
         }
         break;
+        case action.COPY:{
+          // const data = await window.electron.copyTextToClipboard()
+          // console.log("pasting...: ", data);
+         
+          break;
+        }
+        case action.PASTE:{
+          // // clipboard.writeText("clipboard.readText()");
+          // const data = await window.electron.pasteClipboardText()
+          // console.log("pasting...: ", data);
+          break;
+        }
         case action.CUT:{
           const from = editor.state.selection.from;
           const to = editor.state.selection.to;
@@ -170,6 +185,10 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
       >
         <MenuItem onClick={(e) => handleAction(action.UNDO,e, DROPDOWN_OPTIONS.EDIT)}>Undo</MenuItem>
         <MenuItem onClick={(e) => handleAction(action.REDO,e, DROPDOWN_OPTIONS.EDIT)}>Redo</MenuItem>
+        {/* <MenuItem onClick={(e) => handleAction(action.COPY,e, DROPDOWN_OPTIONS.EDIT)}>Copy</MenuItem>
+        <MenuItem onClick={(e) => handleAction(action.PASTE,e, DROPDOWN_OPTIONS.EDIT)}>Paste</MenuItem>
+        <MenuItem onClick={(e) => handleAction(action.CUT,e, DROPDOWN_OPTIONS.EDIT)}>Cut</MenuItem> */}
+
       </Menu>
       </div>
       <div>
