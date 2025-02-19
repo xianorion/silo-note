@@ -23,7 +23,7 @@ import SiloToolBar from './SiloToolbar';
 import { Grid2 as Grid } from "@mui/material";
 import { TEXT_FILETYPES, IMAGE_FILETYPES, SILONOTE_FILETYPE } from '../utils/constants';
 import { ImgListType, SiloNoteFile, SourceLinksType } from 'types/GlobalTypes';
-import { RetroBtn, iconStyles, RetroDialog, RetroDialogTitle, linkDrawerStyle } from './../styles/SiloTextBoxStyle';
+import { RetroBtn, iconStyles, RetroDialog, RetroDialogTitle, linkDrawerStyle, toastStyle } from './../styles/SiloTextBoxStyle';
 import TextAlign from '@tiptap/extension-text-align';
 import { ToggleActions } from './../types/GlobalTypes';
 
@@ -319,6 +319,7 @@ const SiloTextEditor =() => {
       setToast('Your file has been saved!');
        //Since the file has been saved we are no longer in an 'edited' state
        setEdited(false);
+       setCurrentFile(path);
     }else{
       //Message that path is empty
 
@@ -433,18 +434,7 @@ const SiloTextEditor =() => {
       {/*TOAST/ERROR POPUP*/}
 
        <Slide in={toast !=null} mountOnEnter unmountOnExit>
-                <Alert style={{
-                  display: 'flex', 
-                  justifyContent: 'center', 
-                  alignItems: 'center', 
-                  position: 'absolute', 
-                  top: '50%', 
-                  left: '50%', 
-                  transform: 'translate(-50%, -50%)', 
-                  zIndex: 1500,
-                  backgroundColor: '#FFFFFF',
-                  boxShadow:'5px 5px 10px rgba(0, 0, 0, 0.7)',
-                }} 
+                <Alert sx={toastStyle} 
                 variant="outlined" 
                 severity='success'
                 color='success'
@@ -537,7 +527,6 @@ const SiloTextEditor =() => {
     component="div" 
     sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}
   >
-      
       </Grid>
 
     </Grid>
@@ -548,4 +537,3 @@ const SiloTextEditor =() => {
 }
 
 export default SiloTextEditor;
-
