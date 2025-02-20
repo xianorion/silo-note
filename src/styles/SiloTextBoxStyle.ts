@@ -53,6 +53,9 @@ export const toastStyle = {
   zIndex: 1500,
   backgroundColor: '#FFFFFF',
   boxShadow:'5px 5px 10px rgba(0, 0, 0, 0.7)',
+  fontSize: '100%',
+  textAlign: 'center',
+  overflow: 'hidden'
 }
 
 

@@ -306,10 +306,15 @@ const SiloTextEditor =() => {
 
     let content = (editorRef.current!=null ? editorRef.current.getText():"");
     if(path !=null && path.length >0){
+      //clear data to new image list
+      let saveImgList:ImgListType[]=[];
+      imgList.forEach((img) =>{
+        saveImgList.push({id: img.id,name: img.name, note: img.note, data:null})
+      });
       const newFile : SiloNoteFile = {
         content: content,
         links: srcLinks,
-        imageRefs: imgList,
+        imageRefs: saveImgList,
       }
       const serializedData = JSON.stringify(newFile);
       const data = await window.electron.writeFile(path, serializedData);
@@ -380,13 +385,11 @@ const SiloTextEditor =() => {
   
       if(pathObj.canceled === false && pathObj.filePaths.length === 1 && editorRef.current){
         const data = await window.electron.readFile(pathObj.filePaths[0]);
-
         //clear the whole document
         editorRef.current.commands.clearContent();
         //if it is a silo note file, parse
         if(pathObj.filePaths[0].endsWith(SILONOTE_FILETYPE) && data){
           const fileData:SiloNoteFile = JSON.parse(data);
-
           setSrcLinks(fileData.links);
           setImgList(fileData.imageRefs);
           editorRef.current.commands.insertContent(fileData.content);
@@ -403,8 +406,9 @@ const SiloTextEditor =() => {
       }
 
     }catch(e){
-        //log error with opening file
-        setToast("Error opening file...")
+      console.log("ERROR", e);
+      //log error with opening file
+      setToast("Error opening file...")
     }finally{
       setIsLoading(false);
     }
