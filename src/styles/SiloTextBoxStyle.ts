@@ -42,6 +42,22 @@ export const linkDrawerStyle = {
   backgroundColor:'rgb(237, 217, 186)',
 };
 
+export const toastStyle = {
+  justifyContent: 'center', 
+  alignItems: 'center', 
+  position: 'fixed', 
+  width: '50%',
+  height: '10%',
+  top: '45%', // half of width
+  left: '25%', // half of height
+  zIndex: 1500,
+  backgroundColor: '#FFFFFF',
+  boxShadow:'5px 5px 10px rgba(0, 0, 0, 0.7)',
+  fontSize: '100%',
+  textAlign: 'center',
+  overflow: 'hidden'
+}
+
 
 export const RetroBtn = styled(Button)<RetroBtnProps>(({bgcolor, bordercolor}) =>({
     background: `${bgcolor != null?bgcolor:"#fdf0dc"}`,
@@ -85,4 +101,3 @@ export const iconStyles = {
     alignItems: "center",
   });
   
- 

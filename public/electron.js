@@ -165,7 +165,32 @@ ipcMain.handle('open-file-dialog', async (event, fileTypes) => {
 ipcMain.handle('readFile', async (event, path) => {
     try {
       const data = await fs.promises.readFile(path, 'utf8');
-      return data;
+
+      //if file has images, load them first
+      const fileData = JSON.parse(data);
+
+      //loading the file images when the file loads to avoid space issues.
+      if(fileData.imageRefs != null && fileData.imageRefs.length >0){
+       //Read the file as a Blob
+       fileData.imageRefs.forEach(element => {
+
+        const imgFile = element.id;
+        try{
+          const fileBuffer = fs.readFileSync(imgFile); // Read file as buffer
+          // Convert the Buffer to a base64 string
+          const dataRecieved = fileBuffer.toString('base64');
+
+          //set file data and convert it into base64 for app to read
+          element.data = `data:image/png;base64,${dataRecieved}`;
+          console.log("set data");
+
+        }catch(e){
+          console.log("Error reading file: ", e);
+          element.data = null;
+        }
+       });
+      }
+      return JSON.stringify(fileData);
     } catch (err) {
       console.error(err);
       return null;

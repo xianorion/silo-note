@@ -5,7 +5,6 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem'; 
 import { RetroToolbar, retroDropDownBtnStyle, retroMenuStyle } from '../styles/MainToolBarStyle';
 import { ToggleActions } from './../types/GlobalTypes';
-import { DOMSerializer } from '@tiptap/pm/model';
 
 interface MainToolbarProps {
 editor: Editor ;
@@ -26,6 +25,8 @@ enum action {
   PASTE = "PASTE",
   UNDO = "UNDO",
   REDO = "REDO",
+  EXPORT_DOC = "EXPORT_DOC",
+  EXPORT_PDF = "EXPORT_PDF",
   OPEN_MOODBOARD = "OPEN_MOODBOARD",
   OPEN_LINKS = "OPEN_LINKS",
 }
@@ -97,6 +98,15 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
           editor.chain().focus().redo().run();
         }
         break;
+        case action.EXPORT_DOC:{
+          
+          break;
+        }
+        case action.EXPORT_PDF:{
+          
+          break;
+        }
+
         case action.OPEN_MOODBOARD:{
           toggleEvent(ToggleActions.MB);
           break;
@@ -212,9 +222,9 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
           'aria-labelledby': 'basic-button',
         }}
       >
-        <MenuItem onClick={() => handleClose(DROPDOWN_OPTIONS.EXPORT)}>Google Drive</MenuItem>
-        <MenuItem onClick={() => handleClose(DROPDOWN_OPTIONS.EXPORT)}>PDF</MenuItem>
-        <MenuItem onClick={() => handleClose(DROPDOWN_OPTIONS.EXPORT)}>DOC</MenuItem>
+        {/* <MenuItem onClick={() => handleClose(DROPDOWN_OPTIONS.EXPORT)}>Google Drive</MenuItem> */}
+        <MenuItem onClick={(e) => handleAction(action.EXPORT_PDF,e, DROPDOWN_OPTIONS.EXPORT)}>PDF</MenuItem>
+        <MenuItem onClick={(e) => handleAction(action.EXPORT_DOC,e, DROPDOWN_OPTIONS.EXPORT)}>Text</MenuItem>
       </Menu>
     </div>
     <div>

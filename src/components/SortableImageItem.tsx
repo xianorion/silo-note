@@ -69,7 +69,7 @@ const SortableImageItem: FC<SortableImageItemProps> = ({removeImageFromList, set
 
         </div>}
         actionPosition="right" />
-      <img
+      {item.data? <img
         // srcSet={`${item?.data}`}
         ref={setNodeRef}
         {...listeners}
@@ -79,7 +79,7 @@ const SortableImageItem: FC<SortableImageItemProps> = ({removeImageFromList, set
         style={{
           ...style,
           ...corkboardImage
-        }} />
+        }} />:<>IMAGE NOT FOUND</>}
     </ImageListItem></Slide>;
   }
   
