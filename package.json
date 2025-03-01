@@ -1,6 +1,6 @@
 {
   "name": "silo-note",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "A notepad app for creatives",
   "private": true,
   "main": "./public/electron.js",
@@ -23,6 +23,7 @@
     "@tiptap/react": "^2.10.3",
     "@tiptap/starter-kit": "^2.10.3",
     "cross-env": "^7.0.3",
+    "electron-icon-maker": "^0.0.5",
     "electronmon": "^2.0.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -45,19 +46,19 @@
       "buildResources": "public"
     },
     "mac": {
-      "target": "dmg"
+      "target": "dmg",
+      "icon": "build/img/SiloNoteLogo.png"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "build/icons/256x256.png"
     },
-      "linux": {
-        "target": [
-          "AppImage",
-          "deb",
-          "tar.gz"
-        ]
-      }
-  
+    "linux": {
+      "target": [
+        "deb"
+      ],
+      "icon": "build/icons/"
+    }
   },
   "scripts": {
     "start": "export BROWSER=none && react-scripts start",
