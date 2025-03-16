@@ -1,11 +1,8 @@
 export const corkboardStyle = {
   width: '80vw',  // Customize the width as per your requirement
-  maxWidth: '90vw', // Max width of the Paper component
-  maxHeight: '90vh', // Prevent the Paper from getting too large vertically
     padding: "10px",
     justifyContent: 'center',
     alignItems: 'center',
-    overflow: 'auto',
     backgroundColor: '#d6ad7f', /* Corkboard color */
     border: "20px solid rgb(244, 208, 172)",  /* Darker border for depth */
     borderRadius: "10px",
@@ -17,7 +14,7 @@ export const corkboardStyle = {
   
 
 export const corkboardImage: React.CSSProperties = {
-    width:'30vw',
+    width:'35vw',
     minWidth:'10vw',
     height:'auto',
     textAlign: 'center',
@@ -28,7 +25,6 @@ export const corkboardImage: React.CSSProperties = {
 export const corkboardImageToolBar: React.CSSProperties = {
   background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, ' +
     'rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 0%)',
-  width: 'auto',
   height: 'auto',
   display: 'flex',
   padding: '5px',
@@ -38,7 +34,7 @@ export const corkboardImageToolBar: React.CSSProperties = {
 
   
   export const corkboardTitle = {
-    fontSize: "24px",
+    fontSize: "3vx",
     fontWeight: "bold",
     color: "#4e3b31", /* Dark brown text */
     textAlign: "center",

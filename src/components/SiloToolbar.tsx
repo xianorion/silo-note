@@ -5,7 +5,7 @@ import React, {FC} from 'react'
 import {
   Toolbar, 
 } from '@mui/material'
-import { FormatListBulletedRounded, RedoOutlined, UndoOutlined, FormatListNumberedRounded, FormatBoldRounded, FormatItalicRounded, DatasetLinkedRounded, PhotoLibraryRounded } from '@mui/icons-material';
+import { FormatListBulletedRounded, RedoOutlined, UndoOutlined, FormatListNumberedRounded, FormatBoldRounded, FormatItalicRounded, DatasetLinkedRounded, PhotoLibraryRounded, TextSnippetRounded } from '@mui/icons-material';
 import LinkListGui from './LinkListGui';
 import { Drawer } from '@mui/material';
 import {  SourceLinksType } from 'types/GlobalTypes';
@@ -67,6 +67,9 @@ const SiloToolBar : FC<SiloToolBarProps> = ({editor, toggle, linkSection, srcLin
           </Drawer>
           <RetroBtn onClick={() => toggle(ToggleActions.MB)}>
             <PhotoLibraryRounded sx={iconStyles} />
+          </RetroBtn>
+          <RetroBtn onClick={() => toggle(ToggleActions.NOTES)}>
+            <TextSnippetRounded sx={iconStyles} />
           </RetroBtn>
         </div>
   

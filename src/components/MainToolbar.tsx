@@ -1,16 +1,17 @@
-import React, {FC} from 'react';
+import React, {FC, useEffect} from 'react';
 import { Editor, getHTMLFromFragment } from '@tiptap/react'
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem'; 
 import { RetroToolbar, retroDropDownBtnStyle, retroMenuStyle } from '../styles/MainToolBarStyle';
 import { ToggleActions } from './../types/GlobalTypes';
+import { IpcRendererEvent } from 'electron';
 
 interface MainToolbarProps {
 editor: Editor ;
-newFileEvent: (event: React.MouseEvent<any>, override: boolean) => Promise<void>,
-saveFileEvent: (event: React.MouseEvent<any>, isSaveAs: boolean) => Promise<void>,
-openFileEvent: (event: React.MouseEvent<any>, override: boolean) => Promise<void>,
+newFileEvent: (override: boolean) => Promise<void>,
+saveFileEvent: ( isSaveAs: boolean) => Promise<void>,
+openFileEvent: (override: boolean) => Promise<void>,
 toggleEvent: (obj: string) => void
 
 }
@@ -48,22 +49,68 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
     [DROPDOWN_OPTIONS.VIEW]: null
   });
 
-  const handleAction = async (commmand: action |null, event: React.MouseEvent<HTMLLIElement, MouseEvent>, origin: string) => {
+  useEffect(() => {
+    const undoListener = () => {
+      handleAction(action.UNDO);
+      console.log('Received from Electron: UNDO');
+    };
+
+    const redoListener = () => {
+      handleAction(action.REDO, 'edit');
+      console.log('Received from Electron: REDO');
+    };
+    const newFileListener = () => {
+      handleAction(action.NEW);
+    };
+
+    const openListener = () => {
+      handleAction(action.OPEN);
+    };
+    const saveFileListener = () => {
+      handleAction(action.SAVE);
+    };
+
+    const saveAsFileListener = () => {
+      handleAction(action.SAVE_AS);
+    };
+
+ // Listen for the response from the main process
+    window.electron.ipcRenderer.on('undo', undoListener);
+    window.electron.ipcRenderer.on('redo', redoListener);
+    window.electron.ipcRenderer.on('new-file', newFileListener);
+    window.electron.ipcRenderer.on('open-file', openListener);
+    window.electron.ipcRenderer.on('save-file', saveFileListener);
+    window.electron.ipcRenderer.on('save-as-file', saveAsFileListener);
+    
+    // Clean up the listener when the component unmounts
+    return () => {
+      window.electron.ipcRenderer.removeAllListeners('undo');
+      window.electron.ipcRenderer.removeAllListeners('redo');
+      window.electron.ipcRenderer.removeAllListeners('new-file');
+      window.electron.ipcRenderer.removeAllListeners('open-file');
+      window.electron.ipcRenderer.removeAllListeners('save-file');
+      window.electron.ipcRenderer.removeAllListeners('save-as-file');
+
+    }
+  }, []);
+
+
+  const handleAction = async (commmand: action |null, origin?: string |undefined) => {
     // event.preventDefault();
     console.log("Handing click...");
     // onClose(event);
     switch(commmand) {
       case action.NEW:
-        newFileEvent(event, false);
+        newFileEvent( false);
         break;
       case action.SAVE:
-        saveFileEvent(event, false);
+        saveFileEvent(false);
         break;
         case action.SAVE_AS:
-          saveFileEvent(event, true);
+          saveFileEvent(true);
         break;
         case action.OPEN: {
-         openFileEvent(event, false);
+         openFileEvent( false);
         }
         break;
         case action.COPY:{
@@ -121,7 +168,8 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
 
     }
     console.log("Handling close about to be called with origin: ", origin);
-    handleClose(origin);
+    if(origin !=undefined)
+      handleClose(origin);
 
   }
 
@@ -144,115 +192,7 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
     };
 
     return (
-      <RetroToolbar style={{display: 'flex', justifyContent: 'normal', alignItems: 'center', width: '80%' }} >
-      <div >
-        <Button 
-        sx={retroDropDownBtnStyle}
-          id="basic-button"
-          aria-controls={menuState.FILE ? 'basic-menu' : undefined}
-          aria-haspopup="true"
-          aria-expanded={menuState.FILE ? 'true' : undefined}
-          onClick={handleClick(DROPDOWN_OPTIONS.FILE)}
-        >
-          File
-        </Button>
-        <Menu
-          id="basic-menu"
-          sx={retroMenuStyle}
-          anchorEl={menuState.FILE}
-          open={!!menuState.FILE}
-          onClose={()=>handleClose(DROPDOWN_OPTIONS.FILE)}
-          MenuListProps={{
-            'aria-labelledby': 'basic-button',
-          }}
-        >
-          <MenuItem onClick={(e) => handleAction(action.NEW,e, DROPDOWN_OPTIONS.FILE)}>New</MenuItem>
-          <MenuItem onClick={(e) => handleAction(action.OPEN,e,DROPDOWN_OPTIONS.FILE)}>Open</MenuItem>
-          <MenuItem onClick={(e) => handleAction(action.SAVE,e,DROPDOWN_OPTIONS.FILE)}>Save</MenuItem>
-          <MenuItem onClick={(e) => handleAction(action.SAVE_AS, e, DROPDOWN_OPTIONS.FILE)}>Save As</MenuItem>
-        </Menu>
-      </div>
-      <div >
-      <Button 
-        sx={retroDropDownBtnStyle}
-        id="basic-button"
-        aria-controls={menuState.EDIT ? 'basic-menu' : undefined}
-        aria-haspopup="true"
-        aria-expanded={menuState.EDIT ? 'true' : undefined}
-        onClick={handleClick(DROPDOWN_OPTIONS.EDIT)}
-      >
-        Edit
-      </Button>
-      <Menu
-        id="basic-menu"
-        sx={retroMenuStyle}
-        anchorEl={menuState.EDIT}
-        open={!!menuState.EDIT}
-        onClose={()=>handleClose(DROPDOWN_OPTIONS.EDIT)}
-        MenuListProps={{
-          'aria-labelledby': 'basic-button',
-        }}
-      >
-        <MenuItem onClick={(e) => handleAction(action.UNDO,e, DROPDOWN_OPTIONS.EDIT)}>Undo</MenuItem>
-        <MenuItem onClick={(e) => handleAction(action.REDO,e, DROPDOWN_OPTIONS.EDIT)}>Redo</MenuItem>
-        {/* <MenuItem onClick={(e) => handleAction(action.COPY,e, DROPDOWN_OPTIONS.EDIT)}>Copy</MenuItem>
-        <MenuItem onClick={(e) => handleAction(action.PASTE,e, DROPDOWN_OPTIONS.EDIT)}>Paste</MenuItem>
-        <MenuItem onClick={(e) => handleAction(action.CUT,e, DROPDOWN_OPTIONS.EDIT)}>Cut</MenuItem> */}
-
-      </Menu>
-      </div>
-      <div>
-      <Button  
-        sx={retroDropDownBtnStyle}
-        id="basic-button"
-        aria-controls={menuState.EXPORT ? 'basic-menu' : undefined}
-        aria-haspopup="true"
-        aria-expanded={menuState.EXPORT ? 'true' : undefined}
-        onClick={handleClick("Export")}
-      >
-        Export
-      </Button>
-      <Menu
-        id="basic-menu"
-        sx={retroMenuStyle}
-        anchorEl={menuState.EXPORT}
-        open={!!menuState.EXPORT}
-        onClose={()=>handleClose(DROPDOWN_OPTIONS.EXPORT)}
-        MenuListProps={{
-          'aria-labelledby': 'basic-button',
-        }}
-      >
-        {/* <MenuItem onClick={() => handleClose(DROPDOWN_OPTIONS.EXPORT)}>Google Drive</MenuItem> */}
-        <MenuItem onClick={(e) => handleAction(action.EXPORT_PDF,e, DROPDOWN_OPTIONS.EXPORT)}>PDF</MenuItem>
-        <MenuItem onClick={(e) => handleAction(action.EXPORT_DOC,e, DROPDOWN_OPTIONS.EXPORT)}>Text</MenuItem>
-      </Menu>
-    </div>
-    <div>
-      <Button 
-        sx={retroDropDownBtnStyle}
-        id="basic-button"
-        aria-controls={menuState.VIEW ? 'basic-menu' : undefined}
-        aria-haspopup="true"
-        aria-expanded={menuState.VIEW ? 'true' : undefined}
-        onClick={handleClick(DROPDOWN_OPTIONS.VIEW)}
-      >
-        View
-      </Button>
-      <Menu
-        sx={retroMenuStyle}
-        id="basic-menu"
-        anchorEl={menuState.VIEW}
-        open={!!menuState.VIEW}
-        onClose={()=>handleClose(DROPDOWN_OPTIONS.VIEW)}
-        MenuListProps={{
-          'aria-labelledby': 'basic-button',
-        }}
-      >
-        <MenuItem onClick={(e) => handleAction(action.OPEN_MOODBOARD,e, DROPDOWN_OPTIONS.VIEW)}>Mood Board</MenuItem>
-        <MenuItem onClick={(e) => handleAction(action.OPEN_LINKS,e, DROPDOWN_OPTIONS.VIEW)}>Reference Links</MenuItem>
-      </Menu>
-    </div>
-    </RetroToolbar>
+     <></>
     );
 }
 

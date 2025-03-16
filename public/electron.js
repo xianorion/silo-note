@@ -1,5 +1,6 @@
 // Module to control the application lifecycle and the native browser window.
 const { app, BrowserWindow, protocol, ipcMain, dialog, shell, clipboard, Menu} = require("electron");
+const isMac = process.platform === 'darwin'
 const path = require("path");
 var fs = require("fs");
 const url = require("url");
@@ -18,9 +19,104 @@ function createWindow() {
       preload: path.join(__dirname, "preload.js"),
     },
   });
+  //main menu 
+  const template = [
+    ...(isMac
+      ? [{
+          label: app.name,
+          submenu: [
+            { role: 'about' },
+            { type: 'separator' },
+            { role: 'services' },
+            { type: 'separator' },
+            { role: 'hide' },
+            { role: 'hideOthers' },
+            { role: 'unhide' },
+            { type: 'separator' },
+            { role: 'quit' }
+          ]
+        }]
+      : []),
+    {
+      label: 'File',
+      submenu: [
+        {
+          label: 'New',
+          click: () => {
+            // Send IPC to React to call a function
+            mainWindow.webContents.send('new-file');
+          }
+        },
+        {
+          label: 'Open',
+          click: () => {
+            // Send IPC to React to call a function
+            mainWindow.webContents.send('open-file');
+          }
+        },
+        {
+          label: 'Save',
+          click: () => {
+            // Send IPC to React to call a function
+            mainWindow.webContents.send('save-file');
+          }
+        }, {
+          label: 'Save As',
+          click: () => {
+            // Send IPC to React to call a function
+            mainWindow.webContents.send('save-as-file');
+          }
+        },
+        isMac ? { role: 'close' } : { role: 'quit' },
+
+      ]
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        {
+          label: 'Undo',
+          click: () => {
+            // Send IPC to React to call a function
+            mainWindow.webContents.send('undo');
+          }
+        },
+        {
+          label: 'Redo',
+          click: () => {
+            // Send IPC to React to call a function
+            mainWindow.webContents.send('redo');
+          }
+        }
+      ]
+    },
+    {
+      label: 'Export',
+      submenu: [
+        {
+          label: 'as .txt',
+          click: () => {
+            // Send IPC to React to call a function
+            mainWindow.webContents.send('Export', 'TEXT');
+          }
+        },
+        {
+          label: 'as .pdf',
+          click: () => {
+            // Send IPC to React to call a function
+            mainWindow.webContents.send('Export', "PDF");
+          }
+        }
+      ]
+    },
+    // other menu items...
+  ]
+  
+  const menu = Menu.buildFromTemplate(template)
+  Menu.setApplicationMenu(menu)
 
   //context menu template
-  var template = [
+  var contextTemplate = [
         { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
         { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
         { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
@@ -28,7 +124,7 @@ function createWindow() {
         { label: "Quit", accelerator: "Command+Q", click: function() { app.quit(); }}
 ];
    // Build the context menu from the template
-   const contextMenu = Menu.buildFromTemplate(template);
+   const contextMenu = Menu.buildFromTemplate(contextTemplate);
 
    // Listen for right-click event to show the context menu
    mainWindow.webContents.on('context-menu', (e, params) => {

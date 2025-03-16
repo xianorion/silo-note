@@ -17,7 +17,7 @@ interface RetroBtnProps extends React.ComponentProps<typeof  Button>{
 export const GuiStyle: Properties<string | number, string & {}> = {
     
     width: '100%',
-    height: '100%',
+    height: '100vh',
     display: 'flex',          // Enables flexbox
     flexDirection: 'column',  // Stacks child elements vertically
     justifyContent: 'center', // Centers the stack vertically
@@ -26,7 +26,7 @@ export const GuiStyle: Properties<string | number, string & {}> = {
 
 }
 
-export const MainTextBox: {width: string, height: string} = {
+export const MainTextBox: Properties<string | number, string & {}>= {
     width: '80%',
     height: '80%',
 
@@ -35,7 +35,9 @@ export const MainTextBox: {width: string, height: string} = {
 export const mainToolBarStyle: Properties<string | number, string & {}> = {
     width: '100%',
     height: '100%',
-    textAlign: 'left'
+    textAlign: 'left',
+    display: 'flex',
+
 }
 
 export const linkDrawerStyle = {

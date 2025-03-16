@@ -17,6 +17,7 @@ declare global {
         setEditStatus: (isEdited:boolean) => void
         copyTextToClipboard: () =>  Promise<{status:string, error:string }>,
         pasteClipboardText: () =>  Promise<string>,
+        ipcRenderer: Electron.IpcRenderer
       };
     }
   }
