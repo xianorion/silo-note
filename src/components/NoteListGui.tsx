@@ -13,7 +13,6 @@ import {
  } from '@mui/material';
  import { Close, PostAddRounded} from '@mui/icons-material';
 import {
-  Edit,
   RemoveCircleOutline
 } from '@mui/icons-material';
 import { noteStyle, noteContainerStyle,noteHeaderStyle, noteBankStyle, iconCircleStyle,noteBankTitleTypographyStyle, noteItemTypographyStyle, noteTextTitleStyle, noteTextContentStyle, noteTitleStyle, noteBankListStyle, addNoteBtnStyle} from '../styles/NotesGuiStyles';
@@ -155,25 +154,20 @@ const NoteListGui : FC<NoteGuiProps> = ({notes, setToast, setNotes, toggle}) =>{
               <Close sx={{width: '3vw', height: '3vw'}} onClick={()=>{toggle(ToggleActions.NOTES)}}/>
           </Grid>
         </div>
-         <div style={noteBankStyle}>
+         <div style={noteBankStyle} >
          <List style={noteBankListStyle}>
             {notes.map((note) =>(
-              <div>
+              <div key={note.name}>
                  <ListItem 
                  style={noteStyle}
                 key={note.name}>
                  <div style={noteTitleStyle}>
-                    <div style={noteTextTitleStyle}>
-                        {note.name.length > 10? note.name.substring(0,10)+"...": note.name}
+                    <div style={noteTextTitleStyle} onClick={() => openEditNote(note)}  >
+                        {note.name.length > 20? note.name.substring(0,20)+"...": note.name}
 
                       </div>
                       <RemoveCircleOutline sx={iconCircleStyle} onClick={() => removeNote(note.name)} />
-                      <Edit sx={iconCircleStyle} onClick={() => openEditNote(note)} />
                  </div>
-                 
-                  <div style={noteTextContentStyle}>
-                  {note.content.length > 20? note.content.substring(0,20)+"...": note.content}
-                  </div>
                   
                 </ListItem>
 
@@ -280,7 +274,8 @@ const NoteListGui : FC<NoteGuiProps> = ({notes, setToast, setNotes, toggle}) =>{
             variant="standard"
             value={editingNoteData?.content}
             onChange={(e) => handleEditNoteChange(e,'notes')}
-
+            multiline
+            rows={4}
           />
         </DialogContent>
         <DialogActions>

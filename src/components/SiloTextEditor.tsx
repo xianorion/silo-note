@@ -74,7 +74,7 @@ const SiloTextEditor =() => {
   const [notesSection, setNotesSection] = useState(true); // Initially open
   const [imgList, setImgList] = useState<ImgListType[]>([]);
   const [srcLinks, setSrcLinks] = useState<SourceLinksType[]>([]);
-  const notesRef = useRef<NoteType[]>([]);
+  const [notes, setNotes] = useState<NoteType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [saveAlert, setSaveAlert] = useState<{msg:string, location:string} | null>(null);
@@ -83,6 +83,7 @@ const SiloTextEditor =() => {
 
   //Action handler for top toolbar
   useEffect(() => {
+    console.log()
       const undoListener = () => {
         editorRef.current?.chain().focus().undo().run();
         console.log('Received from Electron: UNDO');
@@ -125,7 +126,7 @@ const SiloTextEditor =() => {
         window.electron.ipcRenderer.removeAllListeners('save-as-file');
   
       }
-    }, []);
+    }, [edited]);
   
 
   /*initialize editor reference. 
@@ -304,7 +305,7 @@ const SiloTextEditor =() => {
       imgList.forEach((img) =>{
         saveImgList.push({id: img.id,name: img.name, note: img.note, data:null})
       });
-      console.log("saving notes: ", notesRef.current);
+      console.log("saving notes: ", notes);
       console.log("saving srcLinks: ", srcLinks);
       console.log("saving content: ", content);
       console.log("saving saveImgList: ", saveImgList);
@@ -312,7 +313,7 @@ const SiloTextEditor =() => {
         content: content,
         links: srcLinks,
         imageRefs: saveImgList,
-        notes: notesRef.current
+        notes: notes
       }
       const serializedData = JSON.stringify(newFile);
       const data = await window.electron.writeFile(path, serializedData);
@@ -342,7 +343,7 @@ const SiloTextEditor =() => {
 
   const updateNotes = (notes:NoteType[]) => { 
     console.log("NOTES HAVE BEEN EDITED!!!");
-    notesRef.current = notes; 
+    setNotes(notes); 
     setEdited(true);
     editedRef.current = true;
   
@@ -369,7 +370,7 @@ const SiloTextEditor =() => {
       startNewEditor();
       setSrcLinks([]);
       setImgList([]);
-      notesRef.current = [];
+      setNotes([]);
         //Since a new file is loaded we are no longer in an 'edited' state
         console.log("setting content edoted to false")
         setEdited(false);
@@ -403,7 +404,7 @@ const SiloTextEditor =() => {
           setSrcLinks(fileData.links);
           setImgList(fileData.imageRefs);
           if(fileData.notes)
-          notesRef.current = fileData.notes;
+          setNotes(fileData.notes);
 
           //convert text to html format before adding to editor
           const htmlContent = fileData.content.replace(/\n/g, '<br>');
@@ -547,7 +548,7 @@ const SiloTextEditor =() => {
               }}>
                 {notesSection ? (
                   <NoteListGui 
-                    notes={notesRef.current} 
+                    notes={notes} 
                     setToast={(newToast: string) => setToast(newToast)} 
                     setNotes={updateNotes} 
                     toggle={toggle}

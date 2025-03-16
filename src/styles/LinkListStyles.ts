@@ -40,7 +40,7 @@ export const linkBankStyle = {
             }
 
             export const linkItemTypographyStyle ={
-                fontSize: '25px',                           // Change font size
+                fontSize: '2.5vw',                           // Change font size
 
             }
             

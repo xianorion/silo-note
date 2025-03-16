@@ -53,7 +53,7 @@ export const noteStyle: React.CSSProperties = {
 }
 
 export const iconCircleStyle = {
-  width: '2vw',
+  width: '3vw',
   height: 'auto'
 }
 
@@ -103,6 +103,6 @@ export const noteBankStyle = {
 
             export const addNoteBtnStyle = {
               color:"#43281C",
-    padding:"10px 20px",
+              padding:"10px 20px",
             }
             
