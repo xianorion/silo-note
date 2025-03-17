@@ -15,6 +15,7 @@ export const noteContainerStyle: React.CSSProperties = {
 
 export const noteHeaderStyle: React.CSSProperties ={
   display: 'flex',
+  width:'100%',
   justifyContent: 'space-between',  // Distribute space between items
   alignItems: 'center',  // Vertically align items to the center
   gap: '1vw',  // Add space between the child elements (adjust the value as needed)
@@ -22,20 +23,22 @@ export const noteHeaderStyle: React.CSSProperties ={
 
 export const noteTextTitleStyle = {
   fontFamily:'Singkong',
-  fontSize: '3.5vw',   
+  fontSize: '2.5vw',   
   margin: '0px 10px 0px 0px'
 
 }
 export const noteTextContentStyle = {
   fontFamily:'Singkong',
-  fontSize: '2.5vw',   
+  fontSize: '1.5vw',   
+  width:'100%'
 
 }
 export const noteTitleStyle: React.CSSProperties = {
   flexDirection:'row',
   display: 'flex',
-
-
+  justifyContent: 'space-between',
+   alignItems: 'center',
+  width:'100%'
 }
 export const noteStyle: React.CSSProperties = {
   flexDirection:'column',
@@ -54,7 +57,8 @@ export const noteStyle: React.CSSProperties = {
 
 export const iconCircleStyle = {
   width: '3vw',
-  height: 'auto'
+  height: 'auto',
+  marginLeft: 'auto',
 }
 
 
@@ -90,7 +94,7 @@ export const noteBankStyle = {
             }
 
             export const noteItemTypographyStyle ={
-                fontSize: '30px',   
+                fontSize: '30px', 
                 width: '100%',
 
             }

@@ -148,10 +148,10 @@ const NoteListGui : FC<NoteGuiProps> = ({notes, setToast, setNotes, toggle}) =>{
     return <div style={noteContainerStyle}> 
         <div style={noteHeaderStyle}>
           <Grid size={10}>
-          <DialogTitle sx={noteItemTypographyStyle}>Note</DialogTitle>
+          <DialogTitle sx={noteItemTypographyStyle}>Notes</DialogTitle>
           </Grid>
           <Grid size={2}>    
-              <Close sx={{width: '3vw', height: '3vw'}} onClick={()=>{toggle(ToggleActions.NOTES)}}/>
+              <Close sx={{width: '3vw', height: '3vw', marginRight: '2vw'}} onClick={()=>{toggle(ToggleActions.NOTES)}}/>
           </Grid>
         </div>
          <div style={noteBankStyle} >

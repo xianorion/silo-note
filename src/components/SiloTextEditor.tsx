@@ -465,20 +465,28 @@ const SiloTextEditor =() => {
             </Slide>
  {/*MOOD BOARD DIALOG POPUP*/}
  <Dialog  open={mbSection} 
- 
+ id='popupMoodBoardDialog'
+ /* overriding the Dialogs paper component max width*/
+ PaperProps={{
+  sx:{
+    width:'100%',
+    maxWidth:'100%'
+  }
+ }}
  sx={{ 
   justifyContent: 'center', 
   alignItems: 'center', 
-  width: 'auto', 
+  width: '100%', 
   height: 'auto', 
   padding: 0, // Remove padding to allow full space for content
   overflow: 'auto', // Prevents scrollbars on the dialog content
 }}>
         <DialogContent sx={{ 
+          id:'MOODBOARD_DIALOG_CONTENT',
     display: 'flex', 
     justifyContent: 'center', 
     alignItems: 'center', 
-    width: 'auto', 
+    width: '100%', 
     height: 'auto', 
     background: "rgb(244, 208, 172)",  /* Darker border for depth */
     padding: 0, // Remove padding to allow full space for content

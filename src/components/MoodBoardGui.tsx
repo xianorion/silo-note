@@ -69,11 +69,12 @@ const MoodBoardGui: FC<MoodBoardGuiProps> = ({imgList, addImage, removeImage, se
 
     return(
         <Paper
+        id="PAPER_MOOD_BOARD"
         sx={corkboardStyle}
         >
-        <Box >
+        <Box  sx={{width:'100%'}}>
             <Grid container spacing={2}
-            sx={{padding:'10px'}}>
+            sx={{padding:'10px', width:'100%'}}>
                 <Grid size={10}>
                     <Typography
                     sx={corkboardTitle}
@@ -85,18 +86,19 @@ const MoodBoardGui: FC<MoodBoardGuiProps> = ({imgList, addImage, removeImage, se
                 </Grid>
            
             </Grid>
-            <Grid container spacing={2}>
+            <Grid sx={{width:'100%'}}container spacing={2}>
             <Grid size={12}
             sx={{
               display: 'flex',
               flexDirection: 'column',
+              width: '100%',
               height: '60vh', // Adjust the height as needed, can change based on content
               overflow: 'auto', // Enable scrolling inside Box
             }}
             >
                       <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} onDragStart={()=> setIsDragging(true)}>
                       <SortableContext  items={imgList} strategy={rectSortingStrategy}>
-                    <ImageList sx={{ height: '100%', width: '100%', overflowX: 'auto',overflowY: 'auto',  padding:'5px', margin:'5px'}} >
+                    <ImageList sx={{ height: '100%', width: '100%', overflowY: 'auto',  padding:'5px', margin:'5px'}} >
                     
                     {imgList && imgList.map((item)=>(
                           item && 

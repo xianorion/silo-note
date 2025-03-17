@@ -1,5 +1,5 @@
 export const corkboardStyle = {
-  width: '80vw',  // Customize the width as per your requirement
+  width: '100%',
     padding: "10px",
     justifyContent: 'center',
     alignItems: 'center',
@@ -14,9 +14,9 @@ export const corkboardStyle = {
   
 
 export const corkboardImage: React.CSSProperties = {
-    width:'35vw',
+    width:'auto',
     minWidth:'10vw',
-    height:'auto',
+    height:'20vh',
     textAlign: 'center',
     boxShadow: "3px 3px 0px rgba(0, 0, 0, 0.2)",
  
@@ -38,7 +38,7 @@ export const corkboardImageToolBar: React.CSSProperties = {
     fontWeight: "bold",
     color: "#4e3b31", /* Dark brown text */
     textAlign: "center",
-    marginBottom: "20px"
+    marginBottom: "20px",
   };
   
 
