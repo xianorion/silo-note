@@ -108,8 +108,9 @@ const NoteListGui : FC<NoteGuiProps> = ({notes, setToast, setNotes, toggle}) =>{
       const formData = new FormData(event.currentTarget);
       const formJson = Object.fromEntries((formData as any).entries());
       console.log("saving...", formJson);
+      //since the name is disabled in the tsx code, we have to use the store note name data 
       const editedNote = {
-          name: formJson.name,
+          name: editingNoteData.name,
           content: formJson.content,
       }
 
@@ -130,6 +131,7 @@ const NoteListGui : FC<NoteGuiProps> = ({notes, setToast, setNotes, toggle}) =>{
       // Ensure we return an object with the full data, filling in the missing fields
       return {
           ...prevData,
+          name: editingNoteData.name,
           [field]: value, // Update the specified field
       };
   });
@@ -253,7 +255,6 @@ const NoteListGui : FC<NoteGuiProps> = ({notes, setToast, setNotes, toggle}) =>{
           </DialogContentText>
           <TextField
             autoFocus
-            required
             margin="dense"
             id="name"
             name="name"
@@ -264,7 +265,7 @@ const NoteListGui : FC<NoteGuiProps> = ({notes, setToast, setNotes, toggle}) =>{
             error={errors.name != null}
             value={editingNoteData?.name}
             onChange={(e) => handleEditNoteChange(e,'name')}
-            
+            disabled
           />
            <TextField
             autoFocus
