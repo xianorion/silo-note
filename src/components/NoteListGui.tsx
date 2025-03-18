@@ -107,13 +107,14 @@ const NoteListGui : FC<NoteGuiProps> = ({notes, setToast, setNotes, toggle}) =>{
     const saveNote = (event:React.FormEvent<HTMLFormElement>) =>{
       const formData = new FormData(event.currentTarget);
       const formJson = Object.fromEntries((formData as any).entries());
+      console.log("saving...", formJson);
       const editedNote = {
           name: formJson.name,
           content: formJson.content,
       }
 
       const otherNotes = notes.filter((note)=> note.name != editedNote.name);
-      console.log("Added note!");
+      console.log("saved note!",[...otherNotes, editedNote]);
       setNotes([...otherNotes, editedNote]);
       setIsEditing(false);
       setEditingNoteData(emptyNote);
@@ -263,17 +264,18 @@ const NoteListGui : FC<NoteGuiProps> = ({notes, setToast, setNotes, toggle}) =>{
             error={errors.name != null}
             value={editingNoteData?.name}
             onChange={(e) => handleEditNoteChange(e,'name')}
+            
           />
            <TextField
             autoFocus
             margin="dense"
-            id="notes"
-            name="notes"
+            id="content"
+            name="content"
             label="Notes"
             fullWidth
             variant="standard"
             value={editingNoteData?.content}
-            onChange={(e) => handleEditNoteChange(e,'notes')}
+            onChange={(e) => handleEditNoteChange(e,'content')}
             multiline
             rows={4}
           />
