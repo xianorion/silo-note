@@ -31,6 +31,7 @@ import TextAlign from '@tiptap/extension-text-align';
 import { ToggleActions } from './../types/GlobalTypes';
 import NoteListGui from './NoteListGui';
 import { editorContainerStyle,textEditorOuterLayerStyle, notesOuterLayerStyle} from './../styles/SiloTextEditorStyles';
+import { corkboardParentDialogStyle, corkboardParentDialogContentStyle } from './../styles/MoodBoardStyle';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -126,7 +127,16 @@ const SiloTextEditor =() => {
         window.electron.ipcRenderer.removeAllListeners('save-as-file');
   
       }
-    }, [edited]);
+    }, [edited, notes,srcLinks, imgList]); //reload component when a 'saveable' value changes.
+
+    useEffect(()=>{
+      console.log("is content edited?", edited);
+      console.log("is content edited editedRef?", editedRef);
+      console.log("is content edited current?", editedRef.current);
+      //let electron know to save to already file is saves
+      window.electron.setEditStatus(edited);
+    },[edited]);
+  
   
 
   /*initialize editor reference. 
@@ -162,35 +172,6 @@ const SiloTextEditor =() => {
 
   },[toast]);
 
-  useEffect(()=>{
-    console.log("is content edited?", edited);
-    console.log("is content edited editedRef?", editedRef);
-
-    console.log("is content edited current?", editedRef.current);
-
-    //let electron know to save to already file is saves
-    window.electron.setEditStatus(edited);
-  },[edited]);
-
-  const toggle = (obj :string) =>{
-    switch (obj){
-      case ToggleActions.LINK:
-        setLinkSection(!linkSection);
-        break;
-      case ToggleActions.MB:
-        setMBSection(!mbSection);
-        break;
-      case ToggleActions.NOTES:
-        setNotesSection(!notesSection);
-        break;
-    }
-   
-  }
-  
-
-  const stringIsEmptyOrUndefined  = (str:string | undefined): boolean => {
-    return str === undefined || str === '';
-  }
 
   const handleUpdate = useCallback(() => {
     const currentContent = editorRef.current?.getText();
@@ -216,6 +197,27 @@ const SiloTextEditor =() => {
       editorRef.current?.off('update', handleUpdate);
     };
   }, [editorRef.current]);
+
+ 
+  const toggle = (obj :string) =>{
+    switch (obj){
+      case ToggleActions.LINK:
+        setLinkSection(!linkSection);
+        break;
+      case ToggleActions.MB:
+        setMBSection(!mbSection);
+        break;
+      case ToggleActions.NOTES:
+        setNotesSection(!notesSection);
+        break;
+    }
+  }
+
+
+  const stringIsEmptyOrUndefined  = (str:string | undefined): boolean => {
+    return str === undefined || str === '';
+  }
+
   const addImage = async (event:React.MouseEvent<any>) =>{
     console.log("Add image clicked...");
     let pathObj : FileReturnValue = await window.electron.openFileDialog(IMAGE_FILETYPES);
@@ -334,7 +336,7 @@ const SiloTextEditor =() => {
     
   }
   const updateLinks = (links:SourceLinksType[]) => { 
-    console.log("LINKS HAVE BEEN EDITED!!!");
+    console.log("LINKS HAVE BEEN EDITED!!!", links);
     setSrcLinks(links); 
     setEdited(true);
     editedRef.current = true;
@@ -342,7 +344,7 @@ const SiloTextEditor =() => {
   }
 
   const updateNotes = (notes:NoteType[]) => { 
-    console.log("NOTES HAVE BEEN EDITED!!!");
+    console.log("NOTES HAVE BEEN EDITED!!!", notes);
     setNotes(notes); 
     setEdited(true);
     editedRef.current = true;
@@ -468,30 +470,12 @@ const SiloTextEditor =() => {
  id='popupMoodBoardDialog'
  /* overriding the Dialogs paper component max width*/
  PaperProps={{
-  sx:{
-    width:'100%',
-    maxWidth:'100%'
-  }
+  style:{...corkboardParentDialogStyle}
  }}
- sx={{ 
-  justifyContent: 'center', 
-  alignItems: 'center', 
-  width: '100%', 
-  height: 'auto', 
-  padding: 0, // Remove padding to allow full space for content
-  overflow: 'auto', // Prevents scrollbars on the dialog content
-}}>
-        <DialogContent sx={{ 
-          id:'MOODBOARD_DIALOG_CONTENT',
-    display: 'flex', 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    width: '100%', 
-    height: 'auto', 
-    background: "rgb(244, 208, 172)",  /* Darker border for depth */
-    padding: 0, // Remove padding to allow full space for content
-    overflow: 'auto', // Prevents scrollbars on the dialog content
-  }}>
+
+ >
+  {/*Style seems to work better in this case. Mui sx is causing styleing issues with the different native*/}
+        <DialogContent style={corkboardParentDialogContentStyle} >
         <MoodBoardGui imgList={imgList} addImage={addImage} setImageList={setImgList} removeImage={removeImage} onClose={() =>toggle(ToggleActions.MB)}/>
 
           </DialogContent>

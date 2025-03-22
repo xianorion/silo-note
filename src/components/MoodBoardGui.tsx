@@ -89,7 +89,7 @@ const MoodBoardGui: FC<MoodBoardGuiProps> = ({imgList, addImage, removeImage, se
             <Grid sx={{width:'100%'}}container spacing={2}>
             <Grid size={12}
             sx={{
-              display: 'flex',
+              display: 'block',
               flexDirection: 'column',
               width: '100%',
               height: '60vh', // Adjust the height as needed, can change based on content
