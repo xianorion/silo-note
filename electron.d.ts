@@ -11,12 +11,13 @@ declare global {
       electron: {
         openFileDialog: (fileTypes) => Promise<FileReturnValue>;
         readFile: (filePath: string) => Promise<string | null>;
-        writeFile: (filePath: string, content: string) => Promise<boolean>;
+        writeFile: (filePath: string, content: string | ArrayBufferView | NodeJS.ArrayBufferView) => Promise<boolean>;
         saveFileDialog: (defaultFile: string) => Promise<string | null>;
         openLink: (link: string) => Promise<boolean>;
         setEditStatus: (isEdited:boolean) => void
         copyTextToClipboard: () =>  Promise<{status:string, error:string }>,
         pasteClipboardText: () =>  Promise<string>,
+        readImageFile: (filePath: string) => string,
         ipcRenderer: Electron.IpcRenderer
       };
     }

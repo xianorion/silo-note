@@ -6,11 +6,13 @@ import MenuItem from '@mui/material/MenuItem';
 import { RetroToolbar, retroDropDownBtnStyle, retroMenuStyle } from '../styles/MainToolBarStyle';
 import { ToggleActions } from './../types/GlobalTypes';
 import { IpcRendererEvent } from 'electron';
+import { PDF_FILETYPE, TXT_FILETYPE } from '@utils/constants';
 
 interface MainToolbarProps {
 editor: Editor ;
 newFileEvent: (override: boolean) => Promise<void>,
 saveFileEvent: ( isSaveAs: boolean) => Promise<void>,
+exportFileEvent: ( type: string) => Promise<void>,
 openFileEvent: (override: boolean) => Promise<void>,
 toggleEvent: (obj: string) => void
 
@@ -40,7 +42,7 @@ enum DROPDOWN_OPTIONS {
 }
 
 
-const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, openFileEvent, toggleEvent}) =>{
+const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, openFileEvent, exportFileEvent, toggleEvent}) =>{
  
   const [menuState, setMenuState] =  React.useState<{[key in DROPDOWN_OPTIONS]: HTMLElement | null}>({
     [DROPDOWN_OPTIONS.FILE]: null,
@@ -67,9 +69,16 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
       handleAction(action.OPEN);
     };
     const saveFileListener = () => {
-      handleAction(action.SAVE);
+     
     };
-
+   const exportListener = (type:string) =>{
+        if(type === 'TXT'){
+          handleAction(action.EXPORT_DOC);
+        }else if(type ==='PDF'){
+          handleAction(action.EXPORT_PDF);
+        }
+        
+      };
     const saveAsFileListener = () => {
       handleAction(action.SAVE_AS);
     };
@@ -79,6 +88,7 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
     window.electron.ipcRenderer.on('redo', redoListener);
     window.electron.ipcRenderer.on('new-file', newFileListener);
     window.electron.ipcRenderer.on('open-file', openListener);
+    window.electron.ipcRenderer.on('export-file', (event, type) => {exportListener(type); });    
     window.electron.ipcRenderer.on('save-file', saveFileListener);
     window.electron.ipcRenderer.on('save-as-file', saveAsFileListener);
     
@@ -88,6 +98,7 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
       window.electron.ipcRenderer.removeAllListeners('redo');
       window.electron.ipcRenderer.removeAllListeners('new-file');
       window.electron.ipcRenderer.removeAllListeners('open-file');
+      window.electron.ipcRenderer.removeAllListeners('export-file');
       window.electron.ipcRenderer.removeAllListeners('save-file');
       window.electron.ipcRenderer.removeAllListeners('save-as-file');
 
@@ -146,11 +157,11 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
         }
         break;
         case action.EXPORT_DOC:{
-          
+          exportFileEvent(TXT_FILETYPE)
           break;
         }
         case action.EXPORT_PDF:{
-          
+          exportFileEvent(PDF_FILETYPE)
           break;
         }
 

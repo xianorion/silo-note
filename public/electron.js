@@ -97,14 +97,14 @@ function createWindow() {
           label: 'as .txt',
           click: () => {
             // Send IPC to React to call a function
-            mainWindow.webContents.send('Export', 'TEXT');
+            mainWindow.webContents.send('export-file',null, '.txt');
           }
         },
         {
           label: 'as .pdf',
           click: () => {
             // Send IPC to React to call a function
-            mainWindow.webContents.send('Export', "PDF");
+            mainWindow.webContents.send('export-file',null, ".pdf");
           }
         }
       ]
@@ -303,6 +303,21 @@ ipcMain.handle('readFile', async (event, path) => {
     }
   });
 
+  ipcMain.handle('exportToFile', async (event, path,type, data) => {
+    try {
+      if(type == 'PDF'){
+
+      }else if(type == 'TXT'){
+        
+      }
+      await fs.promises.writeFile(path, data);
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  });
+
   //take in a link from the elction application and opens it in a browser
   ipcMain.handle("open-link", async(event, link)=>{
     let returnObj = {status: 200, msg:""}
@@ -363,3 +378,11 @@ ipcMain.handle('copy-to-clipboard', (event, text) => {
 ipcMain.handle('paste-clipboard-text', () => {
   return clipboard.readText();
 });
+
+ipcMain.handle('read-image-file',(event, filePath)=>{
+const ext = path.extname(filePath).slice(1).toLowerCase();
+    const mime = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : 'image/png';
+    const buffer = fs.readFileSync(filePath);
+    return `data:${mime};base64,${buffer.toString('base64')}`;
+
+})

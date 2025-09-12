@@ -28,18 +28,15 @@ export const corkboardParentDialogContentStyle = {
 
 //Actual mood board content's styles
 export const corkboardStyle = {
-  width: '100%',  // Take up 100% of the parent container width
-  height: '100%', // Take up 100% of the parent container height
-  boxSizing: 'border-box',  // Include the border in the element's total width/height
-  border: "2vw solid rgb(244, 208, 172)",  // Border size
-  borderRadius: "10px",
-  margin: '0px',
-  padding: '10px',
-  backgroundColor: '#d6ad7f', // Corkboard color
-  boxShadow: "inset 0 0 10px rgba(0, 0, 0, 0.7), 0 4px 10px rgba(0, 0, 0, 0.2)", // Depth shadows
-  background: "rgb(201, 159, 94)",
-  backgroundSize: "cover",
-  overflow: 'hidden', // Prevents content from overflowing if the corkboard is resized
+    display: 'flex',
+    flexDirection: 'column',
+    height: '85vh',
+    width: '100%',
+    background: 'linear-gradient(135deg, #fbeec1, #f6d6ad)',
+    borderRadius: '24px',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+    padding: '16px',
+    overflow: 'hidden',
 };
 
   

@@ -16,7 +16,7 @@ export const retroDropDownBtnStyle = {
 
 export const retroMenuStyle = {
     '.MuiPaper-root': {
-      backgroundColor: 'rgb(255, 248, 238)', 
+      backgroundColor: 'rgba(148, 113, 66, 1)', 
       boxShadow: '6px 3px 8px rgba(73, 54, 33, 0.1)',  
     },
   }

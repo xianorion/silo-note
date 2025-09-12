@@ -1,12 +1,10 @@
 // import './styles.scss'
 import './../styles/editor.css';
-import Electron from 'electron';
+import Electron, { IpcRendererEvent } from 'electron';
 
 import { Editor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { Box, IconButton } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import React, {FC, useCallback, useEffect, useState, useRef} from 'react'
 import {
   Alert, 
@@ -24,7 +22,7 @@ import MainToolbar from './MainToolbar';
 import MoodBoardGui from './MoodBoardGui';
 import SiloToolBar from './SiloToolbar';
 import { Grid2 as Grid } from "@mui/material";
-import { TEXT_FILETYPES, IMAGE_FILETYPES, SILONOTE_FILETYPE } from '../utils/constants';
+import { TEXT_FILETYPES, IMAGE_FILETYPES, SILONOTE_FILETYPE, PDF_FILETYPE, TXT_FILETYPE } from '../utils/constants';
 import { ImgListType, SiloNoteFile, SourceLinksType, NoteType } from 'types/GlobalTypes';
 import { RetroBtn, iconStyles, RetroDialog, RetroDialogTitle, linkDrawerStyle, toastStyle } from './../styles/SiloTextBoxStyle';
 import TextAlign from '@tiptap/extension-text-align';
@@ -32,6 +30,8 @@ import { ToggleActions } from './../types/GlobalTypes';
 import NoteListGui from './NoteListGui';
 import { editorContainerStyle,textEditorOuterLayerStyle, notesOuterLayerStyle} from './../styles/SiloTextEditorStyles';
 import { corkboardParentDialogStyle, corkboardParentDialogContentStyle } from './../styles/MoodBoardStyle';
+import { Buffer } from 'buffer';
+
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -104,7 +104,11 @@ const SiloTextEditor =() => {
       const saveFileListener = () => {
         saveFile(false);
       };
-  
+const exportListener = (_event: IpcRendererEvent, type: string ) => {
+  console.log("Type to convert to is:", type);
+  exportFile(type);
+};
+
       const saveAsFileListener = () => {
         saveFile(true);
       };
@@ -114,6 +118,7 @@ const SiloTextEditor =() => {
       window.electron.ipcRenderer.on('redo', redoListener);
       window.electron.ipcRenderer.on('new-file', newFileListener);
       window.electron.ipcRenderer.on('open-file', openListener);
+    window.electron.ipcRenderer.on('export-file', exportListener);    
       window.electron.ipcRenderer.on('save-file', saveFileListener);
       window.electron.ipcRenderer.on('save-as-file', saveAsFileListener);
       
@@ -123,6 +128,7 @@ const SiloTextEditor =() => {
         window.electron.ipcRenderer.removeAllListeners('redo');
         window.electron.ipcRenderer.removeAllListeners('new-file');
         window.electron.ipcRenderer.removeAllListeners('open-file');
+        window.electron.ipcRenderer.removeAllListeners('export-file');
         window.electron.ipcRenderer.removeAllListeners('save-file');
         window.electron.ipcRenderer.removeAllListeners('save-as-file');
   
@@ -282,6 +288,227 @@ const SiloTextEditor =() => {
     }finally{
       return result;
     }
+  }
+
+  const generateSiloNoteTxt = (file: SiloNoteFile): string => {
+const { content, links, imageRefs, notes } = file;
+
+  let txt = `===========================\nSilo Note Export\n===========================\n\n`;
+
+  // Content
+  txt += `Content:\n--------\n${content}\n\n`;
+
+  // Links
+  txt += `Links:\n-------\n`;
+  links.forEach(link => {
+    txt += `• ${link.name}\n`;
+    txt += `  URL: ${link.url}\n`;
+    if (link.notes) txt += `  Note: ${link.notes}\n`;
+    txt += `\n`;
+  });
+
+  // Images
+  txt += `Images:\n--------\n`;
+  imageRefs.forEach(img => {
+    txt += `• ${img.name}\n`;
+    if (img.note) txt += `  Note: ${img.note}\n`;
+    txt += `\n`;
+  });
+
+  // Notes
+  txt += `Notes:\n-------\n`;
+  notes.forEach(note => {
+    txt += `- ${note.name}\n`;
+    if (note.content) txt += `  ${note.content}\n`;
+    txt += `\n`;
+  });
+
+  return txt;
+
+  }
+
+ const generateSiloNotePdf = async (
+  file: SiloNoteFile
+): Promise<Uint8Array> => {
+  const { content, links, imageRefs, notes } = file;
+
+  const pdfDoc = await PDFDocument.create();
+  let page = pdfDoc.addPage([600, 800]);
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const { height } = page.getSize();
+
+  let y = height - 50;
+  const lineHeight = 18;
+
+  const drawText = (text: string, size = 12, indent = 0) => {
+    if (y < 50) {
+      page = pdfDoc.addPage([600, 800]);
+      y = height - 50;
+    }
+    page.drawText(text, {
+      x: 50 + indent,
+      y,
+      size,
+      font,
+      color: rgb(0, 0, 0),
+    });
+    y -= lineHeight;
+  };
+
+  // Content
+  drawText('Content:', 14);
+  drawText(content);
+
+  // Links
+  drawText('');
+  drawText('Links:', 14);
+links.forEach(link => {
+  drawText(`• ${link.name}`, 12, 10);
+  drawText(`  URL: ${link.url}`, 10, 20);
+  if (link.notes) {
+    drawText(`  Note: ${link.notes}`, 10, 20);
+  }
+  drawText(''); // spacing
+});
+
+
+  // Notes
+  drawText('');
+  drawText('Notes:', 14);
+ notes.forEach(note => {
+  drawText(`- ${note.name}`, 12, 10);
+  if (note.content) {
+    drawText(`  ${note.content}`, 10, 20);
+  }
+  drawText(''); // spacing
+});
+
+  // Images
+  drawText('');
+  drawText('Images:', 14);
+  for (const img of imageRefs) {
+    if (!img.data && img.name) {
+    try {
+      img.data = await window.electron.readImageFile(img.name);
+    } catch (err) {
+      console.warn(`Failed to read image file: ${img.name}`, err);
+    }
+  }
+
+  if (!img.data) {
+    drawText(`(Missing image data for ${img.name})`, 10, 10);
+    continue;
+  }
+
+  try {
+    console.log("Image data type:", typeof img.data);
+console.log("IT IS:",img.data);
+    const imageBytes = Uint8Array.from(atob(img.data.split(',')[1]), c => c.charCodeAt(0));
+    const embeddedImage = img.data.startsWith('data:image/jpeg')
+      ? await pdfDoc.embedJpg(imageBytes)
+      : await pdfDoc.embedPng(imageBytes);
+
+    const imgDims = embeddedImage.scale(0.5);
+    if (y - imgDims.height < 50) {
+      page = pdfDoc.addPage([600, 800]);
+      y = height - 50;
+    }
+
+    page.drawImage(embeddedImage, {
+      x: 50,
+      y: y - imgDims.height,
+      width: imgDims.width,
+      height: imgDims.height,
+    });
+
+    y -= imgDims.height + lineHeight;
+
+    if (img.note) {
+      drawText(`Note: ${img.note}`, 10, 10);
+    }
+  } catch (err) {
+    console.log("FAILED TO EMBED IMAGE: ", err);
+    drawText(`(Failed to embed image: ${img.name})`, 10, 10);
+  }
+}
+
+
+  return await pdfDoc.save();
+}
+
+
+
+  const exportFile = async (type:string) =>{
+    setIsLoading(true);
+    let path =currentFileRef.current;
+      let fileName = 'newFile.sn';
+      if(type ===PDF_FILETYPE){
+        fileName = "newFile.pdf";
+      }else if(type === TXT_FILETYPE){
+        fileName = "newFile.txt";
+      }
+      
+
+      path = await window.electron.saveFileDialog(fileName);
+     console.log("Path to write in: ", path);
+ 
+     //save as file wit correct type
+     if(path && !path.endsWith(type)){
+       path = path + type;
+     }
+
+    
+
+    let content = (editorRef.current!=null ? editorRef.current.getText():"");
+    if(path !=null && path.length >0){
+      //clear data to new image list
+      let saveImgList:ImgListType[]=[];
+      imgList.forEach((img) =>{
+        saveImgList.push({id: img.id,name: img.name, note: img.note, data:null})
+      });
+      console.log("saving notes: ", notes);
+      console.log("saving srcLinks: ", srcLinks);
+      console.log("saving content: ", content);
+      console.log("saving saveImgList: ", saveImgList);
+      const newFile : SiloNoteFile = {
+        content: content,
+        links: srcLinks,
+        imageRefs: saveImgList,
+        notes: notes
+      }
+      if (type === PDF_FILETYPE) {
+    console.log("Handing pdf type");
+    const pdfBytes = await generateSiloNotePdf(newFile); // This is a Uint8Array
+
+    // Convert to Node-friendly Buffer
+    const buffer = Buffer.from(pdfBytes);
+console.log("buffer is", buffer);
+        const isWritten = await window.electron.writeFile(path, buffer);
+        console.log("Write success:", isWritten);
+        if(isWritten){
+          setToast('Your file has been saved!');
+        }else{
+          setToast("Error Saving to file.\nPlease check if file is not open or corrupted.")
+        }
+   
+  } else if (type === TXT_FILETYPE) {
+    // TXT is already string, just write it
+    const txtContent = generateSiloNoteTxt(newFile);
+
+    const textWritten = await window.electron.writeFile(path, txtContent);
+    console.log("Write success:", textWritten);
+      if(textWritten){
+          setToast('Your file has been saved!');
+        }else{
+          setToast("Error Saving to file.\nPlease check if file is not open or corrupted.");
+        }
+  }
+    }else{
+      //Message that path is empty
+
+    }
+
+    setIsLoading(false);
   }
 
   const saveFile = async (isSaveAs:boolean) =>{
@@ -549,7 +776,7 @@ const SiloTextEditor =() => {
               </div>
 
             {/* EditorContent takes up the remaining space */}
-            <div style={{
+            <div className='scroll-container' style={{
               flex: notesSection ? '1 0 66%' : '1 0 100%',  // 2/3 when open, 100% when closed
               transition: 'flex 0.3s ease',  //  Smooth transition
               ...textEditorOuterLayerStyle

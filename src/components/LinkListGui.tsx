@@ -193,7 +193,7 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
          handleClose={removeError}
          
          />} */}
-         <div style={linkBankStyle}>
+         <div style={linkBankStyle} className='scroll-container'>
          <List>
             {links.map((link) =>(
                 <ListItem key={link.name}>

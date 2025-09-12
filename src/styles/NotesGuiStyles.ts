@@ -2,8 +2,8 @@ import { display, height, width } from "@mui/system"
 
 export const noteContainerStyle: React.CSSProperties = {
   display: 'flex',          // Enables flexbox
-  height: '100%',
-  width:'100%',
+  height: '100vh',
+  width:'90vw%',
   alignItems: 'flex-start', // Aligns child elements to the left
   flexDirection: 'column',
   background:'rgb(255, 247, 225)',

@@ -148,7 +148,7 @@ const NoteListGui : FC<NoteGuiProps> = ({notes, setToast, setNotes, toggle}) =>{
     }
 
 
-    return <div style={noteContainerStyle}> 
+    return <div style={noteContainerStyle} className='scroll-container'> 
         <div style={noteHeaderStyle}>
           <Grid size={10}>
           <DialogTitle sx={noteItemTypographyStyle}>Notes</DialogTitle>
