@@ -4,9 +4,9 @@ import { styled } from '@mui/material';
 export const RetroToolbar = styled('div')({
   display: 'flex',
   alignItems: 'center',
-  margin: '12px 16px 4px',
-  width: 'calc(100% - 32px)',
-  minHeight: '42px',
+  margin: '1.5%',
+  width: '97%',
+  minHeight: '34px',
   background: '#f6f1e8',
   border: '1px solid #353535',
   borderRadius: '7px 9px 6px 8px',
@@ -19,13 +19,13 @@ export const RetroToolbar = styled('div')({
 
 export const retroDropDownBtnStyle = {
     minWidth: "62px",
-    padding: "6px 10px",
+    padding: "4px 8px",
     color: "#353535",
     borderRight: '1px solid #353535',
     borderRadius: 0,
     textTransform: 'none',
     fontFamily: 'Tengoku, "Courier New", monospace',
-    fontSize: '0.78rem',
+    fontSize: '0.72rem',
     '&:hover': {
       backgroundColor: '#ded8cd',
     },
@@ -34,7 +34,16 @@ export const retroDropDownBtnStyle = {
 
 export const retroMenuStyle = {
     '.MuiPaper-root': {
-      backgroundColor: 'rgb(255, 248, 238)', 
+      backgroundColor: '#ded8cd', 
       boxShadow: '6px 3px 8px rgba(73, 54, 33, 0.1)',  
     },
   }
+
+  export const menuItemStyle = {
+    color: '#353535',
+    fontFamily: 'Tengoku, "Courier New", monospace',
+    fontSize: '0.72rem',
+    '&:hover': {
+      backgroundColor: '#ded8cd',
+    },
+  };

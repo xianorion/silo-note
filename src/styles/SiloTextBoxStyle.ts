@@ -1,6 +1,6 @@
 import { Properties } from 'csstype';
 import { styled } from '@mui/material';
-import { Button, DialogTitle, Dialog} from '@mui/material';
+import { Button, DialogTitle, Dialog, Tooltip} from '@mui/material';
 
 
 // Define a custom type for the props
@@ -30,7 +30,7 @@ export const GuiStyle: Properties<string | number, string & {}> = {
 
 }
 
-export const MainTextBox: {width: string, height: string} = {
+export const MainTextBox: Properties<string | number, string & {}>= {
     width: '80%',
     height: '80%',
 
@@ -39,7 +39,9 @@ export const MainTextBox: {width: string, height: string} = {
 export const mainToolBarStyle: Properties<string | number, string & {}> = {
     width: '100%',
     height: '100%',
-    textAlign: 'left'
+    textAlign: 'left',
+    display: 'flex',
+
 }
 
 export const linkDrawerStyle = {
@@ -62,6 +64,14 @@ export const toastStyle = {
   overflow: 'hidden'
 }
 
+export const RetroTooltip = styled(Tooltip)(() => ({
+    color: '#353535',
+    fontFamily: 'Tengoku, "Courier New", monospace',
+    fontSize: '0.1rem',
+    border: '1px solid #353535',
+    boxShadow: '2px 2px 0 #b9b2a7',
+}));
+
 
 export const RetroBtn = styled(Button)<RetroBtnProps>(({bgcolor, bordercolor}) =>({
   background: `${bgcolor != null?bgcolor:"#f6f1e8"}`,
@@ -76,10 +86,13 @@ export const RetroBtn = styled(Button)<RetroBtnProps>(({bgcolor, bordercolor}) =
   fontFamily: 'Tengoku, "Courier New", monospace',
     fontSize: '0.65rem',
   lineHeight: 1,
+    '--retro-btn-icon-size':'1.5rem',
     '& .MuiSvgIcon-root': {
-      width: '14px',
-      height: '14px',
+      width: 'var(--retro-btn-icon-size)',
+      height: 'var(--retro-btn-icon-size)',
     },
+    width: 'fit-content',
+
     "&:active":{
     backgroundColor: '#ded8cd',
     transform: "translateY(1px)"

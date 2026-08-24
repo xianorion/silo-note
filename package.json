@@ -1,6 +1,6 @@
 {
   "name": "silo-note",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A notepad app for creatives",
   "private": true,
   "main": "./public/electron.js",
@@ -22,9 +22,11 @@
     "@tiptap/pm": "^2.10.3",
     "@tiptap/react": "^2.10.3",
     "@tiptap/starter-kit": "^2.10.3",
+    "buffer": "^6.0.3",
     "cross-env": "^7.0.3",
     "electronmon": "^2.0.3",
     "electron": "43.2.0",
+    "pdf-lib": "^1.17.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-scripts": "5.0.1",
@@ -72,6 +74,20 @@
       ],
       "icon": "build/icons"
     }
+  },
+
+  "scripts": {
+    "start": "cross-env BROWSER=none && react-scripts start",
+    "startw": "export BROWSER=none && react-scripts start",
+    "electron": "electron .",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "package": "electron-packager .",
+    "electron:start": "concurrently -k \"cross-env BROWSER=none npm start\" \"wait-on http://localhost:3000 && electronmon .\"",
+    "electron:package:mac": "npm run build && electron-builder -m -c.extraMetadata.main=build/electron.js",
+    "electron:package:win": "npm run build && electron-builder -w -c.extraMetadata.main=build/electron.js",
+    "electron:package:linux": "npm run build && electron-builder --linux --arm64 --publish never -c.extraMetadata.main=build/electron.js"
   },
   "eslintConfig": {
     "extends": [

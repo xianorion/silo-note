@@ -156,6 +156,7 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
   // This function updates the specific field (name, url, or notes)
   const handleEditLinkChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => {
     const { value } = event.target;
+  
     setEditingLinkData((prevData) => {
       // Ensure we return an object with the full data, filling in the missing fields
       return {
@@ -192,7 +193,7 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
          handleClose={removeError}
          
          />} */}
-         <div style={linkBankStyle}>
+         <div style={linkBankStyle} className='scroll-container'>
          <List>
             {links.map((link) =>(
                 <ListItem key={link.name}>
@@ -296,8 +297,6 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
             {`Got a good reference link to your project? Add it here!`}
           </DialogContentText>
           <TextField
-            autoFocus
-            required
             margin="dense"
             id="name"
             name="name"
@@ -307,7 +306,7 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
             helperText={errors.name}
             error={errors.name != null}
             value={editingLinkData?.name}
-            onChange={(e) => handleEditLinkChange(e,'name')}
+            disabled
           />
           <TextField
             autoFocus

@@ -42,8 +42,7 @@ export const linkBankStyle = {
             }
 
             export const linkItemTypographyStyle ={
-                fontSize: '14px',
                 color: '#353535',
-
+                fontSize: '2.5vw',          
             }
             

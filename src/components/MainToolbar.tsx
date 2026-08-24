@@ -1,16 +1,19 @@
-import React, {FC} from 'react';
+import React, {FC, useEffect} from 'react';
 import { Editor, getHTMLFromFragment } from '@tiptap/react'
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem'; 
 import { RetroToolbar, retroDropDownBtnStyle, retroMenuStyle } from '../styles/MainToolBarStyle';
 import { ToggleActions } from './../types/GlobalTypes';
+import { IpcRendererEvent } from 'electron';
+import { PDF_FILETYPE, TXT_FILETYPE } from '../utils/constants';
 
 interface MainToolbarProps {
 editor: Editor ;
-newFileEvent: (event: React.MouseEvent<any>, override: boolean) => Promise<void>,
-saveFileEvent: (event: React.MouseEvent<any>, isSaveAs: boolean) => Promise<void>,
-openFileEvent: (event: React.MouseEvent<any>, override: boolean) => Promise<void>,
+newFileEvent: (override: boolean) => Promise<void>,
+saveFileEvent: ( isSaveAs: boolean) => Promise<void>,
+exportFileEvent: ( type: string) => Promise<void>,
+openFileEvent: (override: boolean) => Promise<void>,
 toggleEvent: (obj: string) => void
 
 }
@@ -39,7 +42,7 @@ enum DROPDOWN_OPTIONS {
 }
 
 
-const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, openFileEvent, toggleEvent}) =>{
+const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, openFileEvent, exportFileEvent, toggleEvent}) =>{
  
   const [menuState, setMenuState] =  React.useState<{[key in DROPDOWN_OPTIONS]: HTMLElement | null}>({
     [DROPDOWN_OPTIONS.FILE]: null,
@@ -48,22 +51,77 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
     [DROPDOWN_OPTIONS.VIEW]: null
   });
 
-  const handleAction = async (commmand: action |null, event: React.MouseEvent<HTMLLIElement, MouseEvent>, origin: string) => {
+  useEffect(() => {
+    const undoListener = () => {
+      handleAction(action.UNDO);
+      console.log('Received from Electron: UNDO');
+    };
+
+    const redoListener = () => {
+      handleAction(action.REDO, 'edit');
+      console.log('Received from Electron: REDO');
+    };
+    const newFileListener = () => {
+      handleAction(action.NEW);
+    };
+
+    const openListener = () => {
+      handleAction(action.OPEN);
+    };
+    const saveFileListener = () => {
+     
+    };
+   const exportListener = (type:string) =>{
+        if(type === 'TXT'){
+          handleAction(action.EXPORT_DOC);
+        }else if(type ==='PDF'){
+          handleAction(action.EXPORT_PDF);
+        }
+        
+      };
+    const saveAsFileListener = () => {
+      handleAction(action.SAVE_AS);
+    };
+
+ // Listen for the response from the main process
+    window.electron.ipcRenderer.on('undo', undoListener);
+    window.electron.ipcRenderer.on('redo', redoListener);
+    window.electron.ipcRenderer.on('new-file', newFileListener);
+    window.electron.ipcRenderer.on('open-file', openListener);
+    window.electron.ipcRenderer.on('export-file', (event, type) => {exportListener(type); });    
+    window.electron.ipcRenderer.on('save-file', saveFileListener);
+    window.electron.ipcRenderer.on('save-as-file', saveAsFileListener);
+    
+    // Clean up the listener when the component unmounts
+    return () => {
+      window.electron.ipcRenderer.removeAllListeners('undo');
+      window.electron.ipcRenderer.removeAllListeners('redo');
+      window.electron.ipcRenderer.removeAllListeners('new-file');
+      window.electron.ipcRenderer.removeAllListeners('open-file');
+      window.electron.ipcRenderer.removeAllListeners('export-file');
+      window.electron.ipcRenderer.removeAllListeners('save-file');
+      window.electron.ipcRenderer.removeAllListeners('save-as-file');
+
+    }
+  }, []);
+
+
+  const handleAction = async (commmand: action |null, origin?: string |undefined) => {
     // event.preventDefault();
     console.log("Handing click...");
     // onClose(event);
     switch(commmand) {
       case action.NEW:
-        newFileEvent(event, false);
+        newFileEvent( false);
         break;
       case action.SAVE:
-        saveFileEvent(event, false);
+        saveFileEvent(false);
         break;
         case action.SAVE_AS:
-          saveFileEvent(event, true);
+          saveFileEvent(true);
         break;
         case action.OPEN: {
-         openFileEvent(event, false);
+         openFileEvent( false);
         }
         break;
         case action.COPY:{
@@ -99,11 +157,11 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
         }
         break;
         case action.EXPORT_DOC:{
-          
+          exportFileEvent(TXT_FILETYPE)
           break;
         }
         case action.EXPORT_PDF:{
-          
+          exportFileEvent(PDF_FILETYPE)
           break;
         }
 
@@ -121,7 +179,8 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
 
     }
     console.log("Handling close about to be called with origin: ", origin);
-    handleClose(origin);
+    if(origin !=undefined)
+      handleClose(origin);
 
   }
 
@@ -166,10 +225,10 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
             'aria-labelledby': 'basic-button',
           }}
         >
-          <MenuItem onClick={(e) => handleAction(action.NEW,e, DROPDOWN_OPTIONS.FILE)}>New</MenuItem>
-          <MenuItem onClick={(e) => handleAction(action.OPEN,e,DROPDOWN_OPTIONS.FILE)}>Open</MenuItem>
-          <MenuItem onClick={(e) => handleAction(action.SAVE,e,DROPDOWN_OPTIONS.FILE)}>Save</MenuItem>
-          <MenuItem onClick={(e) => handleAction(action.SAVE_AS, e, DROPDOWN_OPTIONS.FILE)}>Save As</MenuItem>
+          <MenuItem onClick={(e) => handleAction(action.NEW, DROPDOWN_OPTIONS.FILE)}>New</MenuItem>
+          <MenuItem onClick={(e) => handleAction(action.OPEN,DROPDOWN_OPTIONS.FILE)}>Open</MenuItem>
+          <MenuItem onClick={(e) => handleAction(action.SAVE,DROPDOWN_OPTIONS.FILE)}>Save</MenuItem>
+          <MenuItem onClick={(e) => handleAction(action.SAVE_AS, DROPDOWN_OPTIONS.FILE)}>Save As</MenuItem>
         </Menu>
       </div>
       <div >
@@ -193,8 +252,8 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
           'aria-labelledby': 'basic-button',
         }}
       >
-        <MenuItem onClick={(e) => handleAction(action.UNDO,e, DROPDOWN_OPTIONS.EDIT)}>Undo</MenuItem>
-        <MenuItem onClick={(e) => handleAction(action.REDO,e, DROPDOWN_OPTIONS.EDIT)}>Redo</MenuItem>
+        <MenuItem onClick={(e) => handleAction(action.UNDO, DROPDOWN_OPTIONS.EDIT)}>Undo</MenuItem>
+        <MenuItem onClick={(e) => handleAction(action.REDO, DROPDOWN_OPTIONS.EDIT)}>Redo</MenuItem>
         {/* <MenuItem onClick={(e) => handleAction(action.COPY,e, DROPDOWN_OPTIONS.EDIT)}>Copy</MenuItem>
         <MenuItem onClick={(e) => handleAction(action.PASTE,e, DROPDOWN_OPTIONS.EDIT)}>Paste</MenuItem>
         <MenuItem onClick={(e) => handleAction(action.CUT,e, DROPDOWN_OPTIONS.EDIT)}>Cut</MenuItem> */}
@@ -223,8 +282,8 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
         }}
       >
         {/* <MenuItem onClick={() => handleClose(DROPDOWN_OPTIONS.EXPORT)}>Google Drive</MenuItem> */}
-        <MenuItem onClick={(e) => handleAction(action.EXPORT_PDF,e, DROPDOWN_OPTIONS.EXPORT)}>PDF</MenuItem>
-        <MenuItem onClick={(e) => handleAction(action.EXPORT_DOC,e, DROPDOWN_OPTIONS.EXPORT)}>Text</MenuItem>
+        <MenuItem onClick={(e) => handleAction(action.EXPORT_PDF, DROPDOWN_OPTIONS.EXPORT)}>PDF</MenuItem>
+        <MenuItem onClick={(e) => handleAction(action.EXPORT_DOC, DROPDOWN_OPTIONS.EXPORT)}>Text</MenuItem>
       </Menu>
     </div>
     <div>
@@ -248,8 +307,8 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
           'aria-labelledby': 'basic-button',
         }}
       >
-        <MenuItem onClick={(e) => handleAction(action.OPEN_MOODBOARD,e, DROPDOWN_OPTIONS.VIEW)}>Mood Board</MenuItem>
-        <MenuItem onClick={(e) => handleAction(action.OPEN_LINKS,e, DROPDOWN_OPTIONS.VIEW)}>Reference Links</MenuItem>
+        <MenuItem onClick={(e) => handleAction(action.OPEN_MOODBOARD, DROPDOWN_OPTIONS.VIEW)}>Mood Board</MenuItem>
+        <MenuItem onClick={(e) => handleAction(action.OPEN_LINKS, DROPDOWN_OPTIONS.VIEW)}>Reference Links</MenuItem>
       </Menu>
     </div>
     </RetroToolbar>

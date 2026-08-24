@@ -48,11 +48,7 @@ const SortableImageItem: FC<SortableImageItemProps> = ({removeImageFromList, set
         position="top"
         style={corkboardImageToolBar}
         actionIcon={showTrashIcon && !dragging && 
-        <div  
-          style={{  
-             
-             
-        }}  >
+        <div>
              <IconButton
            sx={{ padding: '2px' }}
        onClick={()=> setSelectedItem(item.data)}
