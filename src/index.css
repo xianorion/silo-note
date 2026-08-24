@@ -1,3 +1,29 @@
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+:root {
+  --silo-ink: #4b2a1b;
+  --silo-orange: #dc6b3f;
+  --silo-orange-dark: #b95732;
+  --silo-paper: #fffaf0;
+  --silo-paper-muted: #f2eadc;
+  --silo-shadow: #464646;
+  --silo-grid: #ded4c5;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -11,11 +37,11 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
-
+/* 
 @font-face {
   font-family: 'BaksoSapi';
   src: url('./resources/fonts/BaksoSapi.otf') format('truetype');
-}
+} */
 
 @font-face {
   font-family: 'Singkong';
@@ -29,16 +55,23 @@ code {
   src: url('./resources/fonts/8bitArcadeIn.ttf') format('truetype'); /* Ensure the file path is correct */
 }
 
+@font-face {
+  font-family: 'Tengoku';
+  src: url('./resources/fonts/Tengoku.ttf') format('truetype'); /* Ensure the file path is correct */
+}
+
 body {
-  background: linear-gradient(to bottom, #f5eccd, #fbfeda);
-  color: #333;
-  font-family: 'Courier New', monospace;
+  background-color: var(--silo-paper-muted);
+  background-image: radial-gradient(var(--silo-grid) 0.7px, transparent 0.7px);
+  background-size: 9px 9px;
+  color: var(--silo-ink);
+  font-family: 'Tengoku', 'Courier New', monospace;
 }
 
 .window {
-  background: #F8F4E8;
-  border: 3px solid #333;
-  border-radius: 5px;
-  box-shadow: 4px 4px 0px #A8A29E;
-  padding: 20px;
+  background: var(--silo-paper);
+  border: 1.5px solid var(--silo-ink);
+  border-radius: 8px;
+  box-shadow: 4px 4px 0px var(--silo-shadow);
+  padding: 12px;
 }

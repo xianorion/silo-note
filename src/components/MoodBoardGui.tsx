@@ -68,65 +68,85 @@ const MoodBoardGui: FC<MoodBoardGuiProps> = ({imgList, addImage, removeImage, se
 
 
     return(
-        <Paper
-        sx={corkboardStyle}
-        >
-        <Box >
-            <Grid container spacing={2}
-            sx={{padding:'10px'}}>
-                <Grid size={10}>
-                    <Typography
-                    sx={corkboardTitle}
-                    >Mood Board</Typography>
-                </Grid>
-                <Grid size={2}  sx={{
-                    }}>    
-                    <Close sx={{width: '3vw', height: '3vw'}} onClick={onClose}/>
-                </Grid>
-           
-            </Grid>
-            <Grid container spacing={2}>
-            <Grid size={12}
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              height: '60vh', // Adjust the height as needed, can change based on content
-              overflow: 'auto', // Enable scrolling inside Box
-            }}
-            >
-                      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} onDragStart={()=> setIsDragging(true)}>
-                      <SortableContext  items={imgList} strategy={rectSortingStrategy}>
-                    <ImageList sx={{ height: '100%', width: '100%', overflowX: 'auto',overflowY: 'auto',  padding:'5px', margin:'5px'}} >
-                    
-                    {imgList && imgList.map((item)=>(
-                          item && 
-                            <SortableImageItem key={item.id} removeImageFromList={removeImageFromList} item={item} dragging={isDragging} setSelectedItem={setSelectedItem}/>
-                            ))}
-                
-              
-                </ImageList>
-                </SortableContext>
-                
-                </DndContext>
-                </Grid>
+     <Paper
+  id="PAPER_MOOD_BOARD"
+  className='scroll-container'
+  sx={corkboardStyle}
+>
+  {/* Header */}
+  <Grid container alignItems="center" justifyContent="space-between" sx={{ marginBottom: '8px' }}>
+    <Typography
+      sx={corkboardTitle}
+    >
+      Mood Board
+    </Typography>
+    <Close
+      sx={{
+        width: 20,
+        height: 20,
+        cursor: 'pointer',
+        color: 'var(--silo-ink)',
+        transition: 'transform 0.2s ease-in-out',
+        ':hover': { transform: 'scale(1.1)' },
+      }}
+      onClick={onClose}
+    />
+  </Grid>
 
-            </Grid>
-            
-        </Box>
-        <Dialog
-        onClose={handleClose}
-        open={!!selectedItem}
-      >
-        {selectedItem &&<img
-          src={selectedItem}
-          alt={selectedItem}
-          loading="lazy"
-        />}
-      </Dialog>
-       
+  {/* Scrollable Image List */}
+  <Box
+    sx={{
+      flex: '1 1 auto',
+      minHeight: 0,
+      width: '100%',
+      overflow: 'auto',
+      padding: '4px',
+      border: '1px solid var(--silo-ink)',
+      borderRadius: '5px 7px 6px 4px',
+      backgroundColor: 'var(--silo-paper-muted)',
+    }}
+  >
+    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} onDragStart={() => setIsDragging(true)}>
+      <SortableContext items={imgList} strategy={rectSortingStrategy}>
+        <ImageList sx={{ width: '100%', margin: 0 }} variant="masonry" cols={3} gap={6}>
+          {imgList?.map((item) =>
+            item ? (
+              <SortableImageItem
+                key={item.id}
+                removeImageFromList={removeImageFromList}
+                item={item}
+                dragging={isDragging}
+                setSelectedItem={setSelectedItem}
+              />
+            ) : null
+          )}
+        </ImageList>
+      </SortableContext>
+    </DndContext>
+  </Box>
 
-        <Button  sx={corkboardTextOptions} style={{margin:'10px',padding:'10px'}} onClick={addImageToList}>Add</Button>
-        </Paper>
+  {/* Fixed Add Button */}
+  <Box
+    sx={{
+      padding: '8px',
+      textAlign: 'center',
+      borderTop: '1px solid var(--silo-ink)',
+      backgroundColor: 'var(--silo-paper)',
+    }}
+  >
+    <Button
+      onClick={addImageToList}
+      sx={corkboardTextOptions}
+    >
+      Add Image
+    </Button>
+  </Box>
+
+  {/* Dialog for selected image */}
+  <Dialog  onClose={handleClose} open={!!selectedItem}>
+    {selectedItem && <img src={selectedItem} alt={selectedItem} loading="lazy" />}
+  </Dialog>
+</Paper>
 
     );
 

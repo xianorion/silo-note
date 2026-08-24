@@ -1,55 +1,101 @@
+//Mood board parent dialog styles
+import type { CSSProperties } from 'react';
+
+//dialog sits under the the paper
+export const corkboardParentDialogStyle: CSSProperties = { 
+  // justifyContent: 'center', 
+  // alignItems: 'center', 
+  width: 'min(760px, 88vw)',
+  maxWidth: '88vw',
+  height: 'min(760px, 88vh)',
+  maxHeight: '88vh',
+  padding: 0, // Remove padding to allow full space for content
+  display: 'flex',
+  boxSizing: 'border-box',
+}
+
+
+
+
+//mood board popup dialog content
+export const corkboardParentDialogContentStyle = {
+  id: 'corkboardParentDialogContentStyle',
+  width: '100%',  // Take up 100% of the parent container width
+  height: '100%',
+  maxHeight: '100%',
+  padding: '0%',
+  display: 'flex', // Flexbox to center content
+  justifyContent: 'center', // Center horizontally
+  alignItems: 'center', // Center vertically
+  background: "var(--silo-paper-muted)",
+
+};
+
+
+//Actual mood board content's styles
 export const corkboardStyle = {
-  width: '80vw',  // Customize the width as per your requirement
-  maxWidth: '90vw', // Max width of the Paper component
-  maxHeight: '90vh', // Prevent the Paper from getting too large vertically
-    padding: "10px",
+  width: '100%',
+  height: '100%',
+  maxWidth: '100%',
+  maxHeight: '100%',
+    padding: "12px",
     justifyContent: 'center',
     alignItems: 'center',
-    overflow: 'auto',
-    backgroundColor: '#d6ad7f', /* Corkboard color */
-    border: "20px solid rgb(244, 208, 172)",  /* Darker border for depth */
-    borderRadius: "10px",
+    overflow: 'hidden',
+    backgroundColor: 'var(--silo-paper)',
+    border: "1px solid var(--silo-ink)",
+    borderRadius: "8px 6px 9px 7px",
     margin: '0px',
-    boxShadow: "inset 0 0 10px rgba(0, 0, 0, 0.7), 0 4px 10px rgba(0, 0, 0, 0.2)", /* Depth shadows */
-    background: "rgb(201, 159, 94)",
-    backgroundSize: "cover",
+    boxShadow: "3px 3px 0 var(--silo-shadow), -1px 0 var(--silo-shadow)",
+    background: "var(--silo-paper)",
+    boxSizing: 'border-box',
+    display: 'flex',
+    flexDirection: 'column',
   };
   
 
 export const corkboardImage: React.CSSProperties = {
-    width:'30vw',
-    minWidth:'10vw',
+  width:'100%',
+  minWidth:0,
     height:'auto',
-    textAlign: 'center',
-    boxShadow: "3px 3px 0px rgba(0, 0, 0, 0.2)",
- 
+    display: 'flex',
+    flexDirection: 'column',
+    background: 'var(--silo-paper)',
+    border: '1px solid var(--silo-ink)',
+    borderRadius: '5px 7px 6px 4px',
+    boxShadow: '2px 2px 0px var(--silo-shadow)',
+    padding: '4px',
+    overflow: 'hidden',
 };
 
+
 export const corkboardImageToolBar: React.CSSProperties = {
-  background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, ' +
-    'rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 0%)',
+
   width: 'auto',
+  background: 'rgba(75, 42, 27, 0.82)',
   height: 'auto',
   display: 'flex',
-  padding: '5px',
+  padding: '2px',
   flexDirection: 'row',
   textAlign: 'center'
 };
 
   
   export const corkboardTitle = {
-    fontSize: "24px",
+
+    fontSize: "18px",
     fontWeight: "bold",
-    color: "#4e3b31", /* Dark brown text */
+    color: "var(--silo-ink)",
     textAlign: "center",
-    marginBottom: "20px"
+
+    marginBottom: "8px",
   };
   
 
   export const corkboardTextOptions = {
-    fontSize: "16px",
+    fontSize: "13px",
     fontWeight: "bold",
-    color: "#4e3b31", /* Dark brown text */
+    color: "var(--silo-ink)",
     textAlign: "center",
     marginBottom: "20px"
   };

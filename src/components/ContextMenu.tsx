@@ -119,13 +119,13 @@ const ContextMenu: FC<ContextMenuProps> = ({style, editor, selectedText, handleP
       style= {{
       ...style,
       zIndex: 1000,
-      backgroundColor: 'white',
+      backgroundColor: 'var(--silo-paper)',
       position: 'absolute',
-      border: '1px solid #ccc',
+      border: '1px solid var(--silo-ink)',
       width: '8%',
       borderRadius: '4px',
       padding:'20px',
-      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'  // Optional shadow for a modal effect
+      boxShadow: '0 4px 6px rgba(75, 42, 27, 0.2)'  // Optional shadow for a modal effect
     }} >
  <List >
     <ListItem disablePadding>

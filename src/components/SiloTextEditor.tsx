@@ -1,9 +1,10 @@
 // import './styles.scss'
 import './../styles/editor.css';
-import Electron from 'electron';
+import Electron, { IpcRendererEvent } from 'electron';
 
 import { Editor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import React, {FC, useCallback, useEffect, useState, useRef} from 'react'
 import {
   Alert, 
@@ -21,11 +22,16 @@ import MainToolbar from './MainToolbar';
 import MoodBoardGui from './MoodBoardGui';
 import SiloToolBar from './SiloToolbar';
 import { Grid2 as Grid } from "@mui/material";
-import { TEXT_FILETYPES, IMAGE_FILETYPES, SILONOTE_FILETYPE } from '../utils/constants';
-import { ImgListType, SiloNoteFile, SourceLinksType } from 'types/GlobalTypes';
+import { TEXT_FILETYPES, IMAGE_FILETYPES, SILONOTE_FILETYPE, PDF_FILETYPE, TXT_FILETYPE } from '../utils/constants';
+import { ImgListType, SiloNoteFile, SourceLinksType, NoteType } from 'types/GlobalTypes';
 import { RetroBtn, iconStyles, RetroDialog, RetroDialogTitle, linkDrawerStyle, toastStyle } from './../styles/SiloTextBoxStyle';
 import TextAlign from '@tiptap/extension-text-align';
 import { ToggleActions } from './../types/GlobalTypes';
+import NoteListGui from './NoteListGui';
+import { editorContainerStyle,textEditorOuterLayerStyle, notesOuterLayerStyle} from './../styles/SiloTextEditorStyles';
+import { corkboardParentDialogStyle, corkboardParentDialogContentStyle } from './../styles/MoodBoardStyle';
+import { Buffer } from 'buffer';
+
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -36,67 +42,9 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-interface MenuBarProps {
-
-editor:Editor | null;
-}
-
-
-interface MenuToolbarProps {
-
-  className: string;
-  editor: Editor | null;
-}
-
 const NEW_FILE = "NEW_FILE";
 const OPEN_FILE = "OPEN_FILE";
 
-const MenuToolbar : FC<MenuToolbarProps>= ({className, editor}) =>{
-  if (!editor) {
-    return null
-  }
-  return (
-    <div className={className}>
-      <div ><h1><img id='logo' src={`${process.env.PUBLIC_URL}/img/silonote_logo.png`}  alt='SiloNotelogo'/></h1></div>
-       <Toolbar 
-      sx={{ display: 'flex', }}
-      >
-       
-      <div>
-        <RetroBtn  onClick={() => editor.chain().focus().toggleBold().run()}
-          className={editor.isActive('bold') ? 'is-active' : ''}>
-        <FormatBoldRounded className='icon'/>
-        </RetroBtn>
-        <RetroBtn  onClick={() => editor.chain().focus().toggleItalic().run()}
-          
-          className={editor.isActive('italic') ? 'is-active' : ''}>
-       <FormatItalicRounded className='icon'/>
-        </RetroBtn>
-         {/* undo button */}
-        <RetroBtn onClick={() => { editor.chain().focus().undo().run();}}>
-        <UndoOutlined className='icon' />
-        </RetroBtn>
-         {/* redo button */}
-        <RetroBtn  onClick={() => editor.chain().focus().redo().run()}>
-        <RedoOutlined className='icon'/>
-        </RetroBtn>
-        <RetroBtn onClick={() => editor.chain().focus().toggleBulletList().run()}>
-        <FormatListBulletedRounded className='icon'/>
-        </RetroBtn>
-        <RetroBtn onClick={() => editor.chain().focus().toggleOrderedList().run()}>
-        <FormatListNumberedRounded className='icon'/>
-        </RetroBtn>
-        
-      </div>
-
-      <div>
-      
-      </div>
-      
-      </Toolbar>
-    </div>
-  );
-}
 
 
 const editorProps = {
@@ -107,6 +55,9 @@ const editorProps = {
       defaultAlignment: 'left'
     }),
   ],
+  parseOptions:{
+    preserveWhitespace: true,
+  },
   editorProps: {
     attributes: {
       spellcheck: 'true',
@@ -116,17 +67,83 @@ const editorProps = {
 
 const SiloTextEditor =() => {
   const editorRef = useRef<Editor | null>(null); // Use useRef to persist editor instance
-  const [currentFile, setCurrentFile] = useState<string|  null>(null);
   const [edited, setEdited] = useState(false);
+  const currentFileRef = useRef<string | null>(null);
+  const editedRef = useRef<boolean>(false);
   const [linkSection, setLinkSection] = useState(false);
   const [mbSection, setMBSection] = useState(false);
+  const [notesSection, setNotesSection] = useState(true); // Initially open
   const [imgList, setImgList] = useState<ImgListType[]>([]);
   const [srcLinks, setSrcLinks] = useState<SourceLinksType[]>([]);
+  const [notes, setNotes] = useState<NoteType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [saveAlert, setSaveAlert] = useState<{msg:string, location:string} | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [content, setContent] = useState<string | undefined>(undefined);
+
+  //Action handler for top toolbar
+  useEffect(() => {
+    console.log()
+      const undoListener = () => {
+        editorRef.current?.chain().focus().undo().run();
+        console.log('Received from Electron: UNDO');
+      };
+  
+      const redoListener = () => {
+        editorRef.current?.chain().focus().undo().run();
+        console.log('Received from Electron: REDO');
+      };
+      const newFileListener = () => {
+        newFile(false);
+      };
+  
+      const openListener = () => {
+        openFile(false);
+      };
+      const saveFileListener = () => {
+        saveFile(false);
+      };
+const exportListener = (_event: IpcRendererEvent, type: string ) => {
+  console.log("Type to convert to is:", type);
+  exportFile(type);
+};
+
+      const saveAsFileListener = () => {
+        saveFile(true);
+      };
+  
+   // Listen for the response from the main process
+      window.electron.ipcRenderer.on('undo', undoListener);
+      window.electron.ipcRenderer.on('redo', redoListener);
+      window.electron.ipcRenderer.on('new-file', newFileListener);
+      window.electron.ipcRenderer.on('open-file', openListener);
+    window.electron.ipcRenderer.on('export-file', exportListener);    
+      window.electron.ipcRenderer.on('save-file', saveFileListener);
+      window.electron.ipcRenderer.on('save-as-file', saveAsFileListener);
+      
+      // Clean up the listener when the component unmounts
+      return () => {
+        window.electron.ipcRenderer.removeAllListeners('undo');
+        window.electron.ipcRenderer.removeAllListeners('redo');
+        window.electron.ipcRenderer.removeAllListeners('new-file');
+        window.electron.ipcRenderer.removeAllListeners('open-file');
+        window.electron.ipcRenderer.removeAllListeners('export-file');
+        window.electron.ipcRenderer.removeAllListeners('save-file');
+        window.electron.ipcRenderer.removeAllListeners('save-as-file');
+  
+      }
+    }, [edited, notes,srcLinks, imgList]); //reload component when a 'saveable' value changes.
+
+    useEffect(()=>{
+      console.log("is content edited?", edited);
+      console.log("is content edited editedRef?", editedRef);
+      console.log("is content edited current?", editedRef.current);
+      //let electron know to save to already file is saves
+      window.electron.setEditStatus(edited);
+    },[edited]);
+  
+  
 
   /*initialize editor reference. 
   We use a reference since i want to be able to create and detroy an editor 
@@ -161,50 +178,14 @@ const SiloTextEditor =() => {
 
   },[toast]);
 
-  useEffect(()=>{
-    console.log("is content edited?", edited);
-    //let electron know to save to already file is saves
-    window.electron.setEditStatus(edited);
-  },[edited]);
-
-  const toggle = (obj :string) =>{
-    switch (obj){
-      case ToggleActions.LINK:
-        setLinkSection(!linkSection);
-        break;
-      case ToggleActions.MB:
-        setMBSection(!mbSection);
-        break;
-    }
-   
-  }
-  
-
-  // const editor: Editor |null = useEditor({
-  //   extensions: [
-  //     StarterKit,
-  //     TextAlign.configure({
-  //       types: ['heading', 'paragraph'],
-  //     }),
-  //   ],
-  //   editorProps: {
-  //     attributes: {
-  //       spellcheck: 'true',
-  //     },
-  //   }
-  // })
-
-  const stringIsEmptyOrUndefined  = (str:string | undefined): boolean => {
-    return str === undefined || str === '';
-  }
 
   const handleUpdate = useCallback(() => {
     const currentContent = editorRef.current?.getText();
-
+    console.log("Handling editor content update...");
     // Check if the content has changed
     if (currentContent !== content && !(stringIsEmptyOrUndefined(currentContent) && stringIsEmptyOrUndefined(content) )) {
-      setEdited(true);         
-
+      setEdited(true);  
+      editedRef.current = true;       
       setContent(currentContent); // Update previous content
     } else {
       setContent(''); // Update previous content
@@ -222,6 +203,26 @@ const SiloTextEditor =() => {
       editorRef.current?.off('update', handleUpdate);
     };
   }, [editorRef.current]);
+
+ 
+  const toggle = (obj :string) =>{
+    switch (obj){
+      case ToggleActions.LINK:
+        setLinkSection(!linkSection);
+        break;
+      case ToggleActions.MB:
+        setMBSection(!mbSection);
+        break;
+      case ToggleActions.NOTES:
+        setNotesSection(!notesSection);
+        break;
+    }
+  }
+
+
+  const stringIsEmptyOrUndefined  = (str:string | undefined): boolean => {
+    return str === undefined || str === '';
+  }
 
   const addImage = async (event:React.MouseEvent<any>) =>{
     console.log("Add image clicked...");
@@ -257,6 +258,7 @@ const SiloTextEditor =() => {
           setImgList([newImage, ...imgList]);
         }
         setEdited(true);
+        editedRef.current = true;
       
     }else{
       result.status = true;
@@ -266,6 +268,7 @@ const SiloTextEditor =() => {
     return result;
   }
 
+  //Remove the image from the list of images. This does not delete the image from the file system, just removes it from the list of images in the mood board.
   const removeImage = async (event:React.MouseEvent<any>, imageName: string) =>{
     console.log("Add image clicked...");
     let result = {
@@ -276,6 +279,7 @@ const SiloTextEditor =() => {
       const newImageList = imgList.filter((item)=> item.name !== imageName);
       setImgList([...newImageList]);
       setEdited(true);
+      editedRef.current = true;
       setToast("Image Successfully Removed");
       result.status = true;
       result. msg =  "Image Successfully Removed";
@@ -287,10 +291,230 @@ const SiloTextEditor =() => {
     }
   }
 
-  const saveFile = async (event : React.MouseEvent<any>, isSaveAs:boolean) =>{
+  const generateSiloNoteTxt = (file: SiloNoteFile): string => {
+const { content, links, imageRefs, notes } = file;
+
+  let txt = `===========================\nSilo Note Export\n===========================\n\n`;
+
+  // Content
+  txt += `Content:\n--------\n${content}\n\n`;
+
+  // Links
+  txt += `Links:\n-------\n`;
+  links.forEach(link => {
+    txt += `• ${link.name}\n`;
+    txt += `  URL: ${link.url}\n`;
+    if (link.notes) txt += `  Note: ${link.notes}\n`;
+    txt += `\n`;
+  });
+
+  // Images
+  txt += `Images:\n--------\n`;
+  imageRefs.forEach(img => {
+    txt += `• ${img.name}\n`;
+    if (img.note) txt += `  Note: ${img.note}\n`;
+    txt += `\n`;
+  });
+
+  // Notes
+  txt += `Notes:\n-------\n`;
+  notes.forEach(note => {
+    txt += `- ${note.name}\n`;
+    if (note.content) txt += `  ${note.content}\n`;
+    txt += `\n`;
+  });
+
+  return txt;
+
+  }
+
+ const generateSiloNotePdf = async (
+  file: SiloNoteFile
+): Promise<Uint8Array> => {
+  const { content, links, imageRefs, notes } = file;
+
+  const pdfDoc = await PDFDocument.create();
+  let page = pdfDoc.addPage([600, 800]);
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const { height } = page.getSize();
+
+  let y = height - 50;
+  const lineHeight = 18;
+
+  const drawText = (text: string, size = 12, indent = 0) => {
+    if (y < 50) {
+      page = pdfDoc.addPage([600, 800]);
+      y = height - 50;
+    }
+    page.drawText(text, {
+      x: 50 + indent,
+      y,
+      size,
+      font,
+      color: rgb(0, 0, 0),
+    });
+    y -= lineHeight;
+  };
+
+  // Content
+  drawText('Content:', 14);
+  drawText(content);
+
+  // Links
+  drawText('');
+  drawText('Links:', 14);
+links.forEach(link => {
+  drawText(`• ${link.name}`, 12, 10);
+  drawText(`  URL: ${link.url}`, 10, 20);
+  if (link.notes) {
+    drawText(`  Note: ${link.notes}`, 10, 20);
+  }
+  drawText(''); // spacing
+});
+
+
+  // Notes
+  drawText('');
+  drawText('Notes:', 14);
+ notes.forEach(note => {
+  drawText(`- ${note.name}`, 12, 10);
+  if (note.content) {
+    drawText(`  ${note.content}`, 10, 20);
+  }
+  drawText(''); // spacing
+});
+
+  // Images
+  drawText('');
+  drawText('Images:', 14);
+  for (const img of imageRefs) {
+    if (!img.data && img.name) {
+    try {
+      img.data = await window.electron.readImageFile(img.name);
+    } catch (err) {
+      console.warn(`Failed to read image file: ${img.name}`, err);
+    }
+  }
+
+  if (!img.data) {
+    drawText(`(Missing image data for ${img.name})`, 10, 10);
+    continue;
+  }
+
+  try {
+    console.log("Image data type:", typeof img.data);
+console.log("IT IS:",img.data);
+    const imageBytes = Uint8Array.from(atob(img.data.split(',')[1]), c => c.charCodeAt(0));
+    const embeddedImage = img.data.startsWith('data:image/jpeg')
+      ? await pdfDoc.embedJpg(imageBytes)
+      : await pdfDoc.embedPng(imageBytes);
+
+    const imgDims = embeddedImage.scale(0.5);
+    if (y - imgDims.height < 50) {
+      page = pdfDoc.addPage([600, 800]);
+      y = height - 50;
+    }
+
+    page.drawImage(embeddedImage, {
+      x: 50,
+      y: y - imgDims.height,
+      width: imgDims.width,
+      height: imgDims.height,
+    });
+
+    y -= imgDims.height + lineHeight;
+
+    if (img.note) {
+      drawText(`Note: ${img.note}`, 10, 10);
+    }
+  } catch (err) {
+    console.log("FAILED TO EMBED IMAGE: ", err);
+    drawText(`(Failed to embed image: ${img.name})`, 10, 10);
+  }
+}
+
+
+  return await pdfDoc.save();
+}
+
+
+
+  const exportFile = async (type:string) =>{
     setIsLoading(true);
-    console.log("SaveFile --- data is: ", event);
-    let path =currentFile;
+    let path =currentFileRef.current;
+      let fileName = 'newFile.sn';
+      if(type ===PDF_FILETYPE){
+        fileName = "newFile.pdf";
+      }else if(type === TXT_FILETYPE){
+        fileName = "newFile.txt";
+      }
+      
+
+      path = await window.electron.saveFileDialog(fileName);
+     console.log("Path to write in: ", path);
+ 
+     //save as file with correct type
+     if(path && !path.endsWith(type)){
+       path = path + type;
+     }
+
+    
+
+    let content = (editorRef.current!=null ? editorRef.current.getText():"");
+    if(path !=null && path.length >0){
+      //clear data to new image list
+      let saveImgList:ImgListType[]=[];
+      imgList.forEach((img) =>{
+        saveImgList.push({id: img.id,name: img.name, note: img.note, data:null})
+      });
+      console.log("saving notes: ", notes);
+      console.log("saving srcLinks: ", srcLinks);
+      console.log("saving content: ", content);
+      console.log("saving saveImgList: ", saveImgList);
+      const newFile : SiloNoteFile = {
+        content: content,
+        links: srcLinks,
+        imageRefs: saveImgList,
+        notes: notes
+      }
+      if (type === PDF_FILETYPE) {
+    console.log("Handing pdf type");
+    const pdfBytes = await generateSiloNotePdf(newFile); // This is a Uint8Array
+
+    // Convert to Node-friendly Buffer
+    const buffer = Buffer.from(pdfBytes);
+console.log("buffer is", buffer);
+        const isWritten = await window.electron.writeFile(path, buffer);
+        console.log("Write success:", isWritten);
+        if(isWritten){
+          setToast('Your file has been saved!');
+        }else{
+          setToast("Error Saving to file.\nPlease check if file is not open or corrupted.")
+        }
+   
+  } else if (type === TXT_FILETYPE) {
+    // TXT is already string, just write it
+    const txtContent = generateSiloNoteTxt(newFile);
+
+    const textWritten = await window.electron.writeFile(path, txtContent);
+    console.log("Write success:", textWritten);
+      if(textWritten){
+          setToast('Your file has been saved!');
+        }else{
+          setToast("Error Saving to file.\nPlease check if file is not open or corrupted.");
+        }
+  }
+    }else{
+      //Message that path is empty
+
+    }
+
+    setIsLoading(false);
+  }
+
+  const saveFile = async (isSaveAs:boolean) =>{
+    setIsLoading(true);
+    let path =currentFileRef.current;
     if(path == null || isSaveAs){
       const fileName = "newFile.sn";
 
@@ -303,18 +527,28 @@ const SiloTextEditor =() => {
      }
     }
     
-
+    //get the content of the editor
     let content = (editorRef.current!=null ? editorRef.current.getText():"");
+    console.log("Content to save: ", content);
+    console.log("rich content HTML: ", editorRef.current?.getHTML());
+        console.log("rich content JSON: ", editorRef.current?.getJSON());
+
+    //get the links and image references
     if(path !=null && path.length >0){
       //clear data to new image list
       let saveImgList:ImgListType[]=[];
       imgList.forEach((img) =>{
         saveImgList.push({id: img.id,name: img.name, note: img.note, data:null})
       });
+      console.log("saving notes: ", notes);
+      console.log("saving srcLinks: ", srcLinks);
+      console.log("saving content: ", content);
+      console.log("saving saveImgList: ", saveImgList);
       const newFile : SiloNoteFile = {
         content: content,
         links: srcLinks,
         imageRefs: saveImgList,
+        notes: notes
       }
       const serializedData = JSON.stringify(newFile);
       const data = await window.electron.writeFile(path, serializedData);
@@ -324,56 +558,75 @@ const SiloTextEditor =() => {
       setToast('Your file has been saved!');
        //Since the file has been saved we are no longer in an 'edited' state
        setEdited(false);
-       setCurrentFile(path);
+       editedRef.current = false;
+       currentFileRef.current = path;
     }else{
       //Message that path is empty
-
+      setToast('Failed to find file path to save to. Please try again.');
     }
 
     setIsLoading(false);
     
   }
+
+  //Update the links in the state when they are edited 
+  // in the SiloToolBar component. 
+  // This function is passed down to the SiloToolBar 
+  // component as a prop and is called when the links are edited. 
+  // It updates the srcLinks state and sets the edited state to true, 
+  // indicating that the content has been modified.
   const updateLinks = (links:SourceLinksType[]) => { 
-    console.log("LINKS HAVE BEEN EDITED!!!");
+    console.log("LINKS HAVE BEEN EDITED!!!", links);
     setSrcLinks(links); 
     setEdited(true);
+    editedRef.current = true;
   
   }
 
-  const newFile = async (event : React.MouseEvent<any>, override: boolean) =>{
-    console.log("triggering new file event: ", event);
+  const updateNotes = (notes:NoteType[]) => { 
+    console.log("NOTES HAVE BEEN EDITED!!!", notes);
+    setNotes(notes); 
+    setEdited(true);
+    editedRef.current = true;
+  
+  }
+
+  const newFile = async ( override: boolean) =>{
     //have screen loader
     console.log("----------NEW FILE ASK-----------");
 
     console.log("edited is: ",edited );
+    console.log("editedRef.current is: ",editedRef.current );
+
     console.log("override is ", override);
 
     //if editor has text, check with user if they want to save it or discard
-    if(edited && !override){
+    if(editedRef.current && !override){
       setSaveAlert({msg:"Your current file has not been saved, would you like to continue?",location: NEW_FILE});
       console.log("ALERT!!!");
     }else{
 
       //clear out current file settings
-      setCurrentFile(null);
+      currentFileRef.current = null;
       //clear UI content 
       startNewEditor();
       setSrcLinks([]);
       setImgList([]);
+      setNotes([]);
         //Since a new file is loaded we are no longer in an 'edited' state
-        console.log("setting content edoted to false")
+        console.log("setting content edited to false")
         setEdited(false);
+        editedRef.current = false;
       }
     }
 
-  const openFile = async (event : React.MouseEvent<any>, override: boolean) =>{
-    console.log("Opening File --- event is: ", event);
+  const openFile = async (override: boolean) =>{
     //have screen loader
     console.log("edited is: ",edited );
     console.log("override is ", override);
 
     //if editor has text, check with user if they want to save it or discard
-    if(edited && !override){
+    if(editedRef.current && !override){
       setSaveAlert({msg:"Your current file has not been saved, would you like to continue?", location: OPEN_FILE});
       console.log("ALERT!!!");
     }else{
@@ -392,17 +645,23 @@ const SiloTextEditor =() => {
           const fileData:SiloNoteFile = JSON.parse(data);
           setSrcLinks(fileData.links);
           setImgList(fileData.imageRefs);
-          editorRef.current.commands.insertContent(fileData.content);
-      
+          if(fileData.notes)
+          setNotes(fileData.notes);
 
+          //convert text to html format before adding to editor
+          const htmlContent = fileData.content.replace(/\n/g, '<br>');
+          editorRef.current.commands.setContent(htmlContent);
         }else{
-          editorRef.current.commands.insertContent(data);
+          const htmlContent = data?.replace(/\n/g, '<br>');
+          if(htmlContent)
+          editorRef.current.commands.setContent(htmlContent);
           //console.log("DATA READ FROM FILE:",data);
         }
         //set current file path
-        setCurrentFile(pathObj.filePaths[0]);
+        currentFileRef.current = pathObj.filePaths[0];
         //Since a new file is loaded we are no longer in an 'edited' state
         setEdited(false);
+        editedRef.current = false;
       }
 
     }catch(e){
@@ -421,18 +680,20 @@ const SiloTextEditor =() => {
   const handleAlertAction = (event: React.MouseEvent<HTMLButtonElement> , location: string, continueOperation: boolean) =>{
     if(continueOperation){
       if(location === OPEN_FILE){
-        openFile(event, true);
+        openFile(true);
 
       }else if (location === NEW_FILE ){
-        newFile(event, true)
+        newFile(true)
 
       }
     }
     setSaveAlert(null);
   }
 
+
   return (
-    <div style={{margin:'auto'}}>
+    <div className='silo-editor-layout'>
+    <div style={editorContainerStyle}>
       {/* <MenuBar editor={editor} />
       <br/> */}
       {/*TOAST/ERROR POPUP*/}
@@ -446,40 +707,32 @@ const SiloTextEditor =() => {
                 {toast}
               </Alert>
             </Slide>
- {/*MOOD BOARD DIALOG POPUP*/}
- <Dialog  open={mbSection} 
- 
- sx={{ 
-  justifyContent: 'center', 
-  alignItems: 'center', 
-  width: 'auto', 
-  height: 'auto', 
-  padding: 0, // Remove padding to allow full space for content
-  overflow: 'auto', // Prevents scrollbars on the dialog content
-}}>
-        <DialogContent sx={{ 
-    display: 'flex', 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    width: 'auto', 
-    height: 'auto', 
-    background: "rgb(244, 208, 172)",  /* Darker border for depth */
-    padding: 0, // Remove padding to allow full space for content
-    overflow: 'auto', // Prevents scrollbars on the dialog content
-  }}>
+        {/*MOOD BOARD DIALOG POPUP*/}
+        <Dialog onClose={() =>toggle(ToggleActions.MB)} open={mbSection} 
+        id='popupMoodBoardDialog'
+        /* overriding the Dialogs paper component max width*/
+        PaperProps={{
+          style:{...corkboardParentDialogStyle}
+        }}
+
+        >
+          {/*Style seems to work better in this case. Mui sx is causing styleing issues with the different native*/}
+        <DialogContent style={corkboardParentDialogContentStyle} >
         <MoodBoardGui imgList={imgList} addImage={addImage} setImageList={setImgList} removeImage={removeImage} onClose={() =>toggle(ToggleActions.MB)}/>
 
           </DialogContent>
         </Dialog>
       {/*TIPTAP EDITOR LOADER VERIFICATION AND MAINTOOLBAR*/}
 
-      {editorRef.current !=null?<MainToolbar
-            editor={editorRef.current}
-            newFileEvent={newFile}
-      saveFileEvent={saveFile}
-      openFileEvent={(event: React.MouseEvent<HTMLButtonElement>)=> openFile(event, false)}
-      toggleEvent={toggle}
-      />:null}
+        {editorRef.current != null && <MainToolbar
+          editor={editorRef.current}
+          newFileEvent={newFile}
+          saveFileEvent={saveFile}
+          exportFileEvent={exportFile}
+          openFileEvent={openFile}
+          toggleEvent={toggle}
+        />}
+
       {saveAlert &&<RetroDialog
         open={saveAlert !== null}
         TransitionComponent={Transition}
@@ -503,7 +756,7 @@ const SiloTextEditor =() => {
     
       {/*MAIN TEXT AREA AND SIDE DRAWERS + BUTTONS*/}
 
-      <Grid container columnSpacing={2} >
+      <Grid className='silo-content-grid' container columnSpacing={0} >
        {isLoading && <CircularProgress style={{
     display: 'flex', 
     justifyContent: 'center', 
@@ -514,28 +767,60 @@ const SiloTextEditor =() => {
     transform: 'translate(-50%, -50%)', 
     zIndex: 900 
   }}    />}
-      <Grid size={12}>
-        <div>
-          <SiloToolBar editor={editorRef.current} toggle={toggle} linkSection={linkSection} 
-          srcLinks={srcLinks} setToast={setToast} updateLinks={updateLinks}/>
-        
-      <br/>
-      <EditorContent editor={editorRef.current}  onChange={()=>{
-        console.log("edited is:", true );
-        setEdited(true)}}/>     
-        </div>
-      
-      </Grid>
-       <Grid 
-       size={3}
-    component="div" 
-    sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}
-  >
-      </Grid>
+      <Grid className='silo-main-grid' size={12} sx={{ display: 'flex' , margin: '1%'}}>
+        <div className='silo-editor-shell'>
+              <SiloToolBar editor={editorRef.current} toggle={toggle} linkSection={linkSection} 
+              srcLinks={srcLinks} setToast={setToast} updateLinks={updateLinks}/>
+          <Grid className='silo-workspace-row'
+            size={12}
+            sx={{
+              display: 'flex', 
+              alignItems: 'flex-start',  // Align to the top instead of flex-end
+              gap: '8px', 
+              flexDirection: 'row', 
+              maxWidth: '100%',
+              flex: 1,
+              minHeight: 0,
+            }}
+          >
+              {/* Conditionally render the NoteListGui */}
+              <div style={{
+                flex: notesSection ? '0 1 33%' : '0 1 0',  // Take 1/3 space when open, none when closed
+                transition: 'flex 0.3s ease',  // Smooth transition
+                ...notesOuterLayerStyle
+              }}>
+                {notesSection ? (
+                  <NoteListGui 
+                    notes={notes} 
+                    setToast={(newToast: string) => setToast(newToast)} 
+                    setNotes={updateNotes} 
+                    toggle={toggle}
+                  />
+                ) : null}
+              </div>
 
+            {/* EditorContent takes up the remaining space */}
+            <div className='scroll-container' style={{
+              flex: notesSection ? '1 0 66%' : '1 0 100%',  // 2/3 when open, 100% when closed
+              transition: 'flex 0.3s ease',  //  Smooth transition
+              ...textEditorOuterLayerStyle
+            }}>
+              <EditorContent className='typing-area'
+                editor={editorRef.current}  
+                onChange={() => {
+                  console.log("EditorContent edited is:", true);
+                  setEdited(true);
+                  editedRef.current = true;
+                }}
+              />
+            </div>
+          </Grid>
+
+        </div>
+      </Grid>
     </Grid>
-    <br/>
      
+    </div>
     </div>
   )
 }

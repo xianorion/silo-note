@@ -28,7 +28,7 @@ const ErrorPopup: FC<ErrorPopUpProps> = ({open,handleClose, error, errorSubtext}
                 transform: 'translate(-50%, -50%)',
                 height: '30%',
                 width: '30%',
-                border: '1px solid #ccc',
+                border: '1px solid var(--silo-ink)',
                 borderRadius: '4px',
                 outline: 'none',
                 boxShadow: '2px 2px 4px black',
