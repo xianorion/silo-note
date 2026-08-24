@@ -460,7 +460,7 @@ console.log("IT IS:",img.data);
 
     
 
-    let content = (editorRef.current!=null ? editorRef.current.getText():"");
+    let content = (editorRef.current!=null ? editorRef.current.getHTML():"");
     if(path !=null && path.length >0){
       //clear data to new image list
       let saveImgList:ImgListType[]=[];
@@ -528,7 +528,7 @@ console.log("buffer is", buffer);
     }
     
     //get the content of the editor
-    let content = (editorRef.current!=null ? editorRef.current.getText():"");
+    let content = (editorRef.current!=null ? editorRef.current.getHTML():"");
     console.log("Content to save: ", content);
     console.log("rich content HTML: ", editorRef.current?.getHTML());
         console.log("rich content JSON: ", editorRef.current?.getJSON());

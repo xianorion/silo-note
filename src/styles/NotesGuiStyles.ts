@@ -2,6 +2,7 @@ export const noteContainerStyle: React.CSSProperties = {
   display: 'flex',          // Enables flexbox
   height: '100%',
   width: '100%',
+  maxHeight: '77vh',
   alignItems: 'flex-start', // Aligns child elements to the left
   flexDirection: 'column',
   background:'var(--silo-paper)',
@@ -21,7 +22,6 @@ export const noteHeaderStyle: React.CSSProperties ={
   padding: '8px 12px',
   borderBottom: '1px solid var(--silo-ink)',
 }
-
 export const noteTextTitleStyle = {
   fontFamily:'Tengoku',
   fontSize: '14px',
@@ -66,7 +66,8 @@ export const iconCircleStyle = {
 
 
 export const noteBankStyle = {
-    maxHeight: '100%', 
+    maxHeight: '70vh', 
+    minHeight: '65vh',
     width:'100%',
       padding: "4px",
       overflow: 'auto',
@@ -111,12 +112,19 @@ export const noteBankStyle = {
               padding: 0,
             }
 
-            export const addNoteBtnStyle = {
+             export const addNoteBtnStyle = {
+                  maxHeight: '70vh', 
+                width:'100%',
+                  overflow: 'auto',
+                  margin: '0px',
+                  display: 'flex',  // Ensures Flexbox layout
+                  justifyContent: 'center',  // Aligns notes in list to center
+                  alignItems: 'center',  
+            
+              gap: '8px',
+              borderTop: '1px solid var(--silo-ink)',
               color:"var(--silo-orange)",
               minWidth: '28px',
-              padding:"4px 6px",
-              border: '1px solid var(--silo-ink)',
-              borderRadius: '6px 8px 5px 7px',
-              background: 'var(--silo-paper-muted)',
             }
+            
             

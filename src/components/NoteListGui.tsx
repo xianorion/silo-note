@@ -15,7 +15,7 @@ import {
 import {
   RemoveCircleOutline
 } from '@mui/icons-material';
-import { noteStyle, noteContainerStyle,noteHeaderStyle, noteBankStyle, iconCircleStyle,noteBankTitleTypographyStyle, noteItemTypographyStyle, noteTextTitleStyle, noteTextContentStyle, noteTitleStyle, noteBankListStyle, addNoteBtnStyle} from '../styles/NotesGuiStyles';
+import { noteStyle, noteBankStyle, noteContainerStyle,noteHeaderStyle, iconCircleStyle, noteItemTypographyStyle, noteTextTitleStyle, noteTextContentStyle, noteTitleStyle, noteBankListStyle, addNoteBtnStyle} from '../styles/NotesGuiStyles';
 import { NoteType, ToggleActions } from 'types/GlobalTypes';
 
 interface NoteGuiProps {
@@ -180,11 +180,11 @@ const NoteListGui : FC<NoteGuiProps> = ({notes, setToast, setNotes, toggle}) =>{
             </List>
             
          </div>
-         <div style={noteBankStyle}>
-         <Button style={addNoteBtnStyle} onClick={handleClickOpen}>
+         <Button
+            style={addNoteBtnStyle} 
+            onClick={handleClickOpen}>
           <PostAddRounded />
         </Button>
-         </div>
        
           
           <div>
