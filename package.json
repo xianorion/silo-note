@@ -4,7 +4,7 @@
   "description": "A notepad app for creatives",
   "private": true,
   "main": "./public/electron.js",
-  "author": "Mack Cunningham <mackattacksart@gmail.com>",
+  "author": "Mack Cunningham",
   "homepage": "./",
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -23,12 +23,25 @@
     "@tiptap/react": "^2.10.3",
     "@tiptap/starter-kit": "^2.10.3",
     "cross-env": "^7.0.3",
-    "electron-icon-maker": "^0.0.5",
     "electronmon": "^2.0.3",
+    "electron": "43.2.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "generate:icons": "node ./scripts/generate-icons.js",
+    "start": "export BROWSER=none && react-scripts start",
+    "electron": "electron .",
+    "build": "npm run generate:icons && react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "package": "npm run generate:icons && electron-packager .",
+    "electron:start": "concurrently -k \"cross-env BROWSER=none npm start\" \"wait-on http://localhost:3000 && electronmon .\"",
+    "electron:package:mac": "npm run generate:icons && npm run build && electron-builder -m -c.extraMetadata.main=build/electron.js",
+    "electron:package:win": "npm run generate:icons && npm run build && electron-builder -w -c.extraMetadata.main=build/electron.js",
+    "electron:package:linux": "npm run generate:icons && npm run build && electron-builder --linux --arm64 --publish never -c.extraMetadata.main=build/electron.js"
   },
   "build": {
     "appId": "com.electron.silonote",
@@ -47,30 +60,18 @@
     },
     "mac": {
       "target": "dmg",
-      "icon": "build/img/SiloNoteLogo.png"
+      "icon": "build/icons/icon.icns"
     },
     "win": {
       "target": "nsis",
-      "icon": "build/icons/256x256.png"
+      "icon": "build/icons/icon.ico"
     },
     "linux": {
       "target": [
         "deb"
       ],
-      "icon": "build/icons/"
+      "icon": "build/icons"
     }
-  },
-  "scripts": {
-    "start": "export BROWSER=none && react-scripts start",
-    "electron": "electron .",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "package": "electron-packager .",
-    "electron:start": "concurrently -k \"cross-env BROWSER=none npm start\" \"wait-on http://localhost:3000 && electronmon .\"",
-    "electron:package:mac": "npm run build && electron-builder -m -c.extraMetadata.main=build/electron.js",
-    "electron:package:win": "npm run build && electron-builder -w -c.extraMetadata.main=build/electron.js",
-    "electron:package:linux": "npm run build && electron-builder --linux --arm64 --publish never -c.extraMetadata.main=build/electron.js"
   },
   "eslintConfig": {
     "extends": [
@@ -95,10 +96,11 @@
   "devDependencies": {
     "concurrently": "^6.4.0",
     "css-loader": "^7.1.2",
-    "electron": "^33.3.1",
+    "electron": "^43.2.0",
     "electron-builder": "^23.0.2",
     "electron-is-dev": "^3.0.1",
     "electron-packager": "^17.1.2",
+    "png2icons": "^2.0.1",
     "sass": "^1.83.0",
     "sass-loader": "^16.0.4",
     "style-loader": "^4.0.0",

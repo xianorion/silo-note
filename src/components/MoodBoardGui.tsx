@@ -69,9 +69,11 @@ const MoodBoardGui: FC<MoodBoardGuiProps> = ({imgList, addImage, removeImage, se
 
     return(
         <Paper
+        id='moodboard-paper'
         sx={corkboardStyle}
         >
-        <Box >
+        <Box 
+        id='moodboard-box'>
             <Grid container spacing={2}
             sx={{padding:'10px'}}>
                 <Grid size={10}>
@@ -96,11 +98,12 @@ const MoodBoardGui: FC<MoodBoardGuiProps> = ({imgList, addImage, removeImage, se
             >
                       <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} onDragStart={()=> setIsDragging(true)}>
                       <SortableContext  items={imgList} strategy={rectSortingStrategy}>
-                    <ImageList sx={{ height: '100%', width: '100%', overflowX: 'auto',overflowY: 'auto',  padding:'5px', margin:'5px'}} >
+                    <ImageList sx={{ height: '100%', width: '100%', overflowX: 'auto',overflowY: 'auto', rowGap: '2vh', columnGap: '2vw', padding: 0, margin: 0}} >
                     
                     {imgList && imgList.map((item)=>(
                           item && 
-                            <SortableImageItem key={item.id} removeImageFromList={removeImageFromList} item={item} dragging={isDragging} setSelectedItem={setSelectedItem}/>
+                            <SortableImageItem 
+                            key={item.id} removeImageFromList={removeImageFromList} item={item} dragging={isDragging} setSelectedItem={setSelectedItem}/>
                             ))}
                 
               

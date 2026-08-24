@@ -266,6 +266,7 @@ const SiloTextEditor =() => {
     return result;
   }
 
+  //Remove the image from the list of images. This does not delete the image from the file system, just removes it from the list of images in the mood board.
   const removeImage = async (event:React.MouseEvent<any>, imageName: string) =>{
     console.log("Add image clicked...");
     let result = {
@@ -287,6 +288,12 @@ const SiloTextEditor =() => {
     }
   }
 
+  //SaveFile: this function saves the current content of the editor to a file. 
+  // If the current file path is null or if the user chooses "Save As", 
+  // it prompts the user to select a file path. It then serializes the content, 
+  // links, and image references into a SiloNoteFile object and writes it to 
+  // the specified path. After saving, it updates the state to reflect that the 
+  // file has been saved and is no longer in an edited state.
   const saveFile = async (event : React.MouseEvent<any>, isSaveAs:boolean) =>{
     setIsLoading(true);
     console.log("SaveFile --- data is: ", event);
@@ -303,8 +310,9 @@ const SiloTextEditor =() => {
      }
     }
     
-
+    //get the content of the editor
     let content = (editorRef.current!=null ? editorRef.current.getText():"");
+    //get the links and image references
     if(path !=null && path.length >0){
       //clear data to new image list
       let saveImgList:ImgListType[]=[];
@@ -327,12 +335,19 @@ const SiloTextEditor =() => {
        setCurrentFile(path);
     }else{
       //Message that path is empty
-
+      setToast('Failed to find file path to save to. Please try again.');
     }
 
     setIsLoading(false);
     
   }
+
+  //Update the links in the state when they are edited 
+  // in the SiloToolBar component. 
+  // This function is passed down to the SiloToolBar 
+  // component as a prop and is called when the links are edited. 
+  // It updates the srcLinks state and sets the edited state to true, 
+  // indicating that the content has been modified.
   const updateLinks = (links:SourceLinksType[]) => { 
     console.log("LINKS HAVE BEEN EDITED!!!");
     setSrcLinks(links); 
@@ -432,7 +447,7 @@ const SiloTextEditor =() => {
   }
 
   return (
-    <div style={{margin:'auto'}}>
+    <div className='silo-editor-layout'>
       {/* <MenuBar editor={editor} />
       <br/> */}
       {/*TOAST/ERROR POPUP*/}
@@ -503,7 +518,7 @@ const SiloTextEditor =() => {
     
       {/*MAIN TEXT AREA AND SIDE DRAWERS + BUTTONS*/}
 
-      <Grid container columnSpacing={2} >
+      <Grid className='silo-content-grid' container columnSpacing={2} >
        {isLoading && <CircularProgress style={{
     display: 'flex', 
     justifyContent: 'center', 
@@ -514,27 +529,19 @@ const SiloTextEditor =() => {
     transform: 'translate(-50%, -50%)', 
     zIndex: 900 
   }}    />}
-      <Grid size={12}>
-        <div>
+      <Grid className='silo-editor-column' size={12}>
+        <div className='silo-editor-content'>
           <SiloToolBar editor={editorRef.current} toggle={toggle} linkSection={linkSection} 
           srcLinks={srcLinks} setToast={setToast} updateLinks={updateLinks}/>
-        
-      <br/>
-      <EditorContent editor={editorRef.current}  onChange={()=>{
+
+      <EditorContent className='silo-editor-content-area' editor={editorRef.current}  onChange={()=>{
         console.log("edited is:", true );
         setEdited(true)}}/>     
         </div>
       
       </Grid>
-       <Grid 
-       size={3}
-    component="div" 
-    sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}
-  >
-      </Grid>
 
     </Grid>
-    <br/>
      
     </div>
   )

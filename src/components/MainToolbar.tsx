@@ -144,7 +144,7 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
     };
 
     return (
-      <RetroToolbar style={{display: 'flex', justifyContent: 'normal', alignItems: 'center', width: '80%' }} >
+      <RetroToolbar>
       <div >
         <Button 
         sx={retroDropDownBtnStyle}

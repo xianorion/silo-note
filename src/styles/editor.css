@@ -2,42 +2,164 @@
 
 /* Global styles for Tiptap */
 
+.silo-editor-layout {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  color: #353535;
+}
+
+.silo-content-grid {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.silo-editor-column {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+}
+
+.silo-editor-content {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  height: 100%;
+}
+
+.silo-editor-content-area {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 6px 16px 12px;
+}
+
 .tiptap {
-  font-family:'Poiret-One-Latin';
-  width: 20%; 
-  height: 70vh;
-  width: 90vw;
-  background: #d8c5c5; 
-  border: 4px solid #43281C; 
-  box-shadow: 15px 10px 0px #a37c6f; 
-  color: #333;
-  padding: 10px 20px; 
-  outline: 'none';
-  text-align: 'left';
-  border-radius: 8px;
-  margin: auto;
-  background-color: #fdf0dc;
-  font-family: Arial, sans-serif;
+  font-family: 'Courier New', monospace;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  box-sizing: border-box;
+  background: #f6f1e8;
+  border: 1px solid #353535;
+  box-shadow: 2px 2px 0px #b9b2a7, -1px 0px 0px #aaa096;
+  color: #353535;
+  padding: 22px 28px;
+  outline: none;
+  text-align: left;
+  border-radius: 8px 6px 9px 7px;
+  margin: 0;
+  background-color: #f6f1e8;
   font-size: 16px;
+  line-height: 1.65;
   overflow-y: auto;
 
 }
 
 .tiptap:focus{
-  outline: none; /* Removes the default outline */
+  outline: 2px solid #aaa096;
+  outline-offset: -5px;
 }
 
 .icon{
-  color: #000;
+  width: 18px;
+  height: 18px;
+  color: #353535;
 }
 
 .MenuToolbar{
   width: 100%;
-  margin: auto;
+  margin: 0;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+.MenuToolbar > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+}
+
+.MenuToolbar > div:first-child h1 {
+  margin: 0;
+}
+
+.MenuToolbar > div:nth-child(2) {
+  margin: 0;
+  padding: 4px 0 0;
+  min-height: 42px;
+}
+
+.MenuToolbar .MuiToolbar-root {
+  padding: 0;
+  min-height: 42px;
+}
+
+.MenuToolbar .MuiButtonBase-root {
+  margin-right: 3px;
+  border-radius: 6px 8px 5px 7px;
+  box-shadow: 1px 0 0 #353535;
+}
+
+.MuiMenu-paper {
+  border: 1px solid #353535;
+  border-radius: 6px 8px 7px 5px;
+  box-shadow: 2px 2px 0 #b9b2a7 !important;
+}
+
+.mood-image-item {
+  position: relative;
+  min-width: 0;
+}
+
+.mood-image-toolbar {
+  z-index: 3;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.mood-image-toolbar-hidden {
+  display: none !important;
+}
+
+.mood-image-item:hover .mood-image-toolbar {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .tiptap .ProseMirror {
-  padding: 10px;
+  padding: 0;
   font-size: 16px;
 }
 
@@ -62,7 +184,8 @@
 }
 
 #logo{
-  width: 25vw;
-  filter: invert(1) sepia(1) saturate(70) hue-rotate(0deg) brightness(0.2) contrast(1);
+  width: 138px;
+  max-width: 45vw;
+  filter: grayscale(1) contrast(1.5);
 }
 

@@ -1,46 +1,49 @@
 export const linkBankContainerStyle = {
-    width: '50vw',  // Customize the width as per your requirement
-    maxWidth: '50vw', // Max width of the Paper component
-    maxHeight: '100vh', // Prevent the Paper from getting too large vertically
-      padding: "30px",
+    width: 'min(420px, 88vw)',
+    maxWidth: '88vw',
+    maxHeight: '100vh',
+      padding: "16px",
       justifyContent: 'center',
       alignItems: 'center',
       overflow: 'hidden',
       margin: '0px',
-      background: "rgba(213, 33, 33, 0)",
+      background: "#f6f1e8",
+      color: '#353535',
 
 }
 
 
 export const linkBankStyle = {
-    maxHeight: '80%', 
-      padding: "5px",
+    maxHeight: '80%',
+      padding: "4px 0",
       justifyContent: 'center',
       alignItems: 'center',
       overflow: 'auto',
       margin: '0px',
-      background: "rgba(181, 54, 54, 0)",
+      background: "transparent",
     };
   
 
     export const linkIconStyle = {
-        width: '5vw',  // Customize the width as per your requirement
-        height: 'auto', // Prevent the Paper from getting too large vertically
+        width: '18px',
+        height: '18px',
           justifyContent: 'center',
           alignItems: 'center',
           overflow: 'auto',
           margin: '0px',
-          background: "rgba(0, 0, 0,0)",
-          color:"rgb(0, 0, 0)",
+          background: "transparent",
+          color:"#353535",
         };
 
         export const linkBankTitleTypographyStyle ={
-            fontSize: '30px',                           // Change font size
+            fontSize: '19px',
             fontWeight: 'bold',   
+            color: '#353535',
             }
 
             export const linkItemTypographyStyle ={
-                fontSize: '25px',                           // Change font size
+                fontSize: '14px',
+                color: '#353535',
 
             }
             

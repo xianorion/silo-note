@@ -2,15 +2,33 @@ import { styled } from '@mui/material';
 
 
 export const RetroToolbar = styled('div')({
-   margin:'2px',
-   width: '80vw'
+  display: 'flex',
+  alignItems: 'center',
+  margin: '12px 16px 4px',
+  width: 'calc(100% - 32px)',
+  minHeight: '42px',
+  background: '#f6f1e8',
+  border: '1px solid #353535',
+  borderRadius: '7px 9px 6px 8px',
+  boxShadow: '1px 1px 0 #353535, -1px 0 0 #aaa096',
+  overflow: 'hidden',
+  boxSizing: 'border-box',
 
 });
 
 
 export const retroDropDownBtnStyle = {
-    padding: "10px 20px",
-    color: "rgb(93, 83, 67)",
+    minWidth: "62px",
+    padding: "6px 10px",
+    color: "#353535",
+    borderRight: '1px solid #353535',
+    borderRadius: 0,
+    textTransform: 'none',
+    fontFamily: 'Tengoku, "Courier New", monospace',
+    fontSize: '0.78rem',
+    '&:hover': {
+      backgroundColor: '#ded8cd',
+    },
 
 };
 

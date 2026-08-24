@@ -34,12 +34,17 @@ const SortableImageItem: FC<SortableImageItemProps> = ({removeImageFromList, set
     }
 
 
-    return <Slide in timeout={1000} key={item.id}>
+    return <Slide 
+          style={{display:'flex', justifyContent:'center', alignItems:'center', width:'100%', height:'100%'}}
+
+    in timeout={1000} key={item.id}>
       <ImageListItem
+              className="mood-image-item"
              onMouseEnter={() => setShowTrashIcon(true)}
              onMouseLeave={() => setShowTrashIcon(false)}
       >
       <ImageListItemBar 
+        className={`mood-image-toolbar${dragging ? ' mood-image-toolbar-hidden' : ''}`}
         position="top"
         style={corkboardImageToolBar}
         actionIcon={showTrashIcon && !dragging && 
@@ -49,20 +54,20 @@ const SortableImageItem: FC<SortableImageItemProps> = ({removeImageFromList, set
              
         }}  >
              <IconButton
+           sx={{ padding: '2px' }}
        onClick={()=> setSelectedItem(item.data)}
      >
      <Tooltip id="button-zoom" title="zoom">
-         <ZoomIn sx={{ color: 'white', width: '3vw', height: '3vw', background:'rgba(87, 62, 57, 0.4)'}} />
+         <ZoomIn sx={{ color: 'white', width: 14, height: 14, background:'rgba(53, 53, 53, 0.72)' }} />
        </Tooltip>
      </IconButton>
 <IconButton
-       
+  sx={{ padding: '2px', color: 'white', "&:hover": { color: "black" }, zIndex: 800 }}
 
        onClick={handleRemove}
-       sx={{ color: 'white', "&:hover": { color: "black" }, zIndex: 800 }}
      >
        <Tooltip id="button-remove" title="remove">
-         <Delete sx={{ color: 'white', width: '3vw', height: '3vw',background:'rgba(87, 62, 57, 0.4)', }} />
+         <Delete sx={{ color: 'white', width: 14, height: 14, background:'rgba(53, 53, 53, 0.72)' }} />
        </Tooltip>
      </IconButton>
   

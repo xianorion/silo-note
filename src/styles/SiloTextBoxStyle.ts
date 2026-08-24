@@ -17,12 +17,16 @@ interface RetroBtnProps extends React.ComponentProps<typeof  Button>{
 export const GuiStyle: Properties<string | number, string & {}> = {
     
     width: '100%',
-    height: '100%',
+  height: '100vh',
+  maxWidth: '100vw',
+  maxHeight: '100vh',
     display: 'flex',          // Enables flexbox
     flexDirection: 'column',  // Stacks child elements vertically
-    justifyContent: 'center', // Centers the stack vertically
+  justifyContent: 'flex-start',
     alignItems: 'flex-start', // Aligns child elements to the left
     margin: 'auto',           // Centers the flex container in its parent
+  boxSizing: 'border-box',
+  overflow: 'hidden',
 
 }
 
@@ -39,7 +43,7 @@ export const mainToolBarStyle: Properties<string | number, string & {}> = {
 }
 
 export const linkDrawerStyle = {
-  backgroundColor:'rgb(237, 217, 186)',
+  backgroundColor:'#f6f1e8'
 };
 
 export const toastStyle = {
@@ -60,19 +64,29 @@ export const toastStyle = {
 
 
 export const RetroBtn = styled(Button)<RetroBtnProps>(({bgcolor, bordercolor}) =>({
-    background: `${bgcolor != null?bgcolor:"#fdf0dc"}`,
-    width: '5vw',
-    border: `2px solid ${bordercolor != null?bordercolor:"#43281C"}`,
-    boxShadow: "3px 3px 0px #888",
-    color:"#43281C",
-    padding:"10px 20px",
+  background: `${bgcolor != null?bgcolor:"#f6f1e8"}`,
+  minWidth: '6vw',
+  minHeight: '5vh',
+  border: `1px solid ${bordercolor != null?bordercolor:"#353535"}`,
+  borderRadius: '6px 8px 7px 5px',
+  boxShadow: '1px 0 0 #353535',
+  color:"#353535",
+  padding:"4px 5px",
+  textTransform: 'none',
+  fontFamily: 'Tengoku, "Courier New", monospace',
+    fontSize: '0.65rem',
+  lineHeight: 1,
+    '& .MuiSvgIcon-root': {
+      width: '14px',
+      height: '14px',
+    },
     "&:active":{
-        boxShadow: "1px 1px 0px #D4C7B4",
-        transform: "translate(2px, 2px)"
+    backgroundColor: '#ded8cd',
+    transform: "translateY(1px)"
     },
     "&:hover":{
-    backgroundColor:'rgb(237, 217, 186)',
-    transition: 'background-color 0.3s ease-in-out' 
+  backgroundColor:'#ded8cd',
+  transition: 'background-color 0.15s ease-in-out'
     },
 }));
 
@@ -84,17 +98,17 @@ export const iconStyles = {
 
   export const RetroDialog = styled(Dialog)({
     "& .MuiPaper-root": {
-      backgroundColor: "#F8F4E8", 
-      border: "3px solid #000",
-      borderRadius: "0px",
-      boxShadow: "6px 6px 0px #A8A29E",
+    backgroundColor: "#f6f1e8", 
+    border: "1.5px solid #353535",
+    borderRadius: "9px",
+    boxShadow: "4px 4px 0px #b9b2a7",
     },
   });
   
   export const RetroDialogTitle = styled(DialogTitle)({
-    backgroundColor: "rgb(177, 155, 122)", 
-    color: "#000",
-    padding: "5px 10px",
+    backgroundColor: "#ded8cd", 
+    color: "#353535",
+    padding: "8px 12px",
     fontWeight: "bold",
     display: "flex",
     justifyContent: "space-between",

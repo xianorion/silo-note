@@ -1,55 +1,56 @@
 export const corkboardStyle = {
-  width: '80vw',  // Customize the width as per your requirement
-  maxWidth: '90vw', // Max width of the Paper component
-  maxHeight: '90vh', // Prevent the Paper from getting too large vertically
-    padding: "10px",
+  width: 'min(760px, 88vw)',
+  maxWidth: '88vw',
+  maxHeight: '88vh',
+    padding: "12px",
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'auto',
-    backgroundColor: '#d6ad7f', /* Corkboard color */
-    border: "20px solid rgb(244, 208, 172)",  /* Darker border for depth */
-    borderRadius: "10px",
+    backgroundColor: '#f6f1e8',
+    border: "1px solid #353535",
+    borderRadius: "8px 6px 9px 7px",
     margin: '0px',
-    boxShadow: "inset 0 0 10px rgba(0, 0, 0, 0.7), 0 4px 10px rgba(0, 0, 0, 0.2)", /* Depth shadows */
-    background: "rgb(201, 159, 94)",
-    backgroundSize: "cover",
+    boxShadow: "3px 3px 0 #b9b2a7, -1px 0 #aaa096",
+    background: "#f6f1e8",
+    boxSizing: 'border-box',
   };
   
 
 export const corkboardImage: React.CSSProperties = {
-    width:'30vw',
-    minWidth:'10vw',
+  width:'100%',
+  minWidth:0,
     height:'auto',
     textAlign: 'center',
-    boxShadow: "3px 3px 0px rgba(0, 0, 0, 0.2)",
+    border: '1px solid #353535',
+    borderRadius: '5px 7px 6px 4px',
+    boxShadow: "2px 2px 0px #b9b2a7",
  
 };
 
 export const corkboardImageToolBar: React.CSSProperties = {
-  background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, ' +
-    'rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 0%)',
+  background: 'rgba(53, 53, 53, 0.82)',
   width: 'auto',
   height: 'auto',
   display: 'flex',
-  padding: '5px',
+  padding: '2px',
   flexDirection: 'row',
   textAlign: 'center'
 };
 
   
   export const corkboardTitle = {
-    fontSize: "24px",
+    fontSize: "18px",
     fontWeight: "bold",
-    color: "#4e3b31", /* Dark brown text */
+    color: "#353535",
     textAlign: "center",
-    marginBottom: "20px"
+    marginBottom: "8px"
   };
   
 
   export const corkboardTextOptions = {
-    fontSize: "16px",
+    fontSize: "13px",
     fontWeight: "bold",
-    color: "#4e3b31", /* Dark brown text */
+    color: "#353535",
     textAlign: "center",
     marginBottom: "20px"
   };

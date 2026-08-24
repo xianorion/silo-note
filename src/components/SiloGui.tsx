@@ -6,7 +6,7 @@ import { createTheme, ThemeProvider, Typography } from '@mui/material';
 // Create a theme with custom typography
 const theme = createTheme({
   typography: {
-    fontFamily: '"BaksoSapi"', // Your custom font family
+    fontFamily: '"Tengoku"', // Your custom font family
     fontSize:26
   },
 });
