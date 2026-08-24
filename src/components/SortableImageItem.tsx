@@ -54,16 +54,16 @@ const SortableImageItem: FC<SortableImageItemProps> = ({removeImageFromList, set
        onClick={()=> setSelectedItem(item.data)}
      >
      <Tooltip id="button-zoom" title="zoom">
-         <ZoomIn sx={{ color: 'white', width: 14, height: 14, background:'rgba(53, 53, 53, 0.72)' }} />
+         <ZoomIn sx={{ color: 'var(--silo-paper)', width: 14, height: 14, background:'rgba(75, 42, 27, 0.82)' }} />
        </Tooltip>
      </IconButton>
 <IconButton
-  sx={{ padding: '2px', color: 'white', "&:hover": { color: "black" }, zIndex: 800 }}
+  sx={{ padding: '2px', color: 'var(--silo-paper)', "&:hover": { color: "var(--silo-orange)" }, zIndex: 800 }}
 
        onClick={handleRemove}
      >
        <Tooltip id="button-remove" title="remove">
-         <Delete sx={{ color: 'white', width: 14, height: 14, background:'rgba(53, 53, 53, 0.72)' }} />
+        <Delete sx={{ color: 'var(--silo-paper)', width: 14, height: 14, background:'rgba(75, 42, 27, 0.82)' }} />
        </Tooltip>
      </IconButton>
   

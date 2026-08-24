@@ -7,8 +7,8 @@ export const linkBankContainerStyle = {
       alignItems: 'center',
       overflow: 'hidden',
       margin: '0px',
-      background: "#f6f1e8",
-      color: '#353535',
+      background: "var(--silo-paper)",
+      color: 'var(--silo-ink)',
 
 }
 
@@ -32,17 +32,17 @@ export const linkBankStyle = {
           overflow: 'auto',
           margin: '0px',
           background: "transparent",
-          color:"#353535",
+          color:"var(--silo-orange)",
         };
 
         export const linkBankTitleTypographyStyle ={
             fontSize: '19px',
             fontWeight: 'bold',   
-            color: '#353535',
+            color: 'var(--silo-ink)',
             }
 
             export const linkItemTypographyStyle ={
-                color: '#353535',
+                color: 'var(--silo-ink)',
                 fontSize: '2.5vw',          
             }
             

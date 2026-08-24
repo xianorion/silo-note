@@ -85,7 +85,7 @@ const MoodBoardGui: FC<MoodBoardGuiProps> = ({imgList, addImage, removeImage, se
         width: 20,
         height: 20,
         cursor: 'pointer',
-        color: '#353535',
+        color: 'var(--silo-ink)',
         transition: 'transform 0.2s ease-in-out',
         ':hover': { transform: 'scale(1.1)' },
       }}
@@ -101,9 +101,9 @@ const MoodBoardGui: FC<MoodBoardGuiProps> = ({imgList, addImage, removeImage, se
       width: '100%',
       overflow: 'auto',
       padding: '4px',
-      border: '1px solid #353535',
+      border: '1px solid var(--silo-ink)',
       borderRadius: '5px 7px 6px 4px',
-      backgroundColor: '#e9e4dc',
+      backgroundColor: 'var(--silo-paper-muted)',
     }}
   >
     <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} onDragStart={() => setIsDragging(true)}>
@@ -130,8 +130,8 @@ const MoodBoardGui: FC<MoodBoardGuiProps> = ({imgList, addImage, removeImage, se
     sx={{
       padding: '8px',
       textAlign: 'center',
-      borderTop: '1px solid #353535',
-      backgroundColor: '#f6f1e8',
+      borderTop: '1px solid var(--silo-ink)',
+      backgroundColor: 'var(--silo-paper)',
     }}
   >
     <Button

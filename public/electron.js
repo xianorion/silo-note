@@ -210,8 +210,11 @@ app.whenReady().then(() => {
 
 // Listen for changes to the save state from the renderer (React)
 ipcMain.on('set-edit-status', (event, isEdited) => {
-  console.log("Is content isContentEdited?", isContentEdited);
+  console.log("isContentEdited current?", isContentEdited);
+
   isContentEdited = isEdited;
+      console.log("isContentEdited new?", isContentEdited);
+
 });
 
 });

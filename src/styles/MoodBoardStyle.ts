@@ -27,7 +27,7 @@ export const corkboardParentDialogContentStyle = {
   display: 'flex', // Flexbox to center content
   justifyContent: 'center', // Center horizontally
   alignItems: 'center', // Center vertically
-  background: "#e9e4dc",
+  background: "var(--silo-paper-muted)",
 
 };
 
@@ -42,12 +42,12 @@ export const corkboardStyle = {
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
-    backgroundColor: '#f6f1e8',
-    border: "1px solid #353535",
+    backgroundColor: 'var(--silo-paper)',
+    border: "1px solid var(--silo-ink)",
     borderRadius: "8px 6px 9px 7px",
     margin: '0px',
-    boxShadow: "3px 3px 0 #b9b2a7, -1px 0 #aaa096",
-    background: "#f6f1e8",
+    boxShadow: "3px 3px 0 var(--silo-shadow), -1px 0 var(--silo-shadow)",
+    background: "var(--silo-paper)",
     boxSizing: 'border-box',
     display: 'flex',
     flexDirection: 'column',
@@ -60,10 +60,10 @@ export const corkboardImage: React.CSSProperties = {
     height:'auto',
     display: 'flex',
     flexDirection: 'column',
-    background: '#f6f1e8',
-    border: '1px solid #353535',
+    background: 'var(--silo-paper)',
+    border: '1px solid var(--silo-ink)',
     borderRadius: '5px 7px 6px 4px',
-    boxShadow: '2px 2px 0px #b9b2a7',
+    boxShadow: '2px 2px 0px var(--silo-shadow)',
     padding: '4px',
     overflow: 'hidden',
 };
@@ -72,7 +72,7 @@ export const corkboardImage: React.CSSProperties = {
 export const corkboardImageToolBar: React.CSSProperties = {
 
   width: 'auto',
-  background: 'rgba(53, 53, 53, 0.82)',
+  background: 'rgba(75, 42, 27, 0.82)',
   height: 'auto',
   display: 'flex',
   padding: '2px',
@@ -85,7 +85,7 @@ export const corkboardImageToolBar: React.CSSProperties = {
 
     fontSize: "18px",
     fontWeight: "bold",
-    color: "#353535",
+    color: "var(--silo-ink)",
     textAlign: "center",
 
     marginBottom: "8px",
@@ -95,7 +95,7 @@ export const corkboardImageToolBar: React.CSSProperties = {
   export const corkboardTextOptions = {
     fontSize: "13px",
     fontWeight: "bold",
-    color: "#353535",
+    color: "var(--silo-ink)",
     textAlign: "center",
     marginBottom: "20px"
   };

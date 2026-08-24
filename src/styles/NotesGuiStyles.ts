@@ -4,10 +4,10 @@ export const noteContainerStyle: React.CSSProperties = {
   width: '100%',
   alignItems: 'flex-start', // Aligns child elements to the left
   flexDirection: 'column',
-  background:'#f6f1e8',
-  border: '1px solid #353535',
+  background:'var(--silo-paper)',
+  border: '1px solid var(--silo-ink)',
   borderRadius: "8px 6px 9px 7px",
-  boxShadow: '2px 2px 0 #b9b2a7',
+  boxShadow: '2px 2px 0 var(--silo-shadow)',
   overflowY: 'auto',
 
 }
@@ -19,14 +19,14 @@ export const noteHeaderStyle: React.CSSProperties ={
   alignItems: 'center',  // Vertically align items to the center
   gap: '8px',
   padding: '8px 12px',
-  borderBottom: '1px solid #353535',
+  borderBottom: '1px solid var(--silo-ink)',
 }
 
 export const noteTextTitleStyle = {
   fontFamily:'Tengoku',
   fontSize: '14px',
   margin: '0px 10px 0px 0px',
-  color: '#353535',
+  color: 'var(--silo-ink)',
 
 }
 export const noteTextContentStyle = {
@@ -47,13 +47,13 @@ export const noteStyle: React.CSSProperties = {
   display: 'flex',
   width: '100%',
   minWidth: '100%',
-  backgroundColor: '#f6f1e8',
+  backgroundColor: 'var(--silo-paper)',
   padding:  '8px 10px',
-  border: '1px solid #353535',
+  border: '1px solid var(--silo-ink)',
   borderRadius: '6px 8px 5px 7px',
   gridTemplateRows:'auto auto 1fr auto',
   gap: '6px',
-  boxShadow: "1px 1px 0px #b9b2a7",
+  boxShadow: "1px 1px 0px var(--silo-shadow)",
   marginBottom: '6px'
 
 }
@@ -86,21 +86,21 @@ export const noteBankStyle = {
           overflow: 'auto',
           margin: '0px',
           background: "transparent",
-          color:"#353535",
+          color:"var(--silo-orange)",
         };
 
         export const noteBankTitleTypographyStyle ={
             fontSize: '18px',
             fontWeight: 'bold',  
             width: '100%',
-            color: '#353535',
+            color: 'var(--silo-ink)',
  
             }
 
             export const noteItemTypographyStyle ={
                 fontSize: '16px',
                 width: '100%',
-                color: '#353535',
+                color: 'var(--silo-ink)',
 
             }
 
@@ -112,11 +112,11 @@ export const noteBankStyle = {
             }
 
             export const addNoteBtnStyle = {
-              color:"#353535",
+              color:"var(--silo-orange)",
               minWidth: '28px',
               padding:"4px 6px",
-              border: '1px solid #353535',
+              border: '1px solid var(--silo-ink)',
               borderRadius: '6px 8px 5px 7px',
-              background: '#ded8cd',
+              background: 'var(--silo-paper-muted)',
             }
             

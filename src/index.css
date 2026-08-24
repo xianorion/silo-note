@@ -8,6 +8,16 @@ body,
   overflow: hidden;
 }
 
+:root {
+  --silo-ink: #4b2a1b;
+  --silo-orange: #dc6b3f;
+  --silo-orange-dark: #b95732;
+  --silo-paper: #fffaf0;
+  --silo-paper-muted: #f2eadc;
+  --silo-shadow: #464646;
+  --silo-grid: #ded4c5;
+}
+
 *,
 *::before,
 *::after {
@@ -51,17 +61,17 @@ code {
 }
 
 body {
-  background-color: #e9e4dc;
-  background-image: radial-gradient(#cfc8bd 0.7px, transparent 0.7px);
+  background-color: var(--silo-paper-muted);
+  background-image: radial-gradient(var(--silo-grid) 0.7px, transparent 0.7px);
   background-size: 9px 9px;
-  color: #353535;
+  color: var(--silo-ink);
   font-family: 'Tengoku', 'Courier New', monospace;
 }
 
 .window {
-  background: #f6f1e8;
-  border: 1.5px solid #353535;
+  background: var(--silo-paper);
+  border: 1.5px solid var(--silo-ink);
   border-radius: 8px;
-  box-shadow: 4px 4px 0px #b9b2a7;
+  box-shadow: 4px 4px 0px var(--silo-shadow);
   padding: 12px;
 }

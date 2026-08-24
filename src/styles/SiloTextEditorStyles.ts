@@ -11,9 +11,9 @@ export const editorContainerStyle: React.CSSProperties = {
 
 
   export const textEditorOuterLayerStyle: React.CSSProperties =  {
-    background: '#f6f1e8',
-    border: '1px solid #353535',
-    boxShadow: '2px 2px 0 #b9b2a7',
+    background: 'var(--silo-paper)',
+    border: '1px solid var(--silo-ink)',
+    boxShadow: '2px 2px 0 var(--silo-shadow)',
     borderRadius: '8px 6px 9px 7px',
     height: '100%',
     width: '100%',

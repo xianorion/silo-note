@@ -453,7 +453,7 @@ console.log("IT IS:",img.data);
       path = await window.electron.saveFileDialog(fileName);
      console.log("Path to write in: ", path);
  
-     //save as file wit correct type
+     //save as file with correct type
      if(path && !path.endsWith(type)){
        path = path + type;
      }
@@ -529,6 +529,10 @@ console.log("buffer is", buffer);
     
     //get the content of the editor
     let content = (editorRef.current!=null ? editorRef.current.getText():"");
+    console.log("Content to save: ", content);
+    console.log("rich content HTML: ", editorRef.current?.getHTML());
+        console.log("rich content JSON: ", editorRef.current?.getJSON());
+
     //get the links and image references
     if(path !=null && path.length >0){
       //clear data to new image list
@@ -610,7 +614,7 @@ console.log("buffer is", buffer);
       setImgList([]);
       setNotes([]);
         //Since a new file is loaded we are no longer in an 'edited' state
-        console.log("setting content edoted to false")
+        console.log("setting content edited to false")
         setEdited(false);
         editedRef.current = false;
       }

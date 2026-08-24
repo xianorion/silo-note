@@ -45,7 +45,7 @@ export const mainToolBarStyle: Properties<string | number, string & {}> = {
 }
 
 export const linkDrawerStyle = {
-  backgroundColor:'#f6f1e8'
+  backgroundColor:'var(--silo-paper)'
 };
 
 export const toastStyle = {
@@ -57,30 +57,30 @@ export const toastStyle = {
   top: '45%', // half of width
   left: '25%', // half of height
   zIndex: 1500,
-  backgroundColor: '#FFFFFF',
-  boxShadow:'5px 5px 10px rgba(0, 0, 0, 0.7)',
+  backgroundColor: 'var(--silo-paper)',
+  boxShadow:'5px 5px 10px rgba(75, 42, 27, 0.35)',
   fontSize: '100%',
   textAlign: 'center',
   overflow: 'hidden'
 }
 
 export const RetroTooltip = styled(Tooltip)(() => ({
-    color: '#353535',
+    color: 'var(--silo-orange)',
     fontFamily: 'Tengoku, "Courier New", monospace',
     fontSize: '0.1rem',
-    border: '1px solid #353535',
-    boxShadow: '2px 2px 0 #b9b2a7',
+    border: '1px solid var(--silo-ink)',
+    boxShadow: '2px 2px 0 var(--silo-shadow)',
 }));
 
 
 export const RetroBtn = styled(Button)<RetroBtnProps>(({bgcolor, bordercolor}) =>({
-  background: `${bgcolor != null?bgcolor:"#f6f1e8"}`,
+  background: `${bgcolor != null?bgcolor:"var(--silo-paper)"}`,
   minWidth: '6vw',
   minHeight: '5vh',
-  border: `1px solid ${bordercolor != null?bordercolor:"#353535"}`,
+  border: `1px solid ${bordercolor != null?bordercolor:"var(--silo-ink)"}`,
   borderRadius: '6px 8px 7px 5px',
-  boxShadow: '1px 0 0 #353535',
-  color:"#353535",
+  boxShadow: '1px 0 0 var(--silo-ink)',
+  color:"var(--silo-ink)",
   padding:"4px 5px",
   textTransform: 'none',
   fontFamily: 'Tengoku, "Courier New", monospace',
@@ -94,33 +94,31 @@ export const RetroBtn = styled(Button)<RetroBtnProps>(({bgcolor, bordercolor}) =
     width: 'fit-content',
 
     "&:active":{
-    backgroundColor: '#ded8cd',
+    backgroundColor: 'var(--silo-paper-muted)',
     transform: "translateY(1px)"
     },
     "&:hover":{
-  backgroundColor:'#ded8cd',
+  backgroundColor:'var(--silo-paper-muted)',
   transition: 'background-color 0.15s ease-in-out'
     },
 }));
 
 export const iconStyles = {
-    background: '#f5ff2eb',
-    color: "#8a4c4c",
     filter: 'grayscale(50%) contrast(80%)',
   };
 
   export const RetroDialog = styled(Dialog)({
     "& .MuiPaper-root": {
-    backgroundColor: "#f6f1e8", 
-    border: "1.5px solid #353535",
+    backgroundColor: "var(--silo-paper)", 
+    border: "1.5px solid var(--silo-ink)",
     borderRadius: "9px",
-    boxShadow: "4px 4px 0px #b9b2a7",
+    boxShadow: "4px 4px 0px var(--silo-shadow)",
     },
   });
   
   export const RetroDialogTitle = styled(DialogTitle)({
-    backgroundColor: "#ded8cd", 
-    color: "#353535",
+    backgroundColor: "var(--silo-paper-muted)", 
+    color: "var(--silo-ink)",
     padding: "8px 12px",
     fontWeight: "bold",
     display: "flex",
