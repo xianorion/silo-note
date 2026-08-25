@@ -227,6 +227,8 @@ ipcMain.on('set-edit-status', (event, isEdited) => {
 //     });
 //     return result.filePaths[0];  // Return the path of the selected file
 //   });
+
+// Open the save file dialog and return the selected file path
 ipcMain.handle('save-file-dialog', async (event, defaultFilename) => {
     const result = await dialog.showSaveDialog(mainWindow, {
       buttonLabel: 'Save',
@@ -260,7 +262,7 @@ ipcMain.handle('open-file-dialog', async (event, fileTypes) => {
   });
 
 
-
+// Open the file dialog and return the file data
 ipcMain.handle('readFile', async (event, path) => {
     try {
       const data = await fs.promises.readFile(path, 'utf8');
@@ -296,6 +298,7 @@ ipcMain.handle('readFile', async (event, path) => {
     }
   });
 
+  // Write data to a file 
   ipcMain.handle('writeFile', async (event, path, data) => {
     try {
       await fs.promises.writeFile(path, data);
@@ -306,6 +309,8 @@ ipcMain.handle('readFile', async (event, path) => {
     }
   });
 
+
+  //TODO: add export to file functionality for PDF and TXT
   ipcMain.handle('exportToFile', async (event, path,type, data) => {
     try {
       if(type == 'PDF'){
@@ -321,7 +326,7 @@ ipcMain.handle('readFile', async (event, path) => {
     }
   });
 
-  //take in a link from the elction application and opens it in a browser
+  //take in a link from the electron application and opens it in a browser
   ipcMain.handle("open-link", async(event, link)=>{
     let returnObj = {status: 200, msg:""}
     if (typeof link === 'string' && link.startsWith('http')) {

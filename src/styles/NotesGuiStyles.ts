@@ -29,12 +29,7 @@ export const noteTextTitleStyle = {
   color: 'var(--silo-ink)',
 
 }
-export const noteTextContentStyle = {
-  fontFamily:'Tengoku',
-  fontSize: '13px',
-  width:'100%'
 
-}
 export const noteTitleStyle: React.CSSProperties = {
   flexDirection:'row',
   display: 'flex',

@@ -12,11 +12,9 @@ import {
   DialogActions, 
   DialogContent, 
   DialogContentText,
-  Toolbar, 
   Slide,
 } from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress';
-import { FormatListBulletedRounded, RedoOutlined, UndoOutlined, FormatListNumberedRounded, FormatBoldRounded, FormatItalicRounded, DatasetLinkedRounded, PhotoLibraryRounded } from '@mui/icons-material';
 import { TransitionProps } from '@mui/material/transitions';
 import MainToolbar from './MainToolbar';
 import MoodBoardGui from './MoodBoardGui';
@@ -24,7 +22,7 @@ import SiloToolBar from './SiloToolbar';
 import { Grid2 as Grid } from "@mui/material";
 import { TEXT_FILETYPES, IMAGE_FILETYPES, SILONOTE_FILETYPE, PDF_FILETYPE, TXT_FILETYPE } from '../utils/constants';
 import { ImgListType, SiloNoteFile, SourceLinksType, NoteType } from 'types/GlobalTypes';
-import { RetroBtn, iconStyles, RetroDialog, RetroDialogTitle, linkDrawerStyle, toastStyle } from './../styles/SiloTextBoxStyle';
+import { RetroBtn, RetroDialog, RetroDialogTitle, toastStyle } from './../styles/SiloTextBoxStyle';
 import TextAlign from '@tiptap/extension-text-align';
 import { ToggleActions } from './../types/GlobalTypes';
 import NoteListGui from './NoteListGui';
@@ -82,7 +80,12 @@ const SiloTextEditor =() => {
   const [toast, setToast] = useState<string | null>(null);
   const [content, setContent] = useState<string | undefined>(undefined);
 
-  //Action handler for top toolbar
+  /*Action handler for top toolbar
+   This useEffect sets up IPC listeners for various actions from the main process, such as undo, redo, new file, open file,
+    save file, and export file.
+    When these actions are triggered in the main process,
+     the corresponding listener functions will be called to handle the actions in the renderer process.
+  */
   useEffect(() => {
     console.log()
       const undoListener = () => {
@@ -114,6 +117,10 @@ const exportListener = (_event: IpcRendererEvent, type: string ) => {
       };
   
    // Listen for the response from the main process
+   // Set up IPC listeners for various actions
+   // These listeners will call the appropriate functions when the main process sends a message
+   // For example, when the main process sends a 'undo' message, the undoListener will be called
+   // The listeners are cleaned up when the component unmounts to prevent memory leaks  
       window.electron.ipcRenderer.on('undo', undoListener);
       window.electron.ipcRenderer.on('redo', redoListener);
       window.electron.ipcRenderer.on('new-file', newFileListener);
@@ -530,8 +537,6 @@ console.log("buffer is", buffer);
     //get the content of the editor
     let content = (editorRef.current!=null ? editorRef.current.getHTML():"");
     console.log("Content to save: ", content);
-    console.log("rich content HTML: ", editorRef.current?.getHTML());
-        console.log("rich content JSON: ", editorRef.current?.getJSON());
 
     //get the links and image references
     if(path !=null && path.length >0){
@@ -649,12 +654,12 @@ console.log("buffer is", buffer);
           setNotes(fileData.notes);
 
           //convert text to html format before adding to editor
-          const htmlContent = fileData.content.replace(/\n/g, '<br>');
-          editorRef.current.commands.setContent(htmlContent);
+          // const htmlContent = fileData.content.replace(/\n/g, '<br>');
+          editorRef.current.commands.setContent(fileData.content);
         }else{
-          const htmlContent = data?.replace(/\n/g, '<br>');
-          if(htmlContent)
-          editorRef.current.commands.setContent(htmlContent);
+          // const htmlContent = data?.replace(/\n/g, '<br>');
+          if(data)
+          editorRef.current.commands.setContent(data);
           //console.log("DATA READ FROM FILE:",data);
         }
         //set current file path

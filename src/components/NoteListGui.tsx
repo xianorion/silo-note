@@ -15,7 +15,7 @@ import {
 import {
   RemoveCircleOutline
 } from '@mui/icons-material';
-import { noteStyle, noteBankStyle, noteContainerStyle,noteHeaderStyle, iconCircleStyle, noteItemTypographyStyle, noteTextTitleStyle, noteTextContentStyle, noteTitleStyle, noteBankListStyle, addNoteBtnStyle} from '../styles/NotesGuiStyles';
+import { noteStyle, noteBankStyle, noteContainerStyle,noteHeaderStyle, iconCircleStyle, noteItemTypographyStyle, noteTextTitleStyle, noteTitleStyle, noteBankListStyle, addNoteBtnStyle} from '../styles/NotesGuiStyles';
 import { NoteType, ToggleActions } from 'types/GlobalTypes';
 
 interface NoteGuiProps {

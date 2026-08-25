@@ -1,6 +1,5 @@
 import React, {FC, useState,useEffect} from 'react';
 import { 
-  Alert,
   Button, 
   Dialog,
   DialogActions,
@@ -11,8 +10,6 @@ import {
   ListItem, 
   ListItemButton, 
   ListItemText, 
-  Slide,
-  Paper, 
   TextField,
   Typography
  } from '@mui/material';
@@ -24,18 +21,6 @@ import {
 import ErrorPopup from './ErrorPopup';
 import { linkBankContainerStyle, linkBankStyle, linkBankTitleTypographyStyle, linkItemTypographyStyle, linkIconStyle} from './../styles/LinkListStyles';
 
-const testLinkData:{name: string, url: string, notes:string}[]  = [
-{
-name: "MackAttacksArt",
-notes: "art website",
-url: "www.mackattacksart.com"
-},
-{
-name: "MaterialUI React List",
-notes: "React Library",
-url: "https://mui.com/material-ui/react-list/"
-}
-];
 
 type LinkType = {name: string, url: string, notes:string};
 
@@ -91,6 +76,7 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
     }
 
     const addLink = (event:React.FormEvent<HTMLFormElement>) =>{
+      event.preventDefault();
         const formData = new FormData(event.currentTarget);
         const formJson = Object.fromEntries((formData as any).entries());
         console.log("form data", formJson);
@@ -132,8 +118,11 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
     }
 
     const saveLink = (event:React.FormEvent<HTMLFormElement>) =>{
+      console.log("******Saving link...");
       const formData = new FormData(event.currentTarget);
       const formJson = Object.fromEntries((formData as any).entries());
+            console.log("form data", formJson);
+
       const editedLink = {
           url: formJson.url,
           name: formJson.name,
@@ -214,20 +203,13 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
          <Dialog
         open={open}
         onClose={handleClose}
-        PaperProps={{
-          component: 'form',
-          onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
-            event.preventDefault();
-            addLink(event);
-           
-          },
-        }}
       >
         <DialogTitle>Add Link</DialogTitle>
         <DialogContent>
           <DialogContentText>
             {`Got a good reference link to your project? Add it here!`}
           </DialogContentText>
+          <form onSubmit={addLink} id="add-link-form">
           <TextField
             autoFocus
             required
@@ -272,30 +254,26 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
 
             // onChange={e => setLinkNotes(e.target.value)}
           />
+          </form>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button type="submit">Apply link</Button>
+          <Button onClick={handleClose} form="add-link-form">Cancel</Button>
+          <Button type="submit" form="add-link-form">
+            Add link
+          </Button>
         </DialogActions>
       </Dialog>
       
       <Dialog
         open={isEditing}
         onClose={() => setIsEditing(false)}
-        PaperProps={{
-          component: 'form',
-          onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
-            event.preventDefault();
-            saveLink(event);
-           
-          },
-        }}
       >
         <DialogTitle>Edit Link</DialogTitle>
         <DialogContent>
           <DialogContentText>
             {`Got a good reference link to your project? Add it here!`}
           </DialogContentText>
+          <form onSubmit={saveLink} id="edit-link-form">
           <TextField
             margin="dense"
             id="name"
@@ -306,7 +284,13 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
             helperText={errors.name}
             error={errors.name != null}
             value={editingLinkData?.name}
-            disabled
+            //Use slot props to make the name field read-only so we can still get the name data when saving the link,
+            //  but not allow the user to edit it.
+            slotProps={{
+              input: {
+                readOnly: true,
+              },
+  }}
           />
           <TextField
             autoFocus
@@ -335,10 +319,13 @@ const LinkListGui : FC<LinkListGuiProps> = ({links, setToast, setLinks}) =>{
             onChange={(e) => handleEditLinkChange(e,'notes')}
 
           />
+          </form>
         </DialogContent>
         <DialogActions>
-          <Button onClick={closeEditLinkPopup}>Cancel</Button>
-          <Button type="submit">Save Changes</Button>
+          <Button onClick={closeEditLinkPopup} form="edit-link-form">Cancel</Button>
+          <Button type="submit" form="edit-link-form">
+            Save Changes
+          </Button>
         </DialogActions>
       </Dialog>
             </div>

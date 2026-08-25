@@ -1,8 +1,8 @@
-import React, {FC, useState} from 'react';
+import {FC} from 'react';
 import SiloTextEditor from './SiloTextEditor';
 import { GuiStyle } from './../styles/SiloTextBoxStyle';
 import { menuItemStyle } from './../styles/MainToolBarStyle';
-import { createTheme, ThemeProvider, Typography } from '@mui/material';
+import { createTheme, ThemeProvider } from '@mui/material';
 
 // Create a theme with custom typography
 const theme = createTheme({
