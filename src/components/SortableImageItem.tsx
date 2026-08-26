@@ -1,11 +1,10 @@
-import {ImageListItem, ImageListItemBar,IconButton,  Grid2 as Grid, Tooltip, Button, Icon } from '@mui/material';
+import {ImageListItem, ImageListItemBar,IconButton, Tooltip } from '@mui/material';
 import React, {FC, useState} from 'react';
 import {Delete, ZoomIn} from '@mui/icons-material';
 import { ImgListType } from 'types/GlobalTypes';
 import Slide from '@mui/material/Slide';
 
-import { DndContext, useDroppable, useDraggable, MouseSensor, KeyboardSensor, useSensor, useSensors, closestCenter, DragEndEvent } from '@dnd-kit/core';
-import { rectSortingStrategy, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
 import { corkboardImage} from './../styles/MoodBoardStyle';
 import { CSS } from '@dnd-kit/utilities';
 import { corkboardImageToolBar } from './../styles/MoodBoardStyle';

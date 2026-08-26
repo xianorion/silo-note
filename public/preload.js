@@ -10,7 +10,8 @@ process.once("loaded", () => {
   contextBridge.exposeInMainWorld("versions", process.versions);
 });
 
-
+// Expose a limited API to the renderer process
+// The renderer process can only access the APIs that we explicitly expose here
 contextBridge.exposeInMainWorld('electron', {
     openFileDialog: (fileTypes) => ipcRenderer.invoke('open-file-dialog', fileTypes),
     readFile: (path) => ipcRenderer.invoke('readFile', path),
@@ -29,6 +30,7 @@ contextBridge.exposeInMainWorld('electron', {
       removeAllListeners(channel){
         ipcRenderer.removeAllListeners(channel);
       },
+      // Listen for messages from the main process on a specific channel
       on(channel, func) {
         const subscription = (_event, ...args) => func(...args);
         ipcRenderer.on(channel, subscription);

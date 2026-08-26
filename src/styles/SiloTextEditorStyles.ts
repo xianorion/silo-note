@@ -15,11 +15,10 @@ export const editorContainerStyle: React.CSSProperties = {
     border: '1px solid var(--silo-ink)',
     boxShadow: '2px 2px 0 var(--silo-shadow)',
     borderRadius: '8px 6px 9px 7px',
-    height: '100%',
+    maxHeight: '78vh',
     width: '100%',
     minHeight: 0,
     minWidth: 0,
-    overflow: 'auto', /* Enable both horizontal and vertical overflow */
     wordWrap: 'break-word',
     whiteSpace: 'normal', /* Ensures that whitespace behaves normally */
   }

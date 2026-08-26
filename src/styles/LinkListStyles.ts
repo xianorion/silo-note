@@ -36,13 +36,13 @@ export const linkBankStyle = {
         };
 
         export const linkBankTitleTypographyStyle ={
-            fontSize: '19px',
+            fontSize: '17px',
             fontWeight: 'bold',   
             color: 'var(--silo-ink)',
             }
 
             export const linkItemTypographyStyle ={
                 color: 'var(--silo-ink)',
-                fontSize: '2.5vw',          
+                fontSize: '1.5vw',          
             }
             

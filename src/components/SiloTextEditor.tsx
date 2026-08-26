@@ -12,11 +12,9 @@ import {
   DialogActions, 
   DialogContent, 
   DialogContentText,
-  Toolbar, 
   Slide,
 } from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress';
-import { FormatListBulletedRounded, RedoOutlined, UndoOutlined, FormatListNumberedRounded, FormatBoldRounded, FormatItalicRounded, DatasetLinkedRounded, PhotoLibraryRounded } from '@mui/icons-material';
 import { TransitionProps } from '@mui/material/transitions';
 import MainToolbar from './MainToolbar';
 import MoodBoardGui from './MoodBoardGui';
@@ -24,7 +22,7 @@ import SiloToolBar from './SiloToolbar';
 import { Grid2 as Grid } from "@mui/material";
 import { TEXT_FILETYPES, IMAGE_FILETYPES, SILONOTE_FILETYPE, PDF_FILETYPE, TXT_FILETYPE } from '../utils/constants';
 import { ImgListType, SiloNoteFile, SourceLinksType, NoteType } from 'types/GlobalTypes';
-import { RetroBtn, iconStyles, RetroDialog, RetroDialogTitle, linkDrawerStyle, toastStyle } from './../styles/SiloTextBoxStyle';
+import { RetroBtn, RetroDialog, RetroDialogTitle, toastStyle } from './../styles/SiloTextBoxStyle';
 import TextAlign from '@tiptap/extension-text-align';
 import { ToggleActions } from './../types/GlobalTypes';
 import NoteListGui from './NoteListGui';
@@ -82,7 +80,12 @@ const SiloTextEditor =() => {
   const [toast, setToast] = useState<string | null>(null);
   const [content, setContent] = useState<string | undefined>(undefined);
 
-  //Action handler for top toolbar
+  /*Action handler for top toolbar
+   This useEffect sets up IPC listeners for various actions from the main process, such as undo, redo, new file, open file,
+    save file, and export file.
+    When these actions are triggered in the main process,
+     the corresponding listener functions will be called to handle the actions in the renderer process.
+  */
   useEffect(() => {
     console.log()
       const undoListener = () => {
@@ -104,16 +107,20 @@ const SiloTextEditor =() => {
       const saveFileListener = () => {
         saveFile(false);
       };
-const exportListener = (_event: IpcRendererEvent, type: string ) => {
-  console.log("Type to convert to is:", type);
-  exportFile(type);
-};
+      const exportListener = (_event: IpcRendererEvent, type: string ) => {
+        console.log("Type to convert to is:", type);
+        exportFile(type);
+      };
 
       const saveAsFileListener = () => {
         saveFile(true);
       };
   
-   // Listen for the response from the main process
+   /**  Listen for the response from the main process
+      Set up IPC listeners for various actions
+     These listeners will call the appropriate functions when the main process sends a message
+     For example, when the main process sends a 'undo' message, the undoListener will be called
+     The listeners are cleaned up when the component unmounts to prevent memory leaks  **/
       window.electron.ipcRenderer.on('undo', undoListener);
       window.electron.ipcRenderer.on('redo', redoListener);
       window.electron.ipcRenderer.on('new-file', newFileListener);
@@ -167,6 +174,8 @@ const exportListener = (_event: IpcRendererEvent, type: string ) => {
     editorRef.current = new Editor(editorProps);
   }
   }
+
+  //Set a timer up for the toast to only appear for 3 seconds
   useEffect(()=>{
       // Set the timer to change the variable after 3 seconds
       const timer = setTimeout(() => {
@@ -178,7 +187,16 @@ const exportListener = (_event: IpcRendererEvent, type: string ) => {
 
   },[toast]);
 
+  //Set a timer up for the error to only appear for 3 seconds
+  useEffect(() =>{
+    const timer = setTimeout(()=>{
+      setError(null);
+    },3000);
 
+    return () => clearTimeout(timer);
+  },[error])
+
+//Handles the update fo content in the error so we can use accurate content data for saving the file and tracking what is written
   const handleUpdate = useCallback(() => {
     const currentContent = editorRef.current?.getText();
     console.log("Handling editor content update...");
@@ -204,7 +222,7 @@ const exportListener = (_event: IpcRendererEvent, type: string ) => {
     };
   }, [editorRef.current]);
 
- 
+ //allow opening different view to be togglable
   const toggle = (obj :string) =>{
     switch (obj){
       case ToggleActions.LINK:
@@ -219,12 +237,16 @@ const exportListener = (_event: IpcRendererEvent, type: string ) => {
     }
   }
 
-
+  //TODO: MOVE THIS TO UTILS FOLDER/FILE
   const stringIsEmptyOrUndefined  = (str:string | undefined): boolean => {
     return str === undefined || str === '';
   }
 
+
+  /* addImage: Allows the user to add an image to the current imgList
+   the new image is viewable on the moodboard. */
   const addImage = async (event:React.MouseEvent<any>) =>{
+    event.preventDefault();
     console.log("Add image clicked...");
     let pathObj : FileReturnValue = await window.electron.openFileDialog(IMAGE_FILETYPES);
     
@@ -246,13 +268,11 @@ const exportListener = (_event: IpcRendererEvent, type: string ) => {
           note: null
         }
        
-        //TODO: check if item was added to the list or not
         const ImgsWithSamePath = imgList.filter((item)=> item.name === imgPath);
         if(ImgsWithSamePath.length > 0){
           result.status = false;
           result.msg = "This image already exists!";
         }else{
-          //TODO:if not, add
           result.status = true;
           result.msg = "Added Image to Mood Board list!!!";
           setImgList([newImage, ...imgList]);
@@ -263,12 +283,20 @@ const exportListener = (_event: IpcRendererEvent, type: string ) => {
     }else{
       result.status = true;
       result.msg = "User canceled adding image";
+      
       console.log("Canceled adding image");
     }
+    if(result.status){
+       setToast(result.msg);
+    }else{
+      setError(result.msg);
+    }
+   
     return result;
   }
 
-  //Remove the image from the list of images. This does not delete the image from the file system, just removes it from the list of images in the mood board.
+  /*Remove the image from the list of images. This does not delete the image from the file system, 
+   just removes it from the list of images in the mood board. */
   const removeImage = async (event:React.MouseEvent<any>, imageName: string) =>{
     console.log("Add image clicked...");
     let result = {
@@ -291,6 +319,8 @@ const exportListener = (_event: IpcRendererEvent, type: string ) => {
     }
   }
 
+  /* Exports silonote .sn file into a text file with plain text.
+     Separating the content, image referneces, notes, and links to subsections within the text file. */
   const generateSiloNoteTxt = (file: SiloNoteFile): string => {
 const { content, links, imageRefs, notes } = file;
 
@@ -328,6 +358,7 @@ const { content, links, imageRefs, notes } = file;
 
   }
 
+  //works on exporting silo note file (sn) to a PDF file.
  const generateSiloNotePdf = async (
   file: SiloNoteFile
 ): Promise<Uint8Array> => {
@@ -438,7 +469,7 @@ console.log("IT IS:",img.data);
 }
 
 
-
+//Handle export of the silonote file.
   const exportFile = async (type:string) =>{
     setIsLoading(true);
     let path =currentFileRef.current;
@@ -460,7 +491,7 @@ console.log("IT IS:",img.data);
 
     
 
-    let content = (editorRef.current!=null ? editorRef.current.getText():"");
+    let content = (editorRef.current!=null ? editorRef.current.getHTML():"");
     if(path !=null && path.length >0){
       //clear data to new image list
       let saveImgList:ImgListType[]=[];
@@ -512,6 +543,8 @@ console.log("buffer is", buffer);
     setIsLoading(false);
   }
 
+  //SaveFile - save silonote file to current path or a new path if not defined.
+  //if isSaveAs is there, it will prompt the user to find a new path to save the file.
   const saveFile = async (isSaveAs:boolean) =>{
     setIsLoading(true);
     let path =currentFileRef.current;
@@ -528,10 +561,8 @@ console.log("buffer is", buffer);
     }
     
     //get the content of the editor
-    let content = (editorRef.current!=null ? editorRef.current.getText():"");
+    let content = (editorRef.current!=null ? editorRef.current.getHTML():"");
     console.log("Content to save: ", content);
-    console.log("rich content HTML: ", editorRef.current?.getHTML());
-        console.log("rich content JSON: ", editorRef.current?.getJSON());
 
     //get the links and image references
     if(path !=null && path.length >0){
@@ -583,6 +614,7 @@ console.log("buffer is", buffer);
   
   }
 
+  //Updates the notes
   const updateNotes = (notes:NoteType[]) => { 
     console.log("NOTES HAVE BEEN EDITED!!!", notes);
     setNotes(notes); 
@@ -591,6 +623,10 @@ console.log("buffer is", buffer);
   
   }
 
+  /* newFile
+   Handles the new file action from the user. If there have been changes, it lets the user know that the file should be saved 
+   else it clears the editor and all of the links, notes, and moodboard images
+   */
   const newFile = async ( override: boolean) =>{
     //have screen loader
     console.log("----------NEW FILE ASK-----------");
@@ -620,6 +656,7 @@ console.log("buffer is", buffer);
       }
     }
 
+    //opens a silo note file. Loading content, notes, images, and links
   const openFile = async (override: boolean) =>{
     //have screen loader
     console.log("edited is: ",edited );
@@ -645,16 +682,20 @@ console.log("buffer is", buffer);
           const fileData:SiloNoteFile = JSON.parse(data);
           setSrcLinks(fileData.links);
           setImgList(fileData.imageRefs);
-          if(fileData.notes)
-          setNotes(fileData.notes);
+          //Stay compatible with older silo note files that do not have notes array
+          if(fileData.notes){
+              setNotes(fileData.notes);
+          }else{
+              setNotes([]);
+          }
 
           //convert text to html format before adding to editor
-          const htmlContent = fileData.content.replace(/\n/g, '<br>');
-          editorRef.current.commands.setContent(htmlContent);
+          // const htmlContent = fileData.content.replace(/\n/g, '<br>');
+          editorRef.current.commands.setContent(fileData.content);
         }else{
-          const htmlContent = data?.replace(/\n/g, '<br>');
-          if(htmlContent)
-          editorRef.current.commands.setContent(htmlContent);
+          // const htmlContent = data?.replace(/\n/g, '<br>');
+          if(data)
+          editorRef.current.commands.setContent(data);
           //console.log("DATA READ FROM FILE:",data);
         }
         //set current file path
@@ -674,9 +715,13 @@ console.log("buffer is", buffer);
     }
   }
 
+  //close save alert 
   const handleAlertClose = () =>{
     setSaveAlert(null);
   }
+
+  //HandleAlertAction allows the user to move forward with their action if they dont want to save a file after asking for a new
+  //file. It allows them to override.
   const handleAlertAction = (event: React.MouseEvent<HTMLButtonElement> , location: string, continueOperation: boolean) =>{
     if(continueOperation){
       if(location === OPEN_FILE){
@@ -705,6 +750,16 @@ console.log("buffer is", buffer);
                 color='success'
                 >
                 {toast}
+              </Alert>
+            </Slide>
+
+             <Slide in={error !=null} mountOnEnter unmountOnExit>
+                <Alert sx={toastStyle} 
+                variant="outlined" 
+                severity='error'
+                color='error'
+                >
+                {error}
               </Alert>
             </Slide>
         {/*MOOD BOARD DIALOG POPUP*/}

@@ -1,4 +1,6 @@
 # Getting Started with SiloNote App
+ ![Desktop View](assets/SiloNoteDesktopApp.png)
+
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
