@@ -18,7 +18,8 @@ declare global {
         copyTextToClipboard: () =>  Promise<{status:string, error:string }>,
         pasteClipboardText: () =>  Promise<string>,
         readImageFile: (filePath: string) => string,
-        ipcRenderer: Electron.IpcRenderer
+        ipcRenderer: Electron.IpcRenderer,
+        subscribe: (channel: string, callback: (...args: any[]) => void) => () => void
       };
     }
   }

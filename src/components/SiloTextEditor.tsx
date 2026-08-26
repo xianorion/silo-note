@@ -121,25 +121,25 @@ const SiloTextEditor =() => {
      These listeners will call the appropriate functions when the main process sends a message
      For example, when the main process sends a 'undo' message, the undoListener will be called
      The listeners are cleaned up when the component unmounts to prevent memory leaks  **/
-      window.electron.ipcRenderer.on('undo', undoListener);
-      window.electron.ipcRenderer.on('redo', redoListener);
-      window.electron.ipcRenderer.on('new-file', newFileListener);
-      window.electron.ipcRenderer.on('open-file', openListener);
-    window.electron.ipcRenderer.on('export-file', exportListener);    
-      window.electron.ipcRenderer.on('save-file', saveFileListener);
-      window.electron.ipcRenderer.on('save-as-file', saveAsFileListener);
-      
-      // Clean up the listener when the component unmounts
-      return () => {
-        window.electron.ipcRenderer.removeAllListeners('undo');
-        window.electron.ipcRenderer.removeAllListeners('redo');
-        window.electron.ipcRenderer.removeAllListeners('new-file');
-        window.electron.ipcRenderer.removeAllListeners('open-file');
-        window.electron.ipcRenderer.removeAllListeners('export-file');
-        window.electron.ipcRenderer.removeAllListeners('save-file');
-        window.electron.ipcRenderer.removeAllListeners('save-as-file');
+      // 1. Set up all your listeners and store their unique cleanup functions
+  const unsubUndo     = window.electron.subscribe('undo', undoListener);
+  const unsubRedo     = window.electron.subscribe('redo', redoListener);
+  const unsubNew      = window.electron.subscribe('new-file', newFileListener);
+  const unsubOpen     = window.electron.subscribe('open-file', openListener);
+  const unsubExport   = window.electron.subscribe('export-file', exportListener);    
+  const unsubSave     = window.electron.subscribe('save-file', saveFileListener);
+  const unsubSaveAs   = window.electron.subscribe('save-as-file', saveAsFileListener);
   
-      }
+  // 2. Just trigger those exact cleanups when unmounting
+  return () => {
+    unsubUndo();
+    unsubRedo();
+    unsubNew();
+    unsubOpen();
+    unsubExport();
+    unsubSave();
+    unsubSaveAs();
+  };
     }, [edited, notes,srcLinks, imgList]); //reload component when a 'saveable' value changes.
 
     useEffect(()=>{
@@ -473,11 +473,16 @@ console.log("IT IS:",img.data);
   const exportFile = async (type:string) =>{
     setIsLoading(true);
     let path =currentFileRef.current;
-      let fileName = 'newFile.sn';
+
+    let mainFileName = path?path.replace(/\..*$/, ""):'newFile';
+      let fileName = mainFileName+'.sn';
+      console.log("Saving file as a.. "+ type);
+            console.log("current path is"+ path);
+
       if(type ===PDF_FILETYPE){
-        fileName = "newFile.pdf";
+        fileName = mainFileName+".pdf";
       }else if(type === TXT_FILETYPE){
-        fileName = "newFile.txt";
+        fileName = mainFileName+'.txt';
       }
       
 

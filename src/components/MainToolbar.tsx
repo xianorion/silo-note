@@ -51,6 +51,7 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
     [DROPDOWN_OPTIONS.VIEW]: null
   });
 
+
   useEffect(() => {
     const undoListener = () => {
       handleAction(action.UNDO);
@@ -82,28 +83,26 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
     const saveAsFileListener = () => {
       handleAction(action.SAVE_AS);
     };
-
- // Listen for the response from the main process
-    window.electron.ipcRenderer.on('undo', undoListener);
-    window.electron.ipcRenderer.on('redo', redoListener);
-    window.electron.ipcRenderer.on('new-file', newFileListener);
-    window.electron.ipcRenderer.on('open-file', openListener);
-    window.electron.ipcRenderer.on('export-file', (event, type) => {exportListener(type); });    
-    window.electron.ipcRenderer.on('save-file', saveFileListener);
-    window.electron.ipcRenderer.on('save-as-file', saveAsFileListener);
-    
-    // Clean up the listener when the component unmounts
-    return () => {
-      window.electron.ipcRenderer.removeAllListeners('undo');
-      window.electron.ipcRenderer.removeAllListeners('redo');
-      window.electron.ipcRenderer.removeAllListeners('new-file');
-      window.electron.ipcRenderer.removeAllListeners('open-file');
-      window.electron.ipcRenderer.removeAllListeners('export-file');
-      window.electron.ipcRenderer.removeAllListeners('save-file');
-      window.electron.ipcRenderer.removeAllListeners('save-as-file');
-
-    }
-  }, []);
+  // 1. Set up all your listeners and store their unique cleanup functions
+  const unsubUndo     = window.electron.subscribe('undo', undoListener);
+  const unsubRedo     = window.electron.subscribe('redo', redoListener);
+  const unsubNew      = window.electron.subscribe('new-file', newFileListener);
+  const unsubOpen     = window.electron.subscribe('open-file', openListener);
+  const unsubExport   = window.electron.subscribe('export-file', exportListener);    
+  const unsubSave     = window.electron.subscribe('save-file', saveFileListener);
+  const unsubSaveAs   = window.electron.subscribe('save-as-file', saveAsFileListener);
+  
+  // 2. Just trigger those exact cleanups when unmounting
+  return () => {
+    unsubUndo();
+    unsubRedo();
+    unsubNew();
+    unsubOpen();
+    unsubExport();
+    unsubSave();
+    unsubSaveAs();
+  };
+}, []);
 
 
   const handleAction = async (commmand: action |null, origin?: string |undefined) => {
@@ -267,7 +266,7 @@ const MainToolbar : FC<MainToolbarProps> = ({editor,newFileEvent,saveFileEvent, 
         aria-controls={menuState.EXPORT ? 'basic-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={menuState.EXPORT ? 'true' : undefined}
-        onClick={handleClick("Export")}
+        onClick={handleClick(DROPDOWN_OPTIONS.EXPORT)}
       >
         Export
       </Button>

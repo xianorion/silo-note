@@ -1,6 +1,7 @@
 // All of the Node.js APIs are available in the preload process.
 // It has the same sandbox as a Chrome extension.
 const { contextBridge, ipcRenderer } = require("electron");
+const ALLOWED_LISTEN_CHANNELS = ['undo', 'redo','new-file','open-file','export-file','save-file', 'save-file-as'];
 
 
 // As an example, here we use the exposeInMainWorld API to expose the browsers
@@ -23,26 +24,24 @@ contextBridge.exposeInMainWorld('electron', {
     copyTextToClipboard: () => ipcRenderer.invoke('copy-to-clipboard'),
     pasteClipboardText: () => ipcRenderer.invoke('paste-clipboard-text'),
     readImageFile: (path) => ipcRenderer.invoke('read-image-file', path),
-    ipcRenderer: {
-      sendMessage(channel, args) {
-        ipcRenderer.send(channel, args);
-      },
-      removeAllListeners(channel){
-        ipcRenderer.removeAllListeners(channel);
-      },
-      // Listen for messages from the main process on a specific channel
-      on(channel, func) {
-        const subscription = (_event, ...args) => func(...args);
-        ipcRenderer.on(channel, subscription);
-  
-        // Return a cleanup function that removes the listener
-        return () => {
-          ipcRenderer.removeListener(channel, subscription);
-        };
-      },
-      once(channel, func) {
-        ipcRenderer.once(channel, (_event, ...args) => func(...args));
-      },
-    },
+    subscribe: (channel, callback) => {
+    // Security check: Ignore unauthorized channels
+    if (!ALLOWED_LISTEN_CHANNELS.includes(channel)) {
+      console.warn(`Blocked unauthorized listener registration on channel: ${channel}`);
+      return () => {}; // Return a dummy cleanup function
+    }
+
+    // Wrap the callback to strip the internal Electron event object
+    const subscription = (_event, ...args) => callback(...args);
+    
+    // Attach the listener
+    ipcRenderer.on(channel, subscription);
+
+    // Return a bulletproof cleanup function tied specifically to this instance
+    return () => {
+      ipcRenderer.removeListener(channel, subscription);
+    };
+  },
+    
     // Add other file system operations as needed
   });
