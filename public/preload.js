@@ -30,6 +30,7 @@ contextBridge.exposeInMainWorld('electron', {
       removeAllListeners(channel){
         ipcRenderer.removeAllListeners(channel);
       },
+      // Listen for messages from the main process on a specific channel
       on(channel, func) {
         const subscription = (_event, ...args) => func(...args);
         ipcRenderer.on(channel, subscription);

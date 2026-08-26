@@ -61,8 +61,8 @@ export const iconCircleStyle = {
 
 
 export const noteBankStyle = {
-    maxHeight: '70vh', 
-    minHeight: '65vh',
+    maxHeight: '60vh', 
+    minHeight: '60vh',
     width:'100%',
       padding: "4px",
       overflow: 'auto',
@@ -108,9 +108,10 @@ export const noteBankStyle = {
             }
 
              export const addNoteBtnStyle = {
-                  maxHeight: '70vh', 
+                  maxHeight: '6vh', 
+                  minHeight: '6vh',
                 width:'100%',
-                  overflow: 'auto',
+                  overflow: '',
                   margin: '0px',
                   display: 'flex',  // Ensures Flexbox layout
                   justifyContent: 'center',  // Aligns notes in list to center

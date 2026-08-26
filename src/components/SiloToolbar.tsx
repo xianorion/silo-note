@@ -4,7 +4,6 @@ import { Editor } from '@tiptap/react'
 import React, {FC} from 'react'
 import {
   Toolbar,
-  Tooltip, 
 } from '@mui/material'
 import { FormatListBulletedRounded, RedoOutlined, UndoOutlined, FormatListNumberedRounded, FormatBoldRounded, FormatItalicRounded, DatasetLinkedRounded, PhotoLibraryRounded, TextSnippetRounded } from '@mui/icons-material';
 import LinkListGui from './LinkListGui';
